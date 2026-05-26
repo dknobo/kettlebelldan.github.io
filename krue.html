@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE KRÜE • ENTER</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&display=swap');
+
+        :root {
+            --blood: #8B0000;
+            --deep-red: #4A0000;
+            --iron: #1a1a1a;
+            --ash: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: var(--ash);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 60px 20px 80px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 70px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 50px;
+        }
+
+        .logo {
+            font-family: 'Anton', sans-serif;
+            font-size: 5.5rem;
+            letter-spacing: 8px;
+            color: var(--ash);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(139, 0, 0, 0.6);
+        }
+
+        .tagline {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.35rem;
+            letter-spacing: 6px;
+            color: var(--blood);
+            text-transform: uppercase;
+        }
+
+        .section {
+            margin-bottom: 65px;
+        }
+
+        h2 {
+            font-family: 'Anton', sans-serif;
+            font-size: 2rem;
+            color: var(--blood);
+            margin-bottom: 18px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .manifesto {
+            font-size: 1.35rem;
+            line-height: 1.65;
+            color: #cccccc;
+            max-width: 620px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .creed {
+            background-color: #111;
+            border-left: 6px solid var(--blood);
+            padding: 35px 40px;
+            margin: 40px 0;
+        }
+
+        .creed p {
+            font-size: 1.15rem;
+            color: #ddd;
+            margin-bottom: 18px;
+        }
+
+        .creed p:last-child {
+            margin-bottom: 0;
+        }
+
+        .rules {
+            display: grid;
+            gap: 18px;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
+        .rule {
+            background-color: #111;
+            padding: 22px 28px;
+            border: 1px solid #222;
+            font-size: 1.1rem;
+            position: relative;
+        }
+
+        .rule::before {
+            content: "▸";
+            color: var(--blood);
+            font-size: 1.4rem;
+            position: absolute;
+            left: 12px;
+            top: 22px;
+        }
+
+        .rule-text {
+            padding-left: 28px;
+            color: #ccc;
+        }
+
+        .warning {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            color: var(--blood);
+            text-align: center;
+            margin: 50px 0 30px;
+            text-transform: uppercase;
+        }
+
+        .cta {
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .descend {
+            display: inline-block;
+            background-color: var(--blood);
+            color: white;
+            font-family: 'Anton', sans-serif;
+            font-size: 1.35rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            padding: 22px 70px;
+            text-decoration: none;
+            border: 3px solid #fff;
+            transition: all 0.2s ease;
+        }
+
+        .descend:hover {
+            background-color: #000;
+            color: var(--blood);
+            border-color: var(--blood);
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 80px;
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+            color: #666;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .back:hover {
+            color: #999;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 100px;
+            font-size: 0.75rem;
+            color: #444;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">THE KRÜE</div>
+            <div class="tagline">No mercy. Only iron.</div>
+        </header>
+
+        <div class="section">
+            <div class="manifesto">
+                This is not a gym.<br>
+                This is not a community.<br>
+                <strong>This is a crucible.</strong>
+            </div>
+        </div>
+
+        <div class="section creed">
+            <h2>The Vow</h2>
+            <p>We do not train for comfort.</p>
+            <p>We do not swing for validation.</p>
+            <p>We descend into the pain because we know the weak are culled by comfort.</p>
+            <p>If you came here looking for motivation, leave.</p>
+            <p>If you came here looking for permission, you were never one of us.</p>
+        </div>
+
+        <div class="section">
+            <h2 style="text-align:center; margin-bottom:30px;">The Code</h2>
+            <div class="rules">
+                <div class="rule">
+                    <div class="rule-text">You will bleed. You will want to quit. You will not.</div>
+                </div>
+                <div class="rule">
+                    <div class="rule-text">The bell does not care about your feelings, your excuses, or your Instagram.</div>
+                </div>
+                <div class="rule">
+                    <div class="rule-text">Every rep is a vote for the person you will become. Choose wisely.</div>
+                </div>
+                <div class="rule">
+                    <div class="rule-text">The Krüe does not carry the weak. The weak are left on the floor.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning">
+            The 90s version of this site is upstairs.<br>
+            This door only opens one way.
+        </div>
+
+        <div class="cta">
+            <a href="#" class="descend" onclick="alert('The application is closed. You either already know if you belong... or you don\'t.'); return false;">
+                DESCEND
+            </a>
+        </div>
+
+        <a href="index.html" class="back">← Return to the light</a>
+
+        <div class="footer">
+            THE KRÜE • FOUNDED IN SUFFERING • 2026
+        </div>
+    </div>
+</body>
+</html>
