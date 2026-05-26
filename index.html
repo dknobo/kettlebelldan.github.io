@@ -1,256 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KETTLEBELL DAN - Under Construction!</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
-        
-        body {
-            background-color: #000033;
-            color: #ffff00;
-            font-family: "Comic Sans MS", "Comic Neue", cursive;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-        
-        marquee {
-            font-size: 18px;
-            font-weight: bold;
-            background-color: #000000;
-            color: #00ff00;
-            padding: 8px 0;
-            margin: 10px 0;
-            border: 3px solid #ff00ff;
-        }
-        
-        .top-marquee {
-            font-size: 20px;
-            color: #ffff00;
-        }
-        
-        h1 {
-            font-size: 3.5em;
-            color: #ff00ff;
-            text-shadow: 3px 3px 0 #00ffff,
-                        -1px -1px 0 #00ffff;
-            margin: 15px 0 5px;
-            letter-spacing: 3px;
-        }
-        
-        .subtitle {
-            font-size: 1.8em;
-            color: #00ffff;
-            margin-bottom: 10px;
-        }
-        
-        .under-construction {
-            background: repeating-linear-gradient(
-                45deg,
-                #ff0000,
-                #ff0000 10px,
-                #ffff00 10px,
-                #ffff00 20px
-            );
-            color: #000000;
-            font-size: 2.8em;
-            font-weight: bold;
-            padding: 15px 30px;
-            margin: 20px auto;
-            border: 6px solid #ffffff;
-            display: inline-block;
-            box-shadow: 0 0 0 6px #000000;
-            animation: construction 0.8s infinite alternate;
-        }
-        
-        .construction-text {
-            font-size: 1.4em;
-            color: #ffffff;
-            background-color: #990000;
-            padding: 8px 20px;
-            border: 4px solid #ffff00;
-            margin: 15px auto;
-            display: inline-block;
-        }
-        
-        .content {
-            background-color: #000066;
-            border: 4px solid #00ff00;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        
-        .content p {
-            font-size: 1.3em;
-            line-height: 1.4;
-            margin: 12px 0;
-            color: #ffff99;
-        }
-        
-        .blink {
-            animation: blink 1s step-end infinite;
-        }
-        
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-        
-        .counter {
-            background-color: #000000;
-            color: #ffff00;
-            font-family: "Courier New", monospace;
-            font-size: 1.4em;
-            padding: 8px 20px;
-            border: 3px solid #ff00ff;
-            display: inline-block;
-            margin-top: 15px;
-        }
-        
-        .footer {
-            font-size: 0.9em;
-            color: #00ffff;
-            margin-top: 30px;
-        }
-        
-        .footer a {
-            color: #00ffff;
-        }
-        
-        .neon {
-            text-shadow: 0 0 5px #ff00ff,
-                        0 0 10px #ff00ff;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KETTLEBELL DAN</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+
+    :root {
+      --accent: #3f2a2a;
+    }
+
+    body {
+      font-family: 'Instrument Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .display {
+      font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-feature-settings: "ss02";
+    }
+
+    .section {
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+    }
+
+    .nav-link {
+      position: relative;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background-color: #5c4033;
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover:after {
+      width: 100%;
+    }
+
+    .exp-card {
+      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .exp-card:hover {
+      transform: translateY(-1px);
+      border-color: #3f2a2a;
+    }
+
+    .subtle {
+      color: #9ca3af;
+    }
+
+    .prose-custom p {
+      max-width: 42ch;
+    }
+
+    .footer-link {
+      transition: color 0.15s ease;
+    }
+
+    .footer-link:hover {
+      color: #d1d5db;
+    }
+
+    .hairline {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #2a2a2a, transparent);
+    }
+  </style>
 </head>
-<body>
-    <!-- Top scrolling marquee -->
-    <marquee class="top-marquee" scrollamount="8" behavior="scroll">
-        *** WELCOME TO KETTLEBELL DAN'S OFFICIAL WEBSITE!!! *** STRONGER EVERY DAY!!! *** NEW CONTENT COMING VERY SOON!!! *** 
-    </marquee>
+<body class="bg-[#0a0a0a] text-[#e5e5e5] antialiased">
+  <div class="max-w-[680px] mx-auto px-6">
+    
+    <!-- Hero -->
+    <header class="pt-24 pb-16">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-2.5 h-2.5 rounded-full bg-[#3f2a2a]"></div>
+        <span class="text-xs tracking-[3px] text-[#6b7280] font-medium">EXPERIMENTS</span>
+      </div>
+      
+      <h1 class="display text-[88px] leading-[0.82] font-semibold tracking-[-6.2px] text-[#f5f5f5]">
+        KETTLEBELL<br>DAN
+      </h1>
+      
+      <p class="mt-6 max-w-[42ch] text-[21px] leading-tight text-[#a3a3a3]">
+        Quiet pages at the edge of the web.
+      </p>
+    </header>
 
-    <div class="container">
-        <h1 class="neon">KETTLEBELL DAN</h1>
-        <div class="subtitle">💪 THE KETTLEBELL KING 💪</div>
-
-        <!-- Big Under Construction Banner -->
-        <div class="under-construction">
-            UNDER CONSTRUCTION!!!
-        </div>
-
-        <div class="construction-text blink">
-            🚧 SITE UNDER HEAVY CONSTRUCTION 🚧
-        </div>
-
-        <div class="content">
-            <p>
-                <strong>WHOA!!!</strong> Thanks for stopping by!<br>
-                I'm currently rebuilding this site with brand new kettlebell training videos, 
-                programs, and tips that will make you STRONGER THAN EVER!!!
-            </p>
-            <p>
-                Please check back soon because this page is getting a MAJOR upgrade!<br>
-                In the meantime, keep swinging those bells and stay awesome!
-            </p>
-            <p style="color:#ff00ff; font-size:1.1em;">
-                ★ COMING SOON: Training Videos • Programs • Tips • More!!! ★
-            </p>
-
-            <!-- Link to the dark subpage -->
-            <p style="margin-top: 25px; font-size: 1.05em;">
-                If this 90s version is too silly for you...<br>
-                <a href="krue.html" style="color:#ff3333; font-weight: bold; text-decoration: underline; font-size: 1.15em;">
-                    DESCEND INTO THE KRÜE →
-                </a>
-            </p>
-        </div>
-
-        <!-- Second marquee -->
-        <marquee scrollamount="6" direction="right" style="background:#330000; color:#00ff00; font-size:16px; border:3px solid #ffff00;">
-            THIS SITE IS BEST VIEWED WITH NETSCAPE NAVIGATOR 3.0 OR INTERNET EXPLORER 4.0 AT 800x600 RESOLUTION!!! 
-            PLEASE EXCUSE THE DUST WHILE WE RENOVATE!!!
-        </marquee>
-
-        <!-- Fake retro hit counter -->
-        <div style="margin-top: 25px;">
-            <div style="color:#ffff00; font-size:1.1em; margin-bottom:5px;">
-                YOU ARE VISITOR NUMBER:
-            </div>
-            <div class="counter" id="counter">
-                000000
-            </div>
-            <div style="color:#00ffff; font-size:0.85em; margin-top:5px;">
-                (Counter resets when you clear your cookies... sorry!)
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>
-                Last Updated: May 26, 2026<br>
-                © 2026 Kettlebell Dan • All Rights Reserved<br>
-                <span style="font-size:0.8em;">(Not really, this site is still being built lol)</span>
-            </p>
-            <p>
-                <marquee scrollamount="4" style="font-size:12px; width:300px; margin:0 auto; background:#000000;">
-                    Made with ❤️ and way too much nostalgia • Send me an email if you want to collaborate!!!
-                </marquee>
-            </p>
-        </div>
+    <!-- Intro -->
+    <div class="prose-custom text-[15px] leading-relaxed text-[#c4c4c4]">
+      <p class="mb-5">
+        I make small, deliberate sites that occupy strange corners of the browser — 
+        some feel like rituals, others like places you shouldn’t be.
+      </p>
+      <p>
+        No frameworks. No noise. Just the raw materials of the web, arranged with care.
+      </p>
     </div>
 
-    <!-- Bottom marquee -->
-    <marquee scrollamount="7" style="background:#003300; color:#ffff00; font-size:15px; border-top:4px solid #ff00ff; margin-top:20px;">
-        KETTLEBELL DAN • STRONGER EVERY DAY • GET SWOLE • EAT PROTEIN • SWING BELLS • REPEAT • 
-    </marquee>
+    <!-- Experiments -->
+    <div class="section">
+      <div class="flex items-baseline justify-between mb-6">
+        <div class="text-sm tracking-[2px] text-[#6b7280]">EXPERIMENTS</div>
+        <div class="h-px flex-1 mx-4 bg-[#1f1f1f]"></div>
+      </div>
 
-    <script>
-        // Classic 90s fake hit counter using localStorage
-        function updateCounter() {
-            const counterEl = document.getElementById('counter');
-            let count = parseInt(localStorage.getItem('kettlebellDanVisitorCount') || '0');
-            
-            // Increment on each visit
-            count++;
-            
-            // Save it
-            localStorage.setItem('kettlebellDanVisitorCount', count);
-            
-            // Format with leading zeros like old counters (6 digits)
-            const formatted = count.toString().padStart(6, '0');
-            counterEl.textContent = formatted;
-            
-            // Very occasionally show a fun message (90s style)
-            if (count === 1) {
-                setTimeout(() => {
-                    counterEl.style.color = '#00ff00';
-                    setTimeout(() => {
-                        counterEl.style.color = '#ffff00';
-                    }, 1200);
-                }, 800);
-            }
-        }
+      <div class="space-y-3">
         
-        // Run on load
-        updateCounter();
-        
-        // Extra cheese: random color flashes on the under construction banner sometimes
-        setInterval(() => {
-            const banner = document.querySelector('.under-construction');
-            if (banner && Math.random() > 0.7) {
-                banner.style.color = '#0000ff';
-                setTimeout(() => {
-                    if (banner) banner.style.color = '#000000';
-                }, 180);
+        <!-- Krüe -->
+        <a href="krue.html" class="exp-card group block border border-[#1f1f1f] rounded-2xl px-8 py-7 hover:border-[#3f2a2a]">
+          <div class="flex items-start justify-between gap-6">
+            <div>
+              <div class="font-semibold text-xl tracking-[-0.3px] text-[#f5f5f5] group-hover:text-white transition-colors">Krüe</div>
+              <div class="mt-1.5 text-[#9ca3af] leading-snug">No mercy. Only iron. A crucible for those who descend willingly.</div>
+            </div>
+            <div class="mt-1 text-[#4b5563] group-hover:text-[#6b7280] transition-colors">→</div>
+          </div>
+        </a>
+
+        <!-- The Abyss -->
+        <a href="abyss.html" class="exp-card group block border border-[#1f1f1f] rounded-2xl px-8 py-7 hover:border-[#3f2a2a]">
+          <div class="flex items-start justify-between gap-6">
+            <div>
+              <div class="font-semibold text-xl tracking-[-0.3px] text-[#f5f5f5] group-hover:text-white transition-colors">The Abyss</div>
+              <div class="mt-1.5 text-[#9ca3af] leading-snug">There is no bottom. Only the long fall.</div>
+            </div>
+            <div class="mt-1 text-[#4b5563] group-hover:text-[#6b7280] transition-colors">→</div>
+          </div>
+        </a>
+
+        <!-- Backrooms -->
+        <a href="backrooms.html" class="exp-card group block border border-[#1f1f1f] rounded-2xl px-8 py-7 hover:border-[#3f2a2a]">
+          <div class="flex items-start justify-between gap-6">
+            <div>
+              <div class="font-semibold text-xl tracking-[-0.3px] text-[#f5f5f5] group-hover:text-white transition-colors">Backrooms</div>
+              <div class="mt-1.5 text-[#9ca3af] leading-snug">Level 0. If you’re not careful and you noclip out of reality…</div>
+            </div>
+            <div class="mt-1 text-[#4b5563] group-hover:text-[#6b7280] transition-colors">→</div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Subtle divider -->
+    <div class="hairline my-10"></div>
+
+    <!-- Footer nav -->
+    <footer class="pb-20 text-sm">
+      <div class="text-[#6b7280] text-xs tracking-[2px] mb-3">ELSEWHERE ON THIS SITE</div>
+      
+      <div class="flex flex-wrap gap-x-5 gap-y-1 text-[#a3a3a3]">
+        <a href="krue.html" class="footer-link">Krüe</a>
+        <a href="abyss.html" class="footer-link">The Abyss</a>
+        <a href="backrooms.html" class="footer-link">Backrooms</a>
+      </div>
+
+      <div class="mt-8 text-[10px] text-[#525252]">
+        KETTLEBELL DAN — BUILT BY HAND
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Minimal Tailwind runtime config for refined dark aesthetic
+    function initializeTailwind() {
+      if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                'display': ['Space Grotesk', 'system-ui', 'sans-serif'],
+                'sans': ['Instrument Sans', 'system-ui', 'sans-serif']
+              }
             }
-        }, 4500);
-    </script>
+          }
+        };
+      }
+    }
+    
+    initializeTailwind();
+
+    // Subtle accessibility + polish
+    document.documentElement.style.setProperty('color-scheme', 'dark');
+  </script>
 </body>
 </html>
