@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE ABYSS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap');
+
+        body {
+            background-color: #000000;
+            color: #3a0000;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .abyss-container {
+            max-width: 620px;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .title {
+            font-family: 'UnifrakturCook', cursive;
+            font-size: 4.8rem;
+            color: #2a0000;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(60, 0, 0, 0.9);
+            user-select: none;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            letter-spacing: 6px;
+            color: #4a0000;
+            text-transform: uppercase;
+            margin-bottom: 60px;
+            opacity: 0.6;
+        }
+
+        .content {
+            font-size: 1.15rem;
+            line-height: 1.85;
+            color: #4a0000;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .content p {
+            margin-bottom: 22px;
+        }
+
+        .last-line {
+            color: #5a0000;
+            font-style: italic;
+            margin-top: 50px;
+            font-size: 1.05rem;
+        }
+
+        .final-warning {
+            margin-top: 70px;
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            color: #2a0000;
+            border-top: 1px solid #1a0000;
+            padding-top: 25px;
+        }
+
+        .descend-further {
+            display: inline-block;
+            margin-top: 40px;
+            color: #4a0000;
+            font-size: 0.95rem;
+            letter-spacing: 4px;
+            text-decoration: none;
+            padding: 12px 40px;
+            border: 1px solid #1a0000;
+            transition: all 0.3s ease;
+        }
+
+        .descend-further:hover {
+            color: #700000;
+            border-color: #3a0000;
+            background-color: #0a0000;
+        }
+
+        .back-link {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: #1a0000;
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: #3a0000;
+        }
+
+        /* Subtle breathing effect on the title */
+        .title {
+            animation: breathe 6s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.85; }
+            50% { opacity: 0.55; }
+        }
+    </style>
+</head>
+<body>
+    <div class="abyss-container">
+        <div class="title">THE ABYSS</div>
+        <div class="subtitle">You were warned</div>
+
+        <div class="content">
+            <p>There is nothing left to prove here.</p>
+            <p>The bells no longer ring for you.</p>
+            <p>They ring <em>through</em> you.</p>
+            
+            <p class="last-line">
+                Most who reach this depth never speak of what they saw.<br>
+                The ones who do… stop training altogether.
+            </p>
+        </div>
+
+        <div class="final-warning">
+            There is no bottom.<br>
+            Only deeper.
+        </div>
+
+        <a href="#" class="descend-further" onclick="this.innerHTML='...'; this.style.pointerEvents='none'; return false;">
+            DESCEND FURTHER
+        </a>
+
+        <a href="krue.html" class="back-link">← Turn back</a>
+    </div>
+</body>
+</html>
