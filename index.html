@@ -3,14 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KETTLEBELL DAN</title>
+  <title>Dan • @KettlebellDan</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
-
-    :root {
-      --accent: #3f2a2a;
-    }
 
     body {
       font-family: 'Instrument Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -21,59 +17,22 @@
       font-feature-settings: "ss02";
     }
 
+    .icon {
+      transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .pillar:hover .icon {
+      transform: translateY(-2px);
+    }
+
     .section {
-      padding-top: 5rem;
-      padding-bottom: 5rem;
-    }
-
-    .nav-link {
-      position: relative;
-      transition: color 0.2s ease;
-    }
-
-    .nav-link:after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background-color: #5c4033;
-      transition: width 0.3s ease;
-    }
-
-    .nav-link:hover:after {
-      width: 100%;
-    }
-
-    .exp-card {
-      transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-    }
-
-    .exp-card:hover {
-      transform: translateY(-1px);
-      border-color: #3f2a2a;
-    }
-
-    .subtle {
-      color: #9ca3af;
-    }
-
-    .prose-custom p {
-      max-width: 42ch;
-    }
-
-    .footer-link {
-      transition: color 0.15s ease;
-    }
-
-    .footer-link:hover {
-      color: #d1d5db;
+      padding-top: 4.5rem;
+      padding-bottom: 4.5rem;
     }
 
     .hairline {
       height: 1px;
-      background: linear-gradient(to right, transparent, #2a2a2a, transparent);
+      background: linear-gradient(to right, transparent, #262626, transparent);
     }
   </style>
 </head>
@@ -81,118 +40,129 @@
   <div class="max-w-[680px] mx-auto px-6">
     
     <!-- Hero -->
-    <header class="pt-24 pb-16">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="w-2.5 h-2.5 rounded-full bg-[#3f2a2a]"></div>
-        <span class="text-xs tracking-[3px] text-[#6b7280] font-medium">EXPERIMENTS</span>
+    <header class="pt-20 pb-12">
+      <div class="inline-flex items-center gap-2 rounded-full border border-[#1f1f1f] px-3 py-1 text-xs tracking-[2px] text-[#6b7280] mb-6">
+        X EMPLOYEE • FOUNDER • DAD
       </div>
       
-      <h1 class="display text-[88px] leading-[0.82] font-semibold tracking-[-6.2px] text-[#f5f5f5]">
-        KETTLEBELL<br>DAN
+      <h1 class="display text-7xl sm:text-[92px] leading-[0.82] font-semibold tracking-[-6.8px] text-[#f5f5f5]">
+        DAN
       </h1>
       
-      <p class="mt-6 max-w-[42ch] text-[21px] leading-tight text-[#a3a3a3]">
-        Quiet pages at the edge of the web.
+      <p class="mt-4 max-w-[38ch] text-2xl text-[#a3a3a3]">
+        @KettlebellDan on X
       </p>
     </header>
 
     <!-- Intro -->
-    <div class="prose-custom text-[15px] leading-relaxed text-[#c4c4c4]">
-      <p class="mb-5">
-        I make small, deliberate sites that occupy strange corners of the browser — 
-        some feel like rituals, others like places you shouldn’t be.
-      </p>
+    <div class="text-[15px] leading-relaxed text-[#c4c4c4] max-w-[48ch]">
       <p>
-        No frameworks. No noise. Just the raw materials of the web, arranged with care.
+        Proud X employee and founder of the Kettlebell Krüe. 
+        I spend my days building with AI, swinging iron, and trying to be the dad my kids deserve.
       </p>
     </div>
 
-    <!-- Experiments -->
+    <!-- Three Pillars -->
     <div class="section">
-      <div class="flex items-baseline justify-between mb-6">
-        <div class="text-sm tracking-[2px] text-[#6b7280]">EXPERIMENTS</div>
-        <div class="h-px flex-1 mx-4 bg-[#1f1f1f]"></div>
+      <div class="text-xs tracking-[2.5px] text-[#6b7280] mb-8">THE THREE PILLARS</div>
+
+      <!-- X Employee -->
+      <div class="pillar group mb-10">
+        <div class="flex items-start gap-5">
+          <div class="icon mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#111]">
+            <!-- X Icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-[#d1d5db]">
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <div class="font-semibold text-[22px] tracking-[-0.4px] text-white">X Employee</div>
+            <div class="mt-2.5 text-[14.5px] leading-relaxed text-[#b3b3b3]">
+              I work at X. I’m genuinely excited about what we’re building — especially tools like Grok Build that let me ship personal projects in minutes instead of hours. 
+              I still remember the 90s web and I can’t believe how far we’ve come.
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="space-y-3">
-        
-        <!-- Krüe -->
-        <a href="krue.html" class="exp-card group block border border-[#1f1f1f] rounded-2xl px-8 py-7 hover:border-[#3f2a2a]">
-          <div class="flex items-start justify-between gap-6">
-            <div>
-              <div class="font-semibold text-xl tracking-[-0.3px] text-[#f5f5f5] group-hover:text-white transition-colors">Krüe</div>
-              <div class="mt-1.5 text-[#9ca3af] leading-snug">No mercy. Only iron. A crucible for those who descend willingly.</div>
-            </div>
-            <div class="mt-1 text-[#4b5563] group-hover:text-[#6b7280] transition-colors">→</div>
+      <!-- Kettlebell Krüe -->
+      <div class="pillar group mb-10">
+        <div class="flex items-start gap-5">
+          <div class="icon mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#111]">
+            <!-- Kettlebell Icon -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-[#d1d5db]">
+              <path d="M12 4V3M12 21V20M7 7.5C7 6.119 8.119 5 9.5 5H14.5C15.881 5 17 6.119 17 7.5V14.5C17 15.881 15.881 17 14.5 17H9.5C8.119 17 7 15.881 7 14.5V7.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M5 12H3M21 12H19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
           </div>
-        </a>
-
-        <!-- The Abyss -->
-        <a href="abyss.html" class="exp-card group block border border-[#1f1f1f] rounded-2xl px-8 py-7 hover:border-[#3f2a2a]">
-          <div class="flex items-start justify-between gap-6">
-            <div>
-              <div class="font-semibold text-xl tracking-[-0.3px] text-[#f5f5f5] group-hover:text-white transition-colors">The Abyss</div>
-              <div class="mt-1.5 text-[#9ca3af] leading-snug">There is no bottom. Only the long fall.</div>
+          <div class="flex-1">
+            <div class="font-semibold text-[22px] tracking-[-0.4px] text-white">Kettlebell Krüe</div>
+            <div class="mt-2.5 text-[14.5px] leading-relaxed text-[#b3b3b3]">
+              I founded the Kettlebell Krüe — a no-nonsense community built on discipline, iron, and showing up when it’s hard. 
+              “No mercy. Only iron.” We train with purpose and we don’t make excuses.
             </div>
-            <div class="mt-1 text-[#4b5563] group-hover:text-[#6b7280] transition-colors">→</div>
           </div>
-        </a>
+        </div>
+      </div>
 
-        <!-- Backrooms -->
-        <a href="backrooms.html" class="exp-card group block border border-[#1f1f1f] rounded-2xl px-8 py-7 hover:border-[#3f2a2a]">
-          <div class="flex items-start justify-between gap-6">
-            <div>
-              <div class="font-semibold text-xl tracking-[-0.3px] text-[#f5f5f5] group-hover:text-white transition-colors">Backrooms</div>
-              <div class="mt-1.5 text-[#9ca3af] leading-snug">Level 0. If you’re not careful and you noclip out of reality…</div>
+      <!-- Dad -->
+      <div class="pillar group">
+        <div class="flex items-start gap-5">
+          <div class="icon mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#2a2a2a] bg-[#111]">
+            <!-- Dad Icon -->
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-[#d1d5db]">
+              <circle cx="8" cy="8" r="2.25" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M3.5 18.5C3.5 15.462 5.962 13 9 13H15C18.038 13 20.5 15.462 20.5 18.5V19.25H3.5V18.5Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+              <circle cx="16" cy="8" r="2.25" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M12 13.5L12 19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <div class="font-semibold text-[22px] tracking-[-0.4px] text-white">Dad</div>
+            <div class="mt-2.5 text-[14.5px] leading-relaxed text-[#b3b3b3]">
+              Hearing “dad look” thirty times a day is the good old days. I’m trying to be present, do fun things with my kids, 
+              move my body daily, and teach them better habits than the sugar-soaked world we live in.
             </div>
-            <div class="mt-1 text-[#4b5563] group-hover:text-[#6b7280] transition-colors">→</div>
           </div>
-        </a>
-
+        </div>
       </div>
     </div>
 
-    <!-- Subtle divider -->
-    <div class="hairline my-10"></div>
+    <div class="hairline my-8"></div>
 
-    <!-- Footer nav -->
-    <footer class="pb-20 text-sm">
-      <div class="text-[#6b7280] text-xs tracking-[2px] mb-3">ELSEWHERE ON THIS SITE</div>
-      
-      <div class="flex flex-wrap gap-x-5 gap-y-1 text-[#a3a3a3]">
-        <a href="krue.html" class="footer-link">Krüe</a>
-        <a href="abyss.html" class="footer-link">The Abyss</a>
-        <a href="backrooms.html" class="footer-link">Backrooms</a>
-      </div>
-
-      <div class="mt-8 text-[10px] text-[#525252]">
-        KETTLEBELL DAN — BUILT BY HAND
-      </div>
-    </footer>
+    <!-- Find me -->
+    <div class="pb-16">
+      <a 
+        href="https://x.com/KettlebellDan" 
+        target="_blank"
+        class="inline-flex items-center gap-2 rounded-2xl border border-[#2a2a2a] bg-[#111] px-6 py-3.5 text-sm font-medium tracking-wide text-white transition hover:border-[#3f2a2a] hover:bg-[#161616]"
+      >
+        Find me on X
+        <span class="text-lg leading-none">→</span>
+      </a>
+      <div class="mt-3 text-xs text-[#6b7280]">Mostly posting about training, family, and the tools we’re building at X.</div>
+    </div>
 
   </div>
 
   <script>
-    // Minimal Tailwind runtime config for refined dark aesthetic
-    function initializeTailwind() {
+    // Tailwind config
+    function init() {
       if (typeof tailwind !== 'undefined') {
         tailwind.config = {
           theme: {
             extend: {
               fontFamily: {
-                'display': ['Space Grotesk', 'system-ui', 'sans-serif'],
-                'sans': ['Instrument Sans', 'system-ui', 'sans-serif']
+                display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+                sans: ['Instrument Sans', 'system-ui', 'sans-serif']
               }
             }
           }
         };
       }
+      document.documentElement.style.setProperty('color-scheme', 'dark');
     }
-    
-    initializeTailwind();
-
-    // Subtle accessibility + polish
-    document.documentElement.style.setProperty('color-scheme', 'dark');
+    init();
   </script>
 </body>
 </html>
