@@ -3,25 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kettlebell Dan</title>
+    <title>KETTLEBELL DAN - Under Construction!</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            padding: 80px 20px; 
-            background: #111; 
-            color: #eee; 
+        @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+        
+        body {
+            background-color: #000033;
+            color: #ffff00;
+            font-family: "Comic Sans MS", "Comic Neue", cursive;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
-        h1 { font-size: 3em; color: #f0c14d; }
-        p { font-size: 1.3em; max-width: 600px; margin: 20px auto; }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        marquee {
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #000000;
+            color: #00ff00;
+            padding: 8px 0;
+            margin: 10px 0;
+            border: 3px solid #ff00ff;
+        }
+        
+        .top-marquee {
+            font-size: 20px;
+            color: #ffff00;
+        }
+        
+        h1 {
+            font-size: 3.5em;
+            color: #ff00ff;
+            text-shadow: 3px 3px 0 #00ffff,
+                        -1px -1px 0 #00ffff;
+            margin: 15px 0 5px;
+            letter-spacing: 3px;
+        }
+        
+        .subtitle {
+            font-size: 1.8em;
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+        
+        .under-construction {
+            background: repeating-linear-gradient(
+                45deg,
+                #ff0000,
+                #ff0000 10px,
+                #ffff00 10px,
+                #ffff00 20px
+            );
+            color: #000000;
+            font-size: 2.8em;
+            font-weight: bold;
+            padding: 15px 30px;
+            margin: 20px auto;
+            border: 6px solid #ffffff;
+            display: inline-block;
+            box-shadow: 0 0 0 6px #000000;
+            animation: construction 0.8s infinite alternate;
+        }
+        
+        .construction-text {
+            font-size: 1.4em;
+            color: #ffffff;
+            background-color: #990000;
+            padding: 8px 20px;
+            border: 4px solid #ffff00;
+            margin: 15px auto;
+            display: inline-block;
+        }
+        
+        .content {
+            background-color: #000066;
+            border: 4px solid #00ff00;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .content p {
+            font-size: 1.3em;
+            line-height: 1.4;
+            margin: 12px 0;
+            color: #ffff99;
+        }
+        
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+        
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        
+        .counter {
+            background-color: #000000;
+            color: #ffff00;
+            font-family: "Courier New", monospace;
+            font-size: 1.4em;
+            padding: 8px 20px;
+            border: 3px solid #ff00ff;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        
+        .footer {
+            font-size: 0.9em;
+            color: #00ffff;
+            margin-top: 30px;
+        }
+        
+        .footer a {
+            color: #00ffff;
+        }
+        
+        .neon {
+            text-shadow: 0 0 5px #ff00ff,
+                        0 0 10px #ff00ff;
+        }
     </style>
 </head>
 <body>
-    <h1>💪 Kettlebell Dan</h1>
-    <p>Stronger every day.</p>
-    <p>I'm rebuilding the site right now. Great kettlebell training content coming very soon.</p>
-    <p>Stay tuned!</p>
-    
-    <!-- Add your email or social links here later -->
+    <!-- Top scrolling marquee -->
+    <marquee class="top-marquee" scrollamount="8" behavior="scroll">
+        *** WELCOME TO KETTLEBELL DAN'S OFFICIAL WEBSITE!!! *** STRONGER EVERY DAY!!! *** NEW CONTENT COMING VERY SOON!!! *** 
+    </marquee>
+
+    <div class="container">
+        <h1 class="neon">KETTLEBELL DAN</h1>
+        <div class="subtitle">💪 THE KETTLEBELL KING 💪</div>
+
+        <!-- Big Under Construction Banner -->
+        <div class="under-construction">
+            UNDER CONSTRUCTION!!!
+        </div>
+
+        <div class="construction-text blink">
+            🚧 SITE UNDER HEAVY CONSTRUCTION 🚧
+        </div>
+
+        <div class="content">
+            <p>
+                <strong>WHOA!!!</strong> Thanks for stopping by!<br>
+                I'm currently rebuilding this site with brand new kettlebell training videos, 
+                programs, and tips that will make you STRONGER THAN EVER!!!
+            </p>
+            <p>
+                Please check back soon because this page is getting a MAJOR upgrade!<br>
+                In the meantime, keep swinging those bells and stay awesome!
+            </p>
+            <p style="color:#ff00ff; font-size:1.1em;">
+                ★ COMING SOON: Training Videos • Programs • Tips • More!!! ★
+            </p>
+        </div>
+
+        <!-- Second marquee -->
+        <marquee scrollamount="6" direction="right" style="background:#330000; color:#00ff00; font-size:16px; border:3px solid #ffff00;">
+            THIS SITE IS BEST VIEWED WITH NETSCAPE NAVIGATOR 3.0 OR INTERNET EXPLORER 4.0 AT 800x600 RESOLUTION!!! 
+            PLEASE EXCUSE THE DUST WHILE WE RENOVATE!!!
+        </marquee>
+
+        <!-- Fake retro hit counter -->
+        <div style="margin-top: 25px;">
+            <div style="color:#ffff00; font-size:1.1em; margin-bottom:5px;">
+                YOU ARE VISITOR NUMBER:
+            </div>
+            <div class="counter" id="counter">
+                000000
+            </div>
+            <div style="color:#00ffff; font-size:0.85em; margin-top:5px;">
+                (Counter resets when you clear your cookies... sorry!)
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                Last Updated: May 26, 2026<br>
+                © 2026 Kettlebell Dan • All Rights Reserved<br>
+                <span style="font-size:0.8em;">(Not really, this site is still being built lol)</span>
+            </p>
+            <p>
+                <marquee scrollamount="4" style="font-size:12px; width:300px; margin:0 auto; background:#000000;">
+                    Made with ❤️ and way too much nostalgia • Send me an email if you want to collaborate!!!
+                </marquee>
+            </p>
+        </div>
+    </div>
+
+    <!-- Bottom marquee -->
+    <marquee scrollamount="7" style="background:#003300; color:#ffff00; font-size:15px; border-top:4px solid #ff00ff; margin-top:20px;">
+        KETTLEBELL DAN • STRONGER EVERY DAY • GET SWOLE • EAT PROTEIN • SWING BELLS • REPEAT • 
+    </marquee>
+
+    <script>
+        // Classic 90s fake hit counter using localStorage
+        function updateCounter() {
+            const counterEl = document.getElementById('counter');
+            let count = parseInt(localStorage.getItem('kettlebellDanVisitorCount') || '0');
+            
+            // Increment on each visit
+            count++;
+            
+            // Save it
+            localStorage.setItem('kettlebellDanVisitorCount', count);
+            
+            // Format with leading zeros like old counters (6 digits)
+            const formatted = count.toString().padStart(6, '0');
+            counterEl.textContent = formatted;
+            
+            // Very occasionally show a fun message (90s style)
+            if (count === 1) {
+                setTimeout(() => {
+                    counterEl.style.color = '#00ff00';
+                    setTimeout(() => {
+                        counterEl.style.color = '#ffff00';
+                    }, 1200);
+                }, 800);
+            }
+        }
+        
+        // Run on load
+        updateCounter();
+        
+        // Extra cheese: random color flashes on the under construction banner sometimes
+        setInterval(() => {
+            const banner = document.querySelector('.under-construction');
+            if (banner && Math.random() > 0.7) {
+                banner.style.color = '#0000ff';
+                setTimeout(() => {
+                    if (banner) banner.style.color = '#000000';
+                }, 180);
+            }
+        }, 4500);
+    </script>
 </body>
 </html>
