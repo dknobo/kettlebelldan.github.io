@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KNICKS FAN PAGE • 2026 FINALS</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap');
+
+    :root {
+      --knicks-blue: #006BB6;
+      --knicks-orange: #F58426;
+      --dark: #0a1428;
+      --darker: #050a18;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--darker);
+      color: #f5f5f5;
+      font-family: 'Inter', system_ui, sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    .display {
+      font-family: 'Anton', sans-serif;
+      font-weight: 400;
+      letter-spacing: -1px;
+    }
+
+    .bebas {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 3px;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, #0a1428 0%, #050a18 100%);
+      padding: 60px 20px 80px;
+      text-align: center;
+      border-bottom: 6px solid var(--knicks-orange);
+    }
+
+    .hero h1 {
+      font-size: clamp(3.5rem, 12vw, 7.5rem);
+      line-height: 0.9;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .hero .subtitle {
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      color: var(--knicks-orange);
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 6px;
+      margin-bottom: 30px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--knicks-blue);
+      color: white;
+      padding: 8px 24px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      border-radius: 2px;
+    }
+
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+
+    .big-number {
+      font-size: clamp(4rem, 14vw, 9rem);
+      font-family: 'Anton', sans-serif;
+      line-height: 0.85;
+      color: var(--knicks-orange);
+    }
+
+    h2 {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: white;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .year {
+      color: var(--knicks-orange);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 4px;
+    }
+
+    .content {
+      max-width: 720px;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #ddd;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin: 50px 0;
+    }
+
+    .era {
+      background: #111a2e;
+      border-left: 8px solid var(--knicks-orange);
+      padding: 28px 24px;
+    }
+
+    .era h3 {
+      color: var(--knicks-blue);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin: 40px 0;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      border: 3px solid #1a2744;
+      transition: transform 0.2s ease;
+    }
+
+    .gallery img:hover {
+      transform: scale(1.015);
+    }
+
+    .hype-image {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin: 20px 0;
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    .finals-banner {
+      background: linear-gradient(90deg, var(--knicks-blue), #004d80);
+      padding: 50px 30px;
+      text-align: center;
+      margin: 60px 0;
+      border-radius: 8px;
+    }
+
+    .finals-banner h2 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+    }
+
+
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 80px;
+      color: #666;
+      text-decoration: none;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+    }
+
+    .back-link:hover {
+      color: var(--knicks-orange);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 0.75rem;
+      color: #444;
+      border-top: 1px solid #1a2744;
+    }
+
+    .orange { color: var(--knicks-orange); }
+    .blue { color: var(--knicks-blue); }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="tag">NEW YORK BASKETBALL</div>
+    <h1 class="display">THE WAIT<br>IS OVER</h1>
+    <div class="subtitle">2026 NBA FINALS • FIRST TIME SINCE 1999</div>
+    
+    <div style="font-size: 1.35rem; color: #ccc; max-width: 620px; margin: 0 auto;">
+      27 YEARS. COUNTLESS HEARTBREAKS.<br>
+      <span style="color: var(--knicks-orange);">THIS ONE IS FOR THE CITY.</span>
+    </div>
+  </header>
+
+  <!-- 27 YEARS -->
+  <div class="section" style="text-align: center; padding-top: 50px; padding-bottom: 30px;">
+    <div class="big-number">27</div>
+    <div style="font-size: 1.5rem; color: #888; margin-top: -10px; letter-spacing: 3px;">YEARS SINCE THE LAST FINALS APPEARANCE</div>
+  </div>
+
+  <!-- STARKS DUNK - THE ICONIC MOMENT -->
+  <div class="section" style="max-width: 920px; padding-top: 20px; padding-bottom: 10px;">
+    <img src="images/knicks/starks.jpg" alt="John Starks The Dunk - 1993 Playoffs" class="hype-image" style="box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);">
+    <p style="text-align: center; font-size: 0.9rem; color: #777; margin-top: 12px; letter-spacing: 1px;">
+      JOHN STARKS • THE DUNK • MAY 25, 1993
+    </p>
+  </div>
+
+  <!-- THE RUN -->
+  <div class="section">
+    <h2>THE 2026 RUN</h2>
+    <div class="content">
+      <p style="margin-bottom: 20px;">
+        This wasn't supposed to happen. Not according to the experts. Not after decades of near-misses, 
+        injuries, and "almosts." But this group — led by <span class="blue">Jalen Brunson</span>, 
+        <span class="blue">Josh Hart</span>, and the rest of the core — refused to let history repeat itself.
+      </p>
+      <p>
+        They didn't just make the playoffs. They <strong>took</strong> the East. And in the process, they 
+        gave New York the first taste of real hope since the late 90s. The Garden is shaking again.
+      </p>
+    </div>
+  </div>
+
+  <!-- 1994 + 1999 TRIBUTE -->
+  <div class="section">
+    <h2>ECHOES FROM THE PAST</h2>
+    
+    <div class="timeline">
+      <!-- 1994 -->
+      <div class="era">
+        <div class="year">1994</div>
+        <h3>THE EWING ERA</h3>
+        <div class="content" style="font-size: 1rem;">
+          <p>Patrick Ewing. John Starks. Charles Oakley. Anthony Mason.</p>
+          <p style="margin-top: 12px;">
+            The toughest, grittiest Knicks team in modern history. They went to the Finals and 
+            took the Houston Rockets to seven games. They played with a mean streak the league 
+            hadn't seen in years. New York fell in love with that physical, defensive identity.
+          </p>
+          <p style="margin-top: 12px; color: #888; font-size: 0.95rem;">
+            They were one game away from a title. We still talk about Starks' 3s and Oak's elbows.
+          </p>
+        </div>
+      </div>
+
+      <!-- 1999 -->
+      <div class="era">
+        <div class="year">1999</div>
+        <h3>THE 8-SEED MIRACLE</h3>
+        <div class="content" style="font-size: 1rem;">
+          <p>Latrell Sprewell. Allan Houston. Larry Johnson.</p>
+          <p style="margin-top: 12px;">
+            An 8-seed that somehow made it all the way to the Finals. The famous "4-point play." 
+            The improbable run that had the entire city believing again. They ran into the Spurs 
+            and Tim Duncan, but the journey felt like destiny for a few magical weeks.
+          </p>
+          <p style="margin-top: 12px; color: #888; font-size: 0.95rem;">
+            1999 was the last time the Knicks reached the promised land. Until now.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GARDEN VIBES -->
+  <div class="section" style="max-width: 1000px; padding-top: 10px;">
+    <p style="text-align: center; color: #666; font-size: 0.95rem; max-width: 520px; margin: 0 auto 30px;">
+      The Garden. The roar. The history. This is what we're fighting for again.
+    </p>
+  </div>
+
+
+
+  <!-- THE MOMENTS + VIBES -->
+  <div class="section">
+    <h2>THE MOMENTS</h2>
+    <p style="color: #777; margin-bottom: 24px; max-width: 620px;">
+      Cool Knicks imagery — the Garden, iconic moments, and key figures.
+    </p>
+    
+    <div class="gallery">
+      <!-- Starks Dunk -->
+      <div>
+        <img src="images/knicks/starks.jpg" alt="John Starks The Dunk 1993" style="width:100%; height:auto; border: 3px solid #1a2744;">
+        <div style="font-size: 0.75rem; color: #555; margin-top: 6px;">starks.jpg — The Dunk (1993)</div>
+      </div>
+      
+      <!-- Patrick Ewing -->
+      <div>
+        <img src="images/knicks/ewing.jpg" alt="Patrick Ewing" style="width:100%; height:auto; border: 3px solid #1a2744;">
+        <div style="font-size: 0.75rem; color: #555; margin-top: 6px;">ewing.jpg — Patrick Ewing</div>
+      </div>
+      
+      <!-- The Garden -->
+      <div>
+        <img src="images/knicks/garden.jpg" alt="Madison Square Garden" style="width:100%; height:auto; border: 3px solid #1a2744;">
+        <div style="font-size: 0.75rem; color: #555; margin-top: 6px;">garden.jpg — The Garden</div>
+      </div>
+      
+      <!-- Jalen Brunson -->
+      <div>
+        <img src="images/knicks/brunson.jpg" alt="Jalen Brunson" style="width:100%; height:auto; border: 3px solid #1a2744;">
+        <div style="font-size: 0.75rem; color: #555; margin-top: 6px;">brunson.jpg — Jalen Brunson</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALL TO ACTION -->
+  <div class="finals-banner">
+    <div style="max-width: 620px; margin: 0 auto;">
+      <div style="color: #ffebcc; font-size: 0.95rem; letter-spacing: 3px; margin-bottom: 8px;">THIS CITY DESERVES IT</div>
+      <h2 style="color: white; font-size: 2.6rem; line-height: 1;">SEE YOU AT THE GARDEN.<br>SEE YOU IN THE FINALS.</h2>
+    </div>
+  </div>
+
+  <a href="index.html" class="back-link">← BACK TO THE MAIN SITE</a>
+
+  <div class="footer">
+    KNICKS FAN PAGE • BUILT WITH LOVE AND COPIUM • 2026
+  </div>
+
+</body>
+</html>
