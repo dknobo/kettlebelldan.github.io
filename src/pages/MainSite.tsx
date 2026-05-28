@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { X, Dumbbell, User, Coffee } from 'lucide-react'
+import { Twitter, Dumbbell, User, Coffee } from 'lucide-react'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -77,7 +77,7 @@ export default function MainSite() {
           className="mb-8 group rounded-2xl border border-[#1f1f1f] p-6 transition-colors hover:border-[#3f3f46]"
         >
           <div className="flex items-center gap-3 mb-3">
-            <X className="w-6 h-6 text-[#d1d5db] transition-transform group-hover:scale-110" />
+            <Twitter className="w-6 h-6 text-[#d1d5db] transition-transform group-hover:scale-110" />
             <div className="font-semibold text-2xl text-white tracking-[-0.5px]">X Employee</div>
           </div>
           <p className="text-[15px] text-[#b3b3b3]">
@@ -233,21 +233,6 @@ export default function MainSite() {
         Find me on X 
         <span className="text-xl">→</span>
       </motion.a>
-
-      {/* Tech Stack Badges */}
-      <div className="mt-16 pt-8 border-t border-[#1f1f1f]">
-        <div className="text-xs tracking-[2.5px] text-[#6b7280] mb-3 text-center">BUILT WITH</div>
-        <div className="flex flex-wrap justify-center gap-3">
-          {['React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'].map((tech) => (
-            <span 
-              key={tech}
-              className="px-4 py-1.5 rounded-full border border-[#2a2a2a] bg-[#111] text-sm text-[#e5e5e5] hover:border-[#3f3f46] transition-colors"
-            >
-              {tech}
-            </span>
-          ))}
-        </div>
-      </div>
     </div>
   )
 }
