@@ -3,18 +3,19 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-"scripts": {
-  "dev": "vite",
-  "build": "vite build", 
-  "preview": "vite preview",
-  "deploy": "npm run build && cp CNAME dist/ 2>/dev/null || true && gh-pages -d dist"
-},
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && cp CNAME dist/ 2>/dev/null || true && mkdir -p dist/imposter dist/party dist/v2 dist/knicks dist/rocket_catch_game dist/math_imposter dist/imposter_simple dist/imposter_image dist/imposter_party dist/impasta_party dist/3D_Sudoku dist/spacex_tetris dist/x_blaster dist/starbase dist/orb dist/x_the_game dist/x_the_game_v2 && cp dist/index.html dist/imposter/index.html && cp dist/index.html dist/party/index.html && cp dist/index.html dist/v2/index.html && cp dist/index.html dist/knicks/index.html && cp dist/index.html dist/rocket_catch_game/index.html && cp dist/index.html dist/math_imposter/index.html && cp dist/index.html dist/imposter_simple/index.html && cp dist/index.html dist/imposter_image/index.html && cp dist/index.html dist/imposter_party/index.html && cp dist/index.html dist/impasta_party/index.html && cp dist/index.html dist/3D_Sudoku/index.html && cp dist/index.html dist/spacex_tetris/index.html && cp dist/index.html dist/x_blaster/index.html && cp dist/index.html dist/starbase/index.html && cp dist/index.html dist/orb/index.html && cp dist/index.html dist/x_the_game/index.html && cp dist/index.html dist/x_the_game_v2/index.html && gh-pages -d dist --dotfiles"
+  },
   "dependencies": {
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router-dom": "^7.15.1"
+    "react-router-dom": "^7.15.1",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -22,6 +23,7 @@
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",

@@ -1,0 +1,540 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&display=swap');
+
+.xg {
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  position: relative;
+  min-height: 100dvh;
+  background: #030308;
+  color: #f4f4f4;
+  font-family: Outfit, system-ui, sans-serif;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+.xg *,
+.xg *::before,
+.xg *::after {
+  box-sizing: border-box;
+}
+
+.xg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.xg-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: calc(12px + var(--safe-t)) 16px 0;
+  pointer-events: none;
+}
+
+.xg-top a,
+.xg-top button {
+  pointer-events: auto;
+}
+
+.xg-back {
+  color: #8a8a8a;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.xg-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.xg-xmark {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.xg-brand b {
+  font-size: 13px;
+  letter-spacing: 0.36em;
+  font-weight: 600;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
+}
+
+.xg-brand span {
+  display: block;
+  margin-top: 3px;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #6e6e6e;
+}
+
+.xg-top-spacer {
+  width: 72px;
+}
+
+.xg-hud {
+  position: absolute;
+  top: calc(58px + var(--safe-t));
+  left: 28px;
+  z-index: 4;
+  pointer-events: none;
+  padding: 12px 16px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(10, 12, 20, 0.42), rgba(6, 6, 12, 0.22));
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.xg-level {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #9aa3b2;
+  margin-bottom: 4px;
+}
+
+.xg-score {
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 0 0 24px rgba(255, 255, 255, 0.18);
+}
+
+.xg-hearts {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.xg-hearts i {
+  position: relative;
+  width: 14px;
+  height: 13px;
+  display: block;
+}
+
+.xg-hearts i::before,
+.xg-hearts i::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 8px;
+  height: 13px;
+  background: #ff4d6d;
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 0 8px rgba(255, 77, 109, 0.45);
+}
+
+.xg-hearts i::before {
+  left: 7px;
+  transform: rotate(-45deg);
+  transform-origin: 0 100%;
+}
+
+.xg-hearts i::after {
+  left: 0;
+  transform: rotate(45deg);
+  transform-origin: 100% 100%;
+}
+
+.xg-hearts i.off::before,
+.xg-hearts i.off::after {
+  background: #2a2a2a;
+  box-shadow: none;
+}
+
+.xg-mod {
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #f5d76e;
+}
+
+.xg-power {
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  text-shadow: 0 0 14px currentColor;
+}
+
+.xg-weapon {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #9a9a9a;
+}
+
+.xg-banner {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: min(92vw, 920px);
+  text-align: center;
+  pointer-events: none;
+}
+
+.xg-banner small {
+  display: block;
+  letter-spacing: 0.52em;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.xg-banner strong {
+  display: block;
+  margin-top: 4px;
+  font-family: Syne, Outfit, sans-serif;
+  font-size: clamp(44px, 11vw, 96px);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.12);
+  text-shadow: none;
+  line-height: 0.95;
+}
+
+.xg-unlock {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: min(92vw, 720px);
+  text-align: center;
+  pointer-events: none;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.xg-unlock small {
+  display: block;
+  letter-spacing: 0.48em;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.16);
+}
+
+.xg-unlock strong {
+  display: block;
+  margin: 6px 0 4px;
+  font-family: Syne, Outfit, sans-serif;
+  font-size: clamp(40px, 10vw, 84px);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.14);
+}
+
+.xg-unlock p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.xg-streak {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: min(90vw, 720px);
+  text-align: center;
+  pointer-events: none;
+}
+
+.xg-streak strong {
+  display: block;
+  font-size: clamp(42px, 11vw, 92px);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.xg-streak p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.08);
+}
+
+.xg-bossbar {
+  position: absolute;
+  top: calc(58px + var(--safe-t));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: min(380px, calc(100vw - 220px));
+  pointer-events: none;
+  text-align: center;
+}
+
+.xg-bossbar span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 10px;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.xg-bossbar b {
+  display: block;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.xg-bossbar i {
+  display: block;
+  height: 100%;
+  background: #1877f2;
+}
+
+.xg-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 24px calc(36px + var(--safe-b));
+  background: linear-gradient(180deg, transparent 18%, rgba(5, 5, 6, 0.55) 58%, rgba(5, 5, 6, 0.92));
+  text-align: center;
+}
+
+.xg-win {
+  justify-content: flex-end;
+  background: #050506;
+}
+
+.xg-elon {
+  position: absolute;
+  left: 50%;
+  top: 7%;
+  transform: translateX(-50%);
+  width: auto;
+  height: min(58vh, 520px);
+  max-width: min(340px, 72vw);
+  object-fit: contain;
+  object-position: center top;
+  pointer-events: none;
+  filter: contrast(0.96) saturate(0.92);
+}
+
+.xg-win-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 22ch;
+}
+
+.xg-win .xg-title {
+  font-size: clamp(28px, 7vw, 48px);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.xg-kicker {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.xg-title-screen {
+  justify-content: flex-end;
+  background: linear-gradient(180deg, transparent 8%, rgba(4, 6, 14, 0.35) 48%, rgba(3, 3, 8, 0.92));
+}
+
+.xg-title-screen .xg-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 6px;
+  font-size: clamp(88px, 22vw, 140px);
+}
+
+.xg-title-screen .xg-title span {
+  font-size: clamp(14px, 3.4vw, 20px);
+  letter-spacing: 0.46em;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.xg-title {
+  margin: 10px 0 8px;
+  font-size: clamp(56px, 16vw, 96px);
+  font-weight: 600;
+  letter-spacing: -0.07em;
+  line-height: 0.84;
+  text-shadow: 0 0 48px rgba(255, 255, 255, 0.16);
+}
+
+.xg-sub {
+  max-width: 28ch;
+  color: #b5b5b5;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.xg-cta {
+  margin-top: 22px;
+  border: 0;
+  background: #fff;
+  color: #111;
+  border-radius: 999px;
+  padding: 13px 32px;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.xg-over-score {
+  margin: 8px 0 4px;
+  font-size: clamp(60px, 16vw, 100px);
+  font-weight: 600;
+  letter-spacing: -0.07em;
+  line-height: 0.85;
+}
+
+.xg-pad {
+  position: absolute;
+  z-index: 5;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  touch-action: none;
+}
+
+.xg-stick {
+  left: 18px;
+  bottom: calc(18px + var(--safe-b));
+}
+
+.xg-stick i {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.xg-dash {
+  right: 18px;
+  bottom: calc(142px + var(--safe-b));
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ddd;
+}
+
+.xg-dash.is-down,
+.xg-fire.is-down {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.xg-fire {
+  right: 18px;
+  bottom: calc(18px + var(--safe-b));
+}
+
+.xg-best {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+
+.xg-gameover {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.88);
+  font: inherit;
+  font-family: Syne, Outfit, sans-serif;
+  font-size: clamp(36px, 9vw, 72px);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+.xg-pause {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-family: Syne, Outfit, sans-serif;
+  font-size: clamp(28px, 6vw, 48px);
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.xg-hyper {
+  margin-top: 8px;
+  width: 72px;
+  height: 3px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.xg-hyper i {
+  display: block;
+  height: 100%;
+  background: #fff;
+}
+
+@media (pointer: fine) {
+  .xg-pad {
+    display: none;
+  }
+}

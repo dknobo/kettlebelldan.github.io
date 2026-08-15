@@ -1,0 +1,318 @@
+.imposter-app {
+  --ip-bg: #0a1022;
+  --ip-bg-2: #121a34;
+  --ip-card: rgba(23, 31, 58, 0.92);
+  --ip-text: #f6f3ec;
+  --ip-muted: #9aa6c9;
+  --ip-accent: #ff6b4a;
+  --ip-gold: #ffd166;
+  --ip-crew: #3ddc97;
+  --ip-imposter: #ff5d8f;
+  --ip-border: rgba(255, 255, 255, 0.08);
+  --ip-safe-top: env(safe-area-inset-top, 0px);
+  --ip-safe-bot: env(safe-area-inset-bottom, 0px);
+  min-height: 100dvh;
+  color: var(--ip-text);
+  font-family: 'Nunito', ui-rounded, system-ui, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(255, 107, 74, 0.22), transparent 55%),
+    radial-gradient(900px 500px at 110% 10%, rgba(61, 220, 151, 0.12), transparent 50%),
+    radial-gradient(700px 500px at 50% 120%, rgba(255, 209, 102, 0.1), transparent 45%),
+    var(--ip-bg);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.imposter-app.math {
+  --ip-bg: #08140f;
+  --ip-bg-2: #10241b;
+  --ip-card: rgba(16, 40, 30, 0.92);
+  --ip-text: #eef8ef;
+  --ip-muted: #9db8a8;
+  --ip-accent: #37e28a;
+  --ip-gold: #d4ff4f;
+  --ip-crew: #37e28a;
+  --ip-imposter: #ff5d7a;
+  --ip-border: rgba(180, 255, 200, 0.12);
+  font-family: "Iowan Old Style", Palatino, "Palatino Linotype", "Book Antiqua", serif;
+  background:
+    linear-gradient(rgba(8, 20, 15, 0.88), rgba(8, 20, 15, 0.94)),
+    repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180, 255, 200, 0.06) 28px),
+    repeating-linear-gradient(90deg, transparent, transparent 27px, rgba(180, 255, 200, 0.06) 28px),
+    #0b1a13;
+}
+
+.imposter-app.math .ip-btn,
+.imposter-app.math .ip-cat,
+.imposter-app.math input {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.imposter-app.image {
+  background-color: #0a1022;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.imposter-app.image::before {
+  content: none;
+}
+
+.imposter-app.image .ip-card {
+  background: rgba(10, 14, 28, 0.78);
+}
+
+.imposter-app.image .ip-shell {
+  background: linear-gradient(180deg, rgba(6, 10, 20, 0.28), rgba(6, 10, 20, 0.55));
+}
+
+.imposter-app.stream,
+.imposter-app.stream button,
+.imposter-app.stream input,
+.imposter-app.stream .ip-title,
+.imposter-app.stream .ip-secret-word,
+.imposter-app.stream .ip-btn,
+.imposter-app.stream .ip-card,
+.imposter-app.stream .ip-cat,
+.imposter-app.stream .ip-pill,
+.imposter-app.stream h1,
+.imposter-app.stream h2 {
+  font-family: Outfit, ui-sans-serif, system-ui, sans-serif;
+}
+
+.imposter-app.stream .ip-title,
+.imposter-app.stream .ip-secret-word,
+.imposter-app.stream h1,
+.imposter-app.stream h2 {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.imposter-app.stream .ip-btn {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.imposter-app.stream .ip-card-soft {
+  background: rgba(10, 14, 28, 0.38);
+  border-color: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+}
+
+.ip-flip-wrap {
+  width: 100%;
+  max-width: 380px;
+  perspective: 1200px;
+}
+
+.ip-flip {
+  position: relative;
+  min-height: 280px;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+
+.ip-flip.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.ip-flip-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.2rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.ip-flip-back {
+  transform: rotateY(180deg);
+}
+
+.ip-stream-action {
+  width: 100%;
+  max-width: 380px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.imposter-app.math .ip-btn-primary {
+  background: linear-gradient(180deg, #7dffb4, #2fd27a);
+  color: #062415;
+  box-shadow: 0 10px 24px rgba(47, 210, 122, 0.22);
+}
+
+.imposter-app * {
+  box-sizing: border-box;
+}
+
+.imposter-app button,
+.imposter-app input {
+  font-family: inherit;
+}
+
+.ip-shell {
+  width: min(520px, 100%);
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: calc(16px + var(--ip-safe-top)) 18px calc(22px + var(--ip-safe-bot));
+  display: flex;
+  flex-direction: column;
+}
+
+.ip-btn {
+  border: 0;
+  border-radius: 18px;
+  min-height: 54px;
+  padding: 0 18px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+  width: 100%;
+}
+
+.ip-btn:active {
+  transform: scale(0.98);
+}
+
+.ip-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ip-btn-primary {
+  background: linear-gradient(180deg, #ff8a6b, var(--ip-accent));
+  color: #2a0d06;
+  box-shadow: 0 10px 24px rgba(255, 107, 74, 0.28);
+}
+
+.ip-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ip-text);
+  border: 1px solid var(--ip-border);
+}
+
+.ip-btn-ghost {
+  background: transparent;
+  color: var(--ip-muted);
+  min-height: 44px;
+}
+
+.ip-btn-crew {
+  background: linear-gradient(180deg, #63eeb2, var(--ip-crew));
+  color: #063322;
+}
+
+.ip-btn-danger {
+  background: linear-gradient(180deg, #ff89b0, var(--ip-imposter));
+  color: #3a0718;
+}
+
+.ip-card {
+  background: var(--ip-card);
+  border: 1px solid var(--ip-border);
+  border-radius: 22px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.ip-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ip-muted);
+}
+
+.ip-title {
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.ip-muted {
+  color: var(--ip-muted);
+}
+
+.ip-grid-cats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ip-cat {
+  text-align: left;
+  border-radius: 16px;
+  border: 1px solid var(--ip-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ip-text);
+  padding: 12px;
+  min-height: 72px;
+  cursor: pointer;
+}
+
+.ip-cat.on {
+  border-color: rgba(255, 209, 102, 0.55);
+  background: rgba(255, 209, 102, 0.12);
+}
+
+.ip-stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ip-stepper button {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid var(--ip-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ip-text);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.ip-sticky {
+  margin-top: auto;
+  padding-top: 14px;
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent, rgba(10, 16, 34, 0.92) 18%);
+}
+
+.ip-secret-word {
+  font-size: clamp(2.2rem, 10vw, 3.4rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  word-break: break-word;
+}
+
+.ip-timer {
+  font-variant-numeric: tabular-nums;
+  font-weight: 900;
+  font-size: 3.4rem;
+  letter-spacing: -0.06em;
+}
+
+.ip-install {
+  font-size: 13px;
+  color: var(--ip-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed var(--ip-border);
+  border-radius: 14px;
+  padding: 10px 12px;
+}

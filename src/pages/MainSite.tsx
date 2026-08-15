@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Twitter, Dumbbell, User, Coffee } from 'lucide-react'
+import { X, Dumbbell, User, Coffee } from 'lucide-react'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -60,6 +61,87 @@ export default function MainSite() {
         </p>
       </div>
 
+      {/* Immersive portal + party game */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35, duration: 0.45 }}
+        className="my-10 flex flex-wrap items-center justify-center gap-3"
+      >
+        <Link
+          to="/v2"
+          className="group rounded-full border border-[#1f1f1f] px-5 py-2 text-xs tracking-[0.28em] text-[#6b7280] transition-colors hover:border-[#3f3f46] hover:text-[#e5e5e5] focus:outline-none focus-visible:border-[#3f3f46] focus-visible:text-[#e5e5e5]"
+        >
+          Immersive
+        </Link>
+        <Link
+          to="/imposter"
+          className="rounded-full border border-[#3a241c] bg-[#16100e] px-5 py-2 text-xs tracking-[0.18em] text-[#f3c6b5] transition-colors hover:border-[#ff6b4a] hover:text-white"
+        >
+          Imposter Party
+        </Link>
+        <Link
+          to="/imposter_simple"
+          className="rounded-full border border-[#3a241c] bg-[#16100e] px-5 py-2 text-xs tracking-[0.18em] text-[#f3c6b5] transition-colors hover:border-[#ff6b4a] hover:text-white"
+        >
+          Imposter Simple
+        </Link>
+        <Link
+          to="/imposter_image"
+          className="rounded-full border border-[#3a241c] bg-[#16100e] px-5 py-2 text-xs tracking-[0.18em] text-[#f3c6b5] transition-colors hover:border-[#ff6b4a] hover:text-white"
+        >
+          Imposter Scenes
+        </Link>
+        <Link
+          to="/rocket_catch_game"
+          className="rounded-full border border-[#1c2a3a] bg-[#0e141c] px-5 py-2 text-xs tracking-[0.18em] text-[#b7d4f3] transition-colors hover:border-[#4da3ff] hover:text-white"
+        >
+          Starship Catch
+        </Link>
+        <Link
+          to="/math_imposter"
+          className="rounded-full border border-[#1c3328] bg-[#0e1814] px-5 py-2 text-xs tracking-[0.18em] text-[#b7f3cf] transition-colors hover:border-[#37e28a] hover:text-white"
+        >
+          Math Imposter
+        </Link>
+        <Link
+          to="/3D_Sudoku"
+          className="rounded-full border border-[#3a3420] bg-[#14110c] px-5 py-2 text-xs tracking-[0.18em] text-[#e7c37a] transition-colors hover:border-[#e7c37a] hover:text-white"
+        >
+          3D Sudoku
+        </Link>
+        <Link
+          to="/spacex_tetris"
+          className="rounded-full border border-[#2a3038] bg-[#101318] px-5 py-2 text-xs tracking-[0.18em] text-[#d7dde4] transition-colors hover:border-[#d7dde4] hover:text-white"
+        >
+          SpaceX Tetris
+        </Link>
+        <Link
+          to="/x_blaster"
+          className="rounded-full border border-[#2a2a2a] bg-[#111111] px-5 py-2 text-xs tracking-[0.18em] text-[#e8e8e8] transition-colors hover:border-[#e8e8e8] hover:text-white"
+        >
+          X Blaster
+        </Link>
+        <Link
+          to="/starbase"
+          className="rounded-full border border-[#3a3024] bg-[#16130e] px-5 py-2 text-xs tracking-[0.18em] text-[#e8b07a] transition-colors hover:border-[#e8b07a] hover:text-white"
+        >
+          Starbase
+        </Link>
+        <Link
+          to="/orb"
+          className="rounded-full border border-[#2a2a2a] bg-[#0d0d0d] px-5 py-2 text-xs tracking-[0.18em] text-[#f0f0f0] transition-colors hover:border-[#f0f0f0] hover:text-white"
+        >
+          Orb Hop
+        </Link>
+        <Link
+          to="/x_the_game_v2"
+          className="rounded-full border border-[#2a2a2a] bg-[#111] px-5 py-2 text-xs tracking-[0.18em] text-[#f5f5f5] transition-colors hover:border-[#f5f5f5] hover:text-white"
+        >
+          X THE GAME
+        </Link>
+      </motion.div>
+
       {/* Pillars */}
       <motion.div 
         variants={staggerContainer}
@@ -77,7 +159,7 @@ export default function MainSite() {
           className="mb-8 group rounded-2xl border border-[#1f1f1f] p-6 transition-colors hover:border-[#3f3f46]"
         >
           <div className="flex items-center gap-3 mb-3">
-            <Twitter className="w-6 h-6 text-[#d1d5db] transition-transform group-hover:scale-110" />
+            <X className="w-6 h-6 text-[#d1d5db] transition-transform group-hover:scale-110" />
             <div className="font-semibold text-2xl text-white tracking-[-0.5px]">X Employee</div>
           </div>
           <p className="text-[15px] text-[#b3b3b3]">

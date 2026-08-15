@@ -1,0 +1,586 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,700&family=Outfit:wght@400;500;600;700&display=swap');
+
+.s3d {
+  --ink: #f3efe6;
+  --muted: #b7b1a6;
+  --line: rgba(231, 195, 122, 0.22);
+  --gold: #e7c37a;
+  --teal: #7ee0d6;
+  --rose: #ff8b97;
+  --panel: rgba(8, 10, 18, 0.62);
+  min-height: 100dvh;
+  color: var(--ink);
+  font-family: Outfit, system-ui, sans-serif;
+  background:
+    radial-gradient(1200px 700px at 50% 40%, rgba(10, 14, 28, 0.15), rgba(4, 5, 10, 0.88)),
+    url('/sudoku3d/nebula.jpg') center / cover no-repeat,
+    #05060c;
+  overflow: hidden;
+  position: relative;
+}
+
+.s3d *,
+.s3d *::before,
+.s3d *::after {
+  box-sizing: border-box;
+}
+
+.s3d-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+}
+
+.s3d-ui {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+  min-height: 100dvh;
+}
+
+.s3d-ui > * {
+  pointer-events: auto;
+}
+
+.s3d-top,
+.s3d-bottom,
+.s3d-side {
+  padding: 18px 22px;
+}
+
+.s3d-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.s3d-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.s3d-kicker {
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--gold);
+}
+
+.s3d-title {
+  font-family: Fraunces, Georgia, serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  margin: 0;
+}
+
+.s3d-sub {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 36ch;
+}
+
+.s3d-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.s3d-chip,
+.s3d-btn,
+.s3d-pad button,
+.s3d-mini,
+.s3d-mode,
+.s3d-diff {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: 999px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.s3d-chip {
+  min-width: 76px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.s3d-chip b {
+  display: block;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.s3d-chip span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.s3d-btn {
+  cursor: pointer;
+  padding: 10px 16px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.s3d-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(231, 195, 122, 0.55);
+}
+
+.s3d-btn.primary {
+  background: linear-gradient(180deg, rgba(231, 195, 122, 0.28), rgba(231, 195, 122, 0.08));
+  color: #fff6df;
+}
+
+.s3d-btn.ghost {
+  background: transparent;
+}
+
+.s3d-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.s3d-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: minmax(180px, 280px) 1fr minmax(220px, 340px);
+  gap: 16px;
+  align-items: end;
+}
+
+.s3d-panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 22px;
+  padding: 14px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.s3d-panel h3,
+.s3d-side h3 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.s3d-pad {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.s3d-pad.classic {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.s3d-pad.lattice {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.s3d-pad button {
+  height: 48px;
+  border-radius: 16px;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 22px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.s3d-pad button:hover,
+.s3d-pad button.active {
+  transform: translateY(-1px);
+  border-color: var(--teal);
+  background: rgba(126, 224, 214, 0.12);
+}
+
+.s3d-pad button.warn {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: Outfit, system-ui, sans-serif;
+}
+
+.s3d-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.s3d-sliders label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.s3d-sliders input[type='range'] {
+  width: 100%;
+  accent-color: var(--gold);
+}
+
+.s3d-focus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.s3d-focus button {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.s3d-focus button.on {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.s3d-side {
+  position: absolute;
+  right: 18px;
+  top: 108px;
+  width: min(320px, calc(100vw - 36px));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100dvh - 250px);
+  overflow: auto;
+}
+
+.s3d-slices {
+  display: grid;
+  gap: 10px;
+}
+
+.s3d-slice {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.s3d-slice header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.s3d-grid {
+  display: grid;
+  gap: 4px;
+}
+
+.s3d-cell {
+  aspect-ratio: 1;
+  border: 1px solid rgba(231, 195, 122, 0.16);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: rgba(7, 10, 18, 0.55);
+  font-family: Fraunces, Georgia, serif;
+  font-size: 18px;
+  position: relative;
+}
+
+.s3d-cell.given {
+  color: var(--gold);
+}
+
+.s3d-cell.player {
+  color: #eaf8ff;
+}
+
+.s3d-cell.selected {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 1px rgba(126, 224, 214, 0.35), inset 0 0 18px rgba(126, 224, 214, 0.12);
+}
+
+.s3d-cell.related {
+  background: rgba(126, 160, 255, 0.08);
+}
+
+.s3d-cell.conflict {
+  border-color: var(--rose);
+  color: var(--rose);
+}
+
+.s3d-notes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  padding: 3px;
+  gap: 0;
+  font-size: 8px;
+  font-family: Outfit, system-ui, sans-serif;
+  color: rgba(243, 239, 230, 0.55);
+}
+
+.s3d-menu {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.9fr);
+  gap: 24px;
+  padding: clamp(20px, 4vw, 56px);
+  align-items: center;
+}
+
+.s3d-hero {
+  max-width: 680px;
+}
+
+.relic {
+  width: min(240px, 70%);
+  border-radius: 28px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  margin: 0 auto 18px;
+  display: block;
+  border: 1px solid rgba(231, 195, 122, 0.2);
+}
+
+.s3d-hero h1 {
+  font-family: Fraunces, Georgia, serif;
+  font-size: clamp(48px, 8vw, 92px);
+  line-height: 0.88;
+  letter-spacing: -0.055em;
+  margin: 0 0 14px;
+}
+
+.s3d-hero p.lede {
+  font-size: 17px;
+  line-height: 1.55;
+  color: #d8d2c6;
+  max-width: 46ch;
+}
+
+.s3d-rules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 28px 0;
+}
+
+.s3d-rule {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(8, 10, 18, 0.5);
+  backdrop-filter: blur(12px);
+}
+
+.s3d-rule strong {
+  display: block;
+  font-family: Fraunces, Georgia, serif;
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+
+.s3d-rule span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.s3d-setup {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: 22px;
+  background: rgba(8, 10, 18, 0.66);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.s3d-setup h2 {
+  font-family: Fraunces, Georgia, serif;
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.s3d-modes,
+.s3d-diffs {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.s3d-mode,
+.s3d-diff {
+  cursor: pointer;
+  border-radius: 18px;
+  padding: 14px 16px;
+  text-align: left;
+  width: 100%;
+}
+
+.s3d-mode.on,
+.s3d-diff.on {
+  border-color: rgba(126, 224, 214, 0.7);
+  background: rgba(126, 224, 214, 0.08);
+}
+
+.s3d-mode b,
+.s3d-diff b {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 3px;
+}
+
+.s3d-mode span,
+.s3d-diff span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.s3d-start {
+  width: 100%;
+  margin-top: 8px;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 13px;
+}
+
+.s3d-win {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 5, 10, 0.45);
+  z-index: 5;
+}
+
+.s3d-win card,
+.s3d-win .card {
+  width: min(440px, calc(100vw - 32px));
+  border: 1px solid rgba(231, 195, 122, 0.35);
+  background: rgba(10, 12, 20, 0.86);
+  border-radius: 28px;
+  padding: 28px;
+  text-align: center;
+  backdrop-filter: blur(20px);
+}
+
+.s3d-win h2 {
+  font-family: Fraunces, Georgia, serif;
+  font-size: 42px;
+  margin: 0 0 8px;
+  letter-spacing: -0.04em;
+}
+
+.s3d-win p {
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+
+.s3d-help {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.s3d-link {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.s3d-toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.s3d-toggle input {
+  accent-color: var(--gold);
+}
+
+@media (max-width: 980px) {
+  .s3d-menu {
+    grid-template-columns: 1fr;
+    padding-bottom: 40px;
+    overflow: auto;
+    min-height: 100dvh;
+  }
+
+  .s3d-rules {
+    grid-template-columns: 1fr;
+  }
+
+  .s3d-bottom {
+    position: relative;
+    grid-template-columns: 1fr;
+    padding-bottom: 24px;
+  }
+
+  .s3d-side {
+    position: relative;
+    right: auto;
+    top: auto;
+    width: auto;
+    max-height: none;
+    padding: 0 22px;
+  }
+
+  .s3d-top {
+    flex-direction: column;
+  }
+
+  .s3d-ui {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .s3d-canvas-wrap {
+    min-height: 58dvh;
+    position: relative;
+  }
+
+  .s3d.play {
+    overflow: auto;
+  }
+}
+
+@media (min-width: 981px) {
+  .s3d.play .s3d-canvas-wrap {
+    position: absolute;
+    inset: 0;
+  }
+}
