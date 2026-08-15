@@ -200,7 +200,7 @@ export default function XTheGameApp() {
     unlockAudio()
     startMusic()
     void enableTilt()
-    startRun(game.current)
+    startRun(game.current, { compact: mobile.current })
     fireHeld.current = false
     deadGateRef.current = false
     setDeadGate(false)

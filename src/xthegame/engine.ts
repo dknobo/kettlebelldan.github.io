@@ -206,6 +206,7 @@ export type Game = {
   buffs: Record<PowerKind, number>
   novaTick: number
   note: { name: string; use: string; t: number } | null
+  compact: boolean
 }
 
 export type Input = {
@@ -312,16 +313,28 @@ export function createGame(): Game {
     buffs: { rapid: 0, nova: 0, titan: 0 },
     novaTick: 0,
     note: null,
+    compact: false,
   }
 }
 
-export function startRun(g: Game) {
+export function startRun(g: Game, opts?: { compact?: boolean }) {
   const w = g.w
   const h = g.h
-  Object.assign(g, createGame(), { w, h, phase: 'play' as Phase })
+  const compact = opts?.compact ?? g.compact
+  Object.assign(g, createGame(), { w, h, phase: 'play' as Phase, compact })
   g.player.x = w / 2
   g.player.y = h * 0.56
   beginWave(g, 0)
+}
+
+function thinPack(pack: EnemyKind[], keep: number) {
+  if (pack.length <= 5) return pack.slice()
+  const n = Math.max(5, Math.round(pack.length * keep))
+  if (n >= pack.length) return pack.slice()
+  const out: EnemyKind[] = []
+  const step = pack.length / n
+  for (let i = 0; i < n; i++) out.push(pack[Math.min(pack.length - 1, Math.floor(i * step + 0.0001))])
+  return out
 }
 
 function beginWave(g: Game, i: number) {
@@ -330,7 +343,7 @@ function beginWave(g: Game, i: number) {
   g.waveName = wave.name
   g.waveTag = wave.tag
   g.waveBanner = 1.8
-  g.spawnQ = wave.pack.slice()
+  g.spawnQ = g.compact ? thinPack(wave.pack, 0.55) : wave.pack.slice()
   g.spawnT = 0.35
 }
 
@@ -797,7 +810,8 @@ function killEnemy(g: Game, e: Enemy) {
   if (e.split) {
     const childR = Math.max(14, e.r * 0.62)
     const childHp = Math.max(1, Math.ceil(e.max * 0.45))
-    for (let i = 0; i < 2; i++) {
+    const kids = g.compact ? 1 : 2
+    for (let i = 0; i < kids; i++) {
       spawnEnemy(
         g,
         e.kind,
@@ -1403,9 +1417,11 @@ export function step(g: Game, dt: number, input: Input) {
 
   if (g.phase === 'play') {
     g.spawnT -= c
-    if (g.spawnQ.length && g.spawnT <= 0) {
+    const room = !g.compact || g.enemies.length < 7
+    if (g.spawnQ.length && g.spawnT <= 0 && room) {
       spawnEnemy(g, g.spawnQ.shift()!)
-      g.spawnT = (g.wave === 0 ? 0.32 : 0.52) + Math.random() * 0.16
+      const wait = (g.wave === 0 ? 0.32 : 0.52) + Math.random() * 0.16
+      g.spawnT = g.compact ? wait * 1.45 : wait
     }
     if (!g.spawnQ.length && !g.enemies.length) {
       if (g.wave + 1 < WAVES.length) beginWave(g, g.wave + 1)
