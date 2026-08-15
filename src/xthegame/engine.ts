@@ -213,6 +213,7 @@ export type Input = {
   thrust: boolean
   hyper: boolean
   fire: boolean
+  tilt: { x: number; y: number } | null
 }
 
 type Wave = { name: string; tag: string; pack: EnemyKind[] }
@@ -1298,12 +1299,21 @@ export function step(g: Game, dt: number, input: Input) {
     return
   }
 
-  p.angle += input.rotate * 3.9 * capped
-  p.thrusting = input.thrust
-  if (input.thrust) {
-    p.vx += Math.cos(p.angle) * 540 * capped
-    p.vy += Math.sin(p.angle) * 540 * capped
-    if (g.particles.length < 70) {
+  const tilt = input.tilt
+  const tiltMag = tilt ? Math.hypot(tilt.x, tilt.y) : 0
+  if (tilt && tiltMag > 0.05) {
+    const nx = tilt.x / tiltMag
+    const ny = tilt.y / tiltMag
+    const want = Math.atan2(ny, nx)
+    let turn = want - p.angle
+    while (turn > Math.PI) turn -= Math.PI * 2
+    while (turn < -Math.PI) turn += Math.PI * 2
+    p.angle += turn * Math.min(1, 12 * capped)
+    const power = Math.min(1, tiltMag)
+    p.vx += nx * 680 * power * capped
+    p.vy += ny * 680 * power * capped
+    p.thrusting = power > 0.14
+    if (p.thrusting && g.particles.length < 70) {
       g.particles.push({
         x: p.x - Math.cos(p.angle) * 16,
         y: p.y - Math.sin(p.angle) * 16,
@@ -1315,6 +1325,26 @@ export function step(g: Game, dt: number, input: Input) {
         color: Math.random() > 0.5 ? '#fff' : '#9ecbff',
         kind: 'flame',
       })
+    }
+  } else {
+    p.angle += input.rotate * 3.9 * capped
+    p.thrusting = input.thrust
+    if (input.thrust) {
+      p.vx += Math.cos(p.angle) * 540 * capped
+      p.vy += Math.sin(p.angle) * 540 * capped
+      if (g.particles.length < 70) {
+        g.particles.push({
+          x: p.x - Math.cos(p.angle) * 16,
+          y: p.y - Math.sin(p.angle) * 16,
+          vx: -Math.cos(p.angle) * 80 + (Math.random() - 0.5) * 40,
+          vy: -Math.sin(p.angle) * 80 + (Math.random() - 0.5) * 40,
+          life: 0.16,
+          max: 0.16,
+          size: 3 + Math.random() * 3,
+          color: Math.random() > 0.5 ? '#fff' : '#9ecbff',
+          kind: 'flame',
+        })
+      }
     }
   }
   p.vx *= Math.pow(0.72, capped)

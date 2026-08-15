@@ -7,7 +7,23 @@ import './xthegame.css'
 
 const LS_BEST = 'x-the-game-best'
 
+function isMobileDevice() {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window
+}
 
+function screenAngle() {
+  const o = window.screen?.orientation?.angle
+  if (typeof o === 'number') return o
+  const w = (window as Window & { orientation?: number }).orientation
+  return typeof w === 'number' ? w : 0
+}
+
+function deadzone(v: number, z = 0.12) {
+  const a = Math.abs(v)
+  if (a < z) return 0
+  return Math.sign(v) * ((a - z) / (1 - z))
+}
 
 export default function XTheGameApp() {
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -16,11 +32,16 @@ export default function XTheGameApp() {
   const renderer = useRef<Renderer | null>(null)
   const keys = useRef<Record<string, boolean>>({})
   const mouse = useRef({ x: 400, y: 300, on: true })
-  const stick = useRef({ ax: 0, ay: 0, id: -1 })
   const dashQ = useRef(false)
   const fireHeld = useRef(false)
+  const mobile = useRef(isMobileDevice())
+  const tilt = useRef({ x: 0, y: 0, ready: false })
+  const tiltRest = useRef<{ b: number; g: number } | null>(null)
+  const tiltNeedCal = useRef(false)
+  const drag = useRef({ on: false, x: 0, y: 0, sx: 0, sy: 0 })
   const prev = useRef({ kills: 0, weapon: 1, hp: 4, phase: 'title' as Game['phase'], wave: -1 })
   const [best, setBest] = useState(() => Number(localStorage.getItem(LS_BEST) || 0))
+  const [touchUI] = useState(() => isMobileDevice())
 
   const [phase, setPhase] = useState<Game['phase']>('title')
   const [hud, setHud] = useState({
@@ -44,9 +65,6 @@ export default function XTheGameApp() {
     hyper: 0,
     buffs: { rapid: 0, nova: 0, titan: 0 } as Record<PowerKind, number>,
   })
-  const [stickPos, setStickPos] = useState({ x: 0, y: 0 })
-  const [dashDown, setDashDown] = useState(false)
-  const [fireDown, setFireDown] = useState(false)
   const [deadGate, setDeadGate] = useState(false)
   const deadGateRef = useRef(false)
 
@@ -77,21 +95,21 @@ export default function XTheGameApp() {
       last = now
       const g = game.current
       const k = keys.current
-      let rotate = (k['d'] || k['arrowright'] ? 1 : 0) - (k['a'] || k['arrowleft'] ? 1 : 0)
-      let thrust = !!(k['w'] || k['arrowup'])
-      if (stick.current.id !== -1) {
-        rotate = stick.current.ax
-        thrust = stick.current.ay < -0.18
-      }
+      const rotate = (k['d'] || k['arrowright'] ? 1 : 0) - (k['a'] || k['arrowleft'] ? 1 : 0)
+      const thrust = !!(k['w'] || k['arrowup'])
       const playing = g.phase === 'play' || g.phase === 'boss'
-      const hyper = dashQ.current
+      const hyper = mobile.current ? false : dashQ.current
       dashQ.current = false
       const kFire = !!(k[' '] || k['space'] || k['f'] || k['j'])
+      const useTilt = mobile.current && tilt.current.ready
+      const useDrag = mobile.current && !useTilt && drag.current.on
+      const analog = useTilt ? { x: tilt.current.x, y: tilt.current.y } : useDrag ? { x: drag.current.x, y: drag.current.y } : null
       step(g, dt, {
-        rotate,
-        thrust,
+        rotate: analog ? 0 : rotate,
+        thrust: analog ? false : thrust,
         hyper,
-        fire: playing && !g.paused && (fireHeld.current || kFire),
+        fire: playing && !g.paused && (fireHeld.current || (!mobile.current && kFire)),
+        tilt: analog,
       })
 
       if (g.kills > prev.current.kills) sfx.kill()
@@ -119,7 +137,6 @@ export default function XTheGameApp() {
         fireHeld.current = false
         deadGateRef.current = true
         setDeadGate(true)
-        setFireDown(false)
         const score = g.score
         const was = Number(localStorage.getItem(LS_BEST) || 0)
         if (score > was) {
@@ -165,16 +182,31 @@ export default function XTheGameApp() {
     }
   }, [])
 
+  const enableTilt = useCallback(async () => {
+    if (!mobile.current) return
+    try {
+      const DOE = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+        requestPermission?: () => Promise<string>
+      }
+      if (typeof DOE.requestPermission === 'function') await DOE.requestPermission()
+    } catch {
+      /* permission optional */
+    }
+    tiltNeedCal.current = true
+    tilt.current.ready = false
+  }, [])
+
   const play = useCallback(() => {
     unlockAudio()
     startMusic()
+    void enableTilt()
     startRun(game.current)
     fireHeld.current = false
     deadGateRef.current = false
     setDeadGate(false)
     prev.current = { kills: 0, weapon: 1, hp: 4, phase: 'play', wave: 0 }
     setPhase('play')
-  }, [])
+  }, [enableTilt])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -217,34 +249,47 @@ export default function XTheGameApp() {
       const w = r.toWorld(e.clientX, e.clientY)
       mouse.current = { x: w.x, y: w.y, on: true }
     }
+    const onOrient = (e: DeviceOrientationEvent) => {
+      if (!mobile.current) return
+      if (e.beta == null || e.gamma == null) return
+      if (tiltNeedCal.current || !tiltRest.current) {
+        tiltRest.current = { b: e.beta, g: e.gamma }
+        tiltNeedCal.current = false
+        tilt.current.ready = true
+      }
+      const rest = tiltRest.current
+      let x = (e.gamma - rest.g) / 22
+      let y = (e.beta - rest.b) / 22
+      const a = ((screenAngle() % 360) + 360) % 360
+      if (a === 90) {
+        const nx = y
+        y = -x
+        x = nx
+      } else if (a === 270) {
+        const nx = -y
+        y = x
+        x = nx
+      } else if (a === 180) {
+        x = -x
+        y = -y
+      }
+      x = deadzone(Math.max(-1, Math.min(1, x)))
+      y = deadzone(Math.max(-1, Math.min(1, y)))
+      tilt.current.x += (x - tilt.current.x) * 0.28
+      tilt.current.y += (y - tilt.current.y) * 0.28
+      tilt.current.ready = true
+    }
     window.addEventListener('keydown', onKey)
     window.addEventListener('keyup', onKey)
     window.addEventListener('pointermove', onMove)
+    window.addEventListener('deviceorientation', onOrient)
     return () => {
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('keyup', onKey)
       window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('deviceorientation', onOrient)
     }
   }, [play])
-
-  const onStick = (e: React.PointerEvent) => {
-    const el = e.currentTarget.getBoundingClientRect()
-    const cx = el.left + el.width / 2
-    const cy = el.top + el.height / 2
-    const dx = e.clientX - cx
-    const dy = e.clientY - cy
-    const m = Math.hypot(dx, dy) || 1
-    const lim = 36
-    const nx = (dx / m) * Math.min(m, lim)
-    const ny = (dy / m) * Math.min(m, lim)
-    stick.current = { ax: nx / lim, ay: ny / lim, id: e.pointerId }
-    setStickPos({ x: nx, y: ny })
-  }
-
-  const endStick = () => {
-    stick.current = { ax: 0, ay: 0, id: -1 }
-    setStickPos({ x: 0, y: 0 })
-  }
 
   return (
     <div
@@ -252,14 +297,33 @@ export default function XTheGameApp() {
       ref={wrapRef}
       onPointerDown={(e) => {
         if (phase !== 'play' && phase !== 'boss') return
-        if ((e.target as HTMLElement).closest('a, button, .xg-pad')) return
+        if ((e.target as HTMLElement).closest('a, button')) return
         fireHeld.current = true
+        if (mobile.current) {
+          drag.current = { on: true, x: 0, y: 0, sx: e.clientX, sy: e.clientY }
+        }
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId)
+        } catch {
+          /* ignore */
+        }
+      }}
+      onPointerMove={(e) => {
+        if (!drag.current.on) return
+        drag.current.x = Math.max(-1, Math.min(1, (e.clientX - drag.current.sx) / 70))
+        drag.current.y = Math.max(-1, Math.min(1, (e.clientY - drag.current.sy) / 70))
       }}
       onPointerUp={() => {
         fireHeld.current = false
+        drag.current.on = false
+        drag.current.x = 0
+        drag.current.y = 0
       }}
       onPointerCancel={() => {
         fireHeld.current = false
+        drag.current.on = false
+        drag.current.x = 0
+        drag.current.y = 0
       }}
     >
       <canvas ref={canvasRef} className="xg-canvas" />
@@ -352,6 +416,7 @@ export default function XTheGameApp() {
           >
             Play
           </button>
+          {touchUI ? <div className="xg-how">tilt to move · hold to fire</div> : null}
         </div>
       ) : null}
 
@@ -416,60 +481,6 @@ export default function XTheGameApp() {
           </div>
         </div>
       ) : null}
-
-      {(phase === 'play' || phase === 'boss') && (
-        <>
-          <div
-            className="xg-pad xg-stick"
-            onPointerDown={(e) => {
-              e.currentTarget.setPointerCapture(e.pointerId)
-              onStick(e)
-            }}
-            onPointerMove={(e) => {
-              if (stick.current.id === e.pointerId) onStick(e)
-            }}
-            onPointerUp={endStick}
-            onPointerCancel={endStick}
-          >
-            <i style={{ transform: `translate(calc(-50% + ${stickPos.x}px), calc(-50% + ${stickPos.y}px))` }} />
-          </div>
-          <button
-            type="button"
-            tabIndex={-1}
-            className={`xg-pad xg-dash${dashDown ? ' is-down' : ''}`}
-            onPointerDown={() => {
-              dashQ.current = true
-              setDashDown(true)
-              sfx.dash()
-              unlockAudio()
-            }}
-            onPointerUp={() => setDashDown(false)}
-            onPointerCancel={() => setDashDown(false)}
-          >
-            hyper
-          </button>
-          <button
-            type="button"
-            tabIndex={-1}
-            className={`xg-pad xg-fire${fireDown ? ' is-down' : ''}`}
-            onPointerDown={() => {
-              fireHeld.current = true
-              setFireDown(true)
-              unlockAudio()
-            }}
-            onPointerUp={() => {
-              fireHeld.current = false
-              setFireDown(false)
-            }}
-            onPointerCancel={() => {
-              fireHeld.current = false
-              setFireDown(false)
-            }}
-          >
-            fire
-          </button>
-        </>
-      )}
 
       {hud.paused && (phase === 'play' || phase === 'boss') ? <div className="xg-pause">paused</div> : null}
 

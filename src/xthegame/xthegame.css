@@ -533,8 +533,22 @@
   background: #fff;
 }
 
+.xg-how {
+  margin-top: 18px;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+
 @media (pointer: fine) {
   .xg-pad {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .xg-hyper {
     display: none;
   }
 }
