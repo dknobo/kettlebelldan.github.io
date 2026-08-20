@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hot Dog Catcher 95</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="assets/hotdog.png" />
+</head>
+<body>
+  <div class="desktop" id="desktop">
+    <div class="icons">
+      <button class="desk-icon" data-toast="My Computer" type="button">
+        <span class="ico ico-pc"></span>
+        <span>My Computer</span>
+      </button>
+      <button class="desk-icon" data-toast="Recycle Bin is empty." type="button">
+        <span class="ico ico-bin"></span>
+        <span>Recycle Bin</span>
+      </button>
+      <button class="desk-icon" data-toast="Welcome to Netscape!" type="button">
+        <span class="ico ico-net"></span>
+        <span>The Internet</span>
+      </button>
+      <button class="desk-icon" data-toast="You've got mail! (it's a coupon for mustard)" type="button">
+        <span class="ico ico-mail"></span>
+        <span>Free HotMail</span>
+      </button>
+      <button class="desk-icon active" id="icon-game" type="button">
+        <span class="ico ico-game"></span>
+        <span>Hot Dog<br>Catcher 95</span>
+      </button>
+    </div>
+
+    <div class="window" id="app">
+      <div class="title-bar" id="title-bar">
+        <div class="title-bar-text">
+          <span class="tiny-hotdog"></span>
+          Hot Dog Catcher 95
+        </div>
+        <div class="title-buttons">
+          <button class="tb" id="btn-min" type="button" aria-label="Minimize">_</button>
+          <button class="tb" id="btn-max" type="button" aria-label="Maximize">□</button>
+          <button class="tb close" id="btn-close" type="button" aria-label="Close">×</button>
+        </div>
+      </div>
+
+      <div class="menu-bar">
+        <button type="button" id="menu-game">Game</button>
+        <button type="button" id="menu-help">Help</button>
+      </div>
+
+      <div class="client">
+        <canvas id="game" width="800" height="450"></canvas>
+
+        <div class="overlay" id="overlay">
+          <div class="dlg" id="dlg">
+            <div class="dlg-title" id="dlg-title">Hot Dog Catcher 95</div>
+            <div class="dlg-body">
+              <div class="dlg-icon" id="dlg-icon">🌭</div>
+              <div>
+                <p id="dlg-msg">
+                  Catch <b>10</b> flying hot dogs in your mouth.<br />
+                  Your belly gets bigger with every catch.<br />
+                  Drop <b>3</b> on the grass and it's game over.<br />
+                  Catch 10 and… well. You'll see.
+                </p>
+                <p class="hint" id="dlg-hint">Move with the <b>mouse</b> or <b>← →</b> keys</p>
+              </div>
+            </div>
+            <div class="dlg-actions">
+              <button class="win-btn default" id="btn-start" type="button">Start!</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <div class="sb-field" id="st-caught">Caught: 0 / 10</div>
+        <div class="sb-field" id="st-dropped">Dropped: 0 / 3</div>
+        <div class="sb-field grow" id="st-msg">Click Start, then open wide.</div>
+      </div>
+    </div>
+
+    <div class="taskbar">
+      <button class="start" id="start-btn" type="button">
+        <span class="win-flag"></span> Start
+      </button>
+      <button class="task active" id="task-btn" type="button">Hot Dog Catcher 95</button>
+      <div class="tray">
+        <span class="tray-ico" title="Volume">♪</span>
+        <span id="clock">8:44 PM</span>
+      </div>
+    </div>
+
+    <div class="start-menu hidden" id="start-menu">
+      <div class="start-banner">Windows<span>95</span></div>
+      <button type="button" data-toast="Not enough memory to run Solitaire. Ironic.">♠ Games</button>
+      <button type="button" data-toast="Help is not installed. Have you tried catching the hot dog?">? Help</button>
+      <button type="button" data-toast="Please insert Disk 2 of 47.">⚙ Settings</button>
+      <hr />
+      <button type="button" id="start-shutdown">Shut Down...</button>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="error-modal">
+    <div class="window small">
+      <div class="title-bar">
+        <div class="title-bar-text">Hot Dog Catcher 95</div>
+        <div class="title-buttons">
+          <button class="tb close" id="err-x" type="button">×</button>
+        </div>
+      </div>
+      <div class="window-pad">
+        <p id="err-text">This program has performed an illegal operation and will be restarted.</p>
+        <div class="dlg-actions">
+          <button class="win-btn default" id="err-ok" type="button">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
