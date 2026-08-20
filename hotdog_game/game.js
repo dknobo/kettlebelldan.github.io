@@ -6,7 +6,7 @@
 
   const CATCH_WIN = 10;
   const DROP_LOSE = 3;
-  const GRAVITY = 0.17;
+  const GRAVITY = 0.16;
 
   const PATHS = {
     bg: "assets/bg.jpg",
@@ -152,9 +152,9 @@
     const { w, h } = manSize();
     // Tight zone centered on the open mouth of these sprites.
     return {
-      x: state.playerX + w * (0.355 + manIndex() * 0.028),
-      y: H - 18 - h + h * (0.255 + manIndex() * 0.01),
-      r: 16,
+      x: state.playerX + w * (0.372 + manIndex() * 0.026),
+      y: H - 18 - h + h * (0.232 + manIndex() * 0.012),
+      r: 26,
     };
   }
 
@@ -221,8 +221,8 @@
 
   function shoot(now) {
     const m = muzzle();
-    const landX = 240 + Math.random() * 460;
-    const flight = 70 + Math.random() * 34;
+    const landX = 260 + Math.random() * 430;
+    const flight = 84 + Math.random() * 28;
     const gy = feetY() - 14;
     state.dogs.push({
       x: m.x,
@@ -244,8 +244,8 @@
         life: 1,
       });
     }
-    const gap = Math.max(820, 1850 - state.caught * 95);
-    state.nextShot = now + gap + Math.random() * 260;
+    const gap = Math.max(860, 1980 - state.caught * 88);
+    state.nextShot = now + gap + Math.random() * 290;
   }
 
   function catchDog(d, now) {
@@ -331,7 +331,7 @@
       if (state.mode === "play") {
         const dx = d.x - mouth.x;
         const dy = d.y - mouth.y;
-        if (dx * dx + dy * dy < mouth.r * mouth.r) {
+        if (dx * dx + dy * dy < (mouth.r + 4) * (mouth.r + 6)) {
           state.dogs.splice(i, 1);
           catchDog(d, now);
           continue;
