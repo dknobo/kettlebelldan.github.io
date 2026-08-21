@@ -23,11 +23,15 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
   }
 
   function bot(img: HTMLImageElement, x: number, y: number, r: number, rot: number, alpha = 1) {
-    const s = r * 2.08
+    const s = r * 2.12
     ctx.save()
     ctx.globalAlpha = alpha
     ctx.translate(x, y)
     ctx.rotate(rot)
+    ctx.beginPath()
+    ctx.arc(0, 0, r + 1.25, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.12)'
+    ctx.fill()
     if (img.complete && img.naturalWidth) {
       ctx.drawImage(img, -s / 2, -s / 2, s, s)
     } else {
@@ -48,7 +52,7 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
     ctx.save()
     ctx.beginPath()
     ctx.roundRect(b.x, b.y, b.w, b.h, 22)
-    ctx.fillStyle = '#0c0c0e'
+    ctx.fillStyle = '#18181c'
     ctx.fill()
     ctx.strokeStyle = '#2a2a2e'
     ctx.lineWidth = 2
