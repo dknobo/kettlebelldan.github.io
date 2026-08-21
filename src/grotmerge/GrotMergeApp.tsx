@@ -1,0 +1,168 @@
+import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { clampDropX, createGame, drop, layout, startRun, step, type Game, type Phase } from './engine'
+import { createRenderer, type Renderer } from './render'
+import './grotmerge.css'
+
+function beep(freq: number, dur = 0.08, type: OscillatorType = 'square', gain = 0.05) {
+  const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+  if (!AC) return
+  const ctx = ((beep as unknown as { c?: AudioContext }).c ||= new AC())
+  if (ctx.state === 'suspended') ctx.resume()
+  const o = ctx.createOscillator()
+  const g = ctx.createGain()
+  o.type = type
+  o.frequency.value = freq
+  g.gain.setValueAtTime(gain, ctx.currentTime)
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur)
+  o.connect(g)
+  g.connect(ctx.destination)
+  o.start()
+  o.stop(ctx.currentTime + dur)
+}
+
+export default function GrotMergeApp() {
+  const wrap = useRef<HTMLDivElement>(null)
+  const canvas = useRef<HTMLCanvasElement>(null)
+  const game = useRef<Game>(createGame())
+  const renderer = useRef<Renderer | null>(null)
+  const last = useRef(0)
+  const [phase, setPhase] = useState<Phase>('title')
+  const [hud, setHud] = useState({ score: 0, best: game.current.best })
+
+  useEffect(() => {
+    const el = wrap.current!
+    const cv = canvas.current!
+    const g = game.current
+    renderer.current = createRenderer(cv)
+
+    const fit = () => {
+      const r = el.getBoundingClientRect()
+      renderer.current?.resize(r.width, r.height)
+      layout(g, r.width, r.height)
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+
+    let raf = 0
+    const loop = (now: number) => {
+      const dt = Math.min(34, now - (last.current || now))
+      last.current = now
+      const before = g.score
+      const ph = g.phase
+      step(g, dt)
+      if (g.score !== before) beep(420 + g.score * 0.01, 0.07, 'triangle', 0.045)
+      if (ph === 'play' && g.phase === 'over') {
+        beep(180, 0.28, 'sawtooth', 0.05)
+        setPhase('over')
+      }
+      if (g.score !== hud.score || g.best !== hud.best) {
+        setHud({ score: g.score, best: g.best })
+      }
+      renderer.current?.draw(g)
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+    }
+    // hud is read inside rAF; we only want this to mount once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const aim = (clientX: number) => {
+    const cv = canvas.current
+    if (!cv) return
+    const r = cv.getBoundingClientRect()
+    clampDropX(game.current, clientX - r.left)
+  }
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    e.preventDefault()
+    ;(e.currentTarget as HTMLCanvasElement).setPointerCapture(e.pointerId)
+    game.current.holding = true
+    aim(e.clientX)
+  }
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!game.current.holding && e.pointerType !== 'mouse') return
+    aim(e.clientX)
+  }
+  const onPointerUp = (_e: React.PointerEvent) => {
+    if (!game.current.holding) return
+    game.current.holding = false
+    if (game.current.phase === 'play') {
+      if (drop(game.current)) beep(220, 0.05, 'sine', 0.04)
+    }
+  }
+
+  const play = () => {
+    startRun(game.current)
+    setPhase('play')
+    setHud({ score: 0, best: game.current.best })
+    beep(520, 0.1, 'square', 0.04)
+  }
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'r' || e.key === 'R') play()
+      if (e.key === ' ' && game.current.phase === 'play') {
+        e.preventDefault()
+        drop(game.current)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  return (
+    <div className="grot">
+      <div className="grot-bar">
+        <Link to="/" className="grot-home">
+          Dan
+        </Link>
+        <div className="grot-word">Grot Bot Merge</div>
+        <div className="grot-scores">
+          <div>
+            <span>Score</span>
+            <b>{hud.score}</b>
+          </div>
+          <div>
+            <span>Best</span>
+            <b>{hud.best}</b>
+          </div>
+        </div>
+      </div>
+      <div className="grot-stage" ref={wrap}>
+        <canvas
+          ref={canvas}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+        />
+        {phase !== 'play' && (
+          <div className="grot-overlay">
+            <div className="grot-card">
+              <h1>{phase === 'over' ? 'Bowl full' : 'Grot Bot Merge'}</h1>
+              <p>
+                {phase === 'over'
+                  ? `You scored ${hud.score}. Two of the same Grot become the next color.`
+                  : 'Drop Grot Bots. Match two of a kind to grow the next logo. Stay under the red line.'}
+              </p>
+              <div className="grot-actions">
+                <button className="grot-btn primary" type="button" onClick={play}>
+                  {phase === 'over' ? 'Again' : 'Play'}
+                </button>
+                <Link className="grot-btn" to="/">
+                  Home
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

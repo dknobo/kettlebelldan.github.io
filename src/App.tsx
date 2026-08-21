@@ -15,6 +15,7 @@ const XBlasterApp = lazy(() => import('./xblaster/XBlasterApp'))
 const StarbaseApp = lazy(() => import('./starbase/StarbaseApp'))
 const OrbHopApp = lazy(() => import('./orb/OrbHopApp'))
 const XTheGameApp = lazy(() => import('./xthegame/XTheGameApp'))
+const GrotMergeApp = lazy(() => import('./grotmerge/GrotMergeApp'))
 
 function KnicksPage() {
   return (
@@ -108,6 +109,22 @@ function App() {
           element={
             <Suspense fallback={<div className="min-h-screen bg-[#050506] text-[#f4f4f4] p-8 tracking-[0.2em] uppercase text-sm">Loading the mark…</div>}>
               <XTheGameApp />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/grot_bot_merge"
+          element={
+            <Suspense fallback={<div className="min-h-screen bg-[#070708] text-[#f4f4f5] p-8 tracking-[0.28em] uppercase text-sm">Waking Grot…</div>}>
+              <GrotMergeApp />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/grot-bot-merge"
+          element={
+            <Suspense fallback={<div className="min-h-screen bg-[#070708] text-[#f4f4f5] p-8 tracking-[0.28em] uppercase text-sm">Waking Grot…</div>}>
+              <GrotMergeApp />
             </Suspense>
           }
         />

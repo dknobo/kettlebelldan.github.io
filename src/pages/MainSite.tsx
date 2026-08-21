@@ -140,6 +140,12 @@ export default function MainSite() {
         >
           X THE GAME
         </Link>
+        <Link
+          to="/grot_bot_merge"
+          className="rounded-full border border-[#2a2438] bg-[#120f18] px-5 py-2 text-xs tracking-[0.18em] text-[#e9d5ff] transition-colors hover:border-[#c084fc] hover:text-white"
+        >
+          Grot Bot Merge
+        </Link>
       </motion.div>
 
       {/* Pillars */}
