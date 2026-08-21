@@ -103,9 +103,10 @@ export function createGame(): Game {
 
 export function layout(g: Game, viewW: number, viewH: number) {
   const wall = 16
-  const hud = 92
+  const hud = 88
+  const keyH = 72
   const w = Math.min(420, Math.max(280, viewW - 28))
-  const h = Math.min(640, Math.max(420, viewH - hud - 36))
+  const h = Math.min(620, Math.max(380, viewH - hud - keyH - 16))
   const x = (viewW - w) / 2
   const y = hud + 8
   g.bowl = { x, y, w, h, wall }
