@@ -11,7 +11,7 @@ export const TIERS = [
   { name: 'Pulse', color: '#84cc16' },
   { name: 'Hum', color: '#2dd4bf' },
   { name: 'Glow', color: '#38bdf8' },
-  { name: 'Orbit', color: '#2563eb' },
+  { name: 'Orbit', color: '#7c3aed' },
   { name: 'Nova', color: '#8b5cf6' },
   { name: 'Quasar', color: '#e11d8a' },
   { name: 'Core', color: '#eab308' },
@@ -66,10 +66,11 @@ export type Game = {
   warnMs: number
   shake: number
   floorTop: number
+  acc: number
 }
 
 function radius(tier: number, scale: number) {
-  return 16 * Math.pow(1.22, tier) * scale
+  return (18 + tier * 0.4) * Math.pow(1.2, tier) * scale
 }
 
 function pickDrop() {
@@ -115,6 +116,7 @@ export function createGame(): Game {
     warnMs: 0,
     shake: 0,
     floorTop: 0,
+    acc: 0,
   }
   Matter.Events.on(engine, 'collisionStart', (e) => {
     for (const p of e.pairs) {
@@ -137,6 +139,23 @@ export function layout(g: Game, viewW: number, viewH: number) {
   const h = Math.min(640, Math.max(360, viewH - hud - 10))
   const x = (viewW - w) / 2
   const y = hud + 4
+  if (
+    g.walls.length &&
+    Math.abs(w - g.bowl.w) < 10 &&
+    Math.abs(h - g.bowl.h) < 10 &&
+    Math.abs(x - g.bowl.x) < 10 &&
+    Math.abs(y - g.bowl.y) < 10
+  ) {
+    return
+  }
+  const dx = x - g.bowl.x
+  const dy = y - g.bowl.y
+  if (g.live.length && (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5)) {
+    for (const b of g.live) {
+      Matter.Body.setPosition(b, { x: b.position.x + dx, y: b.position.y + dy })
+    }
+    g.dropX += dx
+  }
   g.bowl = { x, y, w, h, wall }
   g.scale = w / 400
   g.dangerY = y + 72 * g.scale
@@ -172,16 +191,17 @@ export function layout(g: Game, viewW: number, viewH: number) {
 function spawn(g: Game, tier: number, x: number, y: number, opts?: { falling?: boolean }) {
   const r = radius(tier, g.scale)
   const body = Matter.Bodies.circle(x, y, r, {
-    restitution: 0.02,
-    friction: 0.55,
-    frictionAir: 0.018,
-    density: 0.0024,
-    slop: 0.012,
+    restitution: 0.005,
+    friction: 0.85,
+    frictionStatic: 0.95,
+    frictionAir: 0.035,
+    density: 0.0032 + (10 - tier) * 0.00025,
+    slop: 0.008,
     label: 'bot',
   })
   if (opts?.falling) {
-    Matter.Body.setVelocity(body, { x: (Math.random() - 0.5) * 0.35, y: 0.55 })
-    Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.08)
+    Matter.Body.setVelocity(body, { x: (Math.random() - 0.5) * 0.08, y: 0.35 })
+    Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.02)
   }
   const data: BotData = { id: g.nextId++, tier, dead: false, overMs: 0, age: 0, squash: 0, born: 1 }
   g.bots.set(body, data)
@@ -240,7 +260,7 @@ function mergePair(g: Game, a: Matter.Body, b: Matter.Body) {
     nd.born = 1
     nd.squash = 1
   }
-  Matter.Body.setAngularVelocity(neu, (Math.random() - 0.5) * 0.12)
+  Matter.Body.setAngularVelocity(neu, (Math.random() - 0.5) * 0.03)
   g.score += 2 ** next
   if (g.score > g.best) {
     g.best = g.score
@@ -287,9 +307,14 @@ export function step(g: Game, dt: number) {
     mergePair(g, a, b)
   }
 
-  const stepMs = Math.min(16.7, dt)
-  Matter.Engine.update(g.engine, stepMs)
-  if (dt > 20) Matter.Engine.update(g.engine, stepMs)
+  g.acc += Math.min(48, dt)
+  const fixed = 1000 / 120
+  let steps = 0
+  while (g.acc >= fixed && steps < 8) {
+    Matter.Engine.update(g.engine, fixed)
+    g.acc -= fixed
+    steps++
+  }
 
   g.shake = Math.max(0, g.shake - dt / 180)
 
@@ -301,13 +326,20 @@ export function step(g: Game, dt: number) {
     d.born = Math.max(0, d.born - dt / 220)
     d.squash = Math.max(0, d.squash - dt / 160)
     const r = body.circleRadius || 0
-    if (body.velocity.y > 14) {
-      Matter.Body.setVelocity(body, { x: body.velocity.x, y: 14 })
+    if (body.velocity.y > 10) {
+      Matter.Body.setVelocity(body, { x: body.velocity.x, y: 10 })
+    }
+    if (Math.abs(body.velocity.x) > 6) {
+      Matter.Body.setVelocity(body, { x: Math.sign(body.velocity.x) * 6, y: body.velocity.y })
+    }
+    Matter.Body.setAngularVelocity(body, body.angularVelocity * 0.92)
+    if (Math.abs(body.velocity.x) < 0.18 && body.speed < 0.45) {
+      Matter.Body.setVelocity(body, { x: body.velocity.x * 0.6, y: body.velocity.y })
     }
     const maxY = g.floorTop - r - 0.5
     if (body.position.y > maxY) {
       Matter.Body.setPosition(body, { x: body.position.x, y: maxY })
-      Matter.Body.setVelocity(body, { x: body.velocity.x * 0.4, y: Math.min(0, body.velocity.y) })
+      Matter.Body.setVelocity(body, { x: body.velocity.x * 0.25, y: Math.min(0, body.velocity.y) })
     }
     const bottom = body.position.y + r
     const fullyAbove = bottom < g.dangerY - 1

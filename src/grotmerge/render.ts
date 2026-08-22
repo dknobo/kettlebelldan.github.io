@@ -41,6 +41,8 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
     canvas.style.width = `${w}px`
     canvas.style.height = `${h}px`
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
   }
 
   function sprite(
@@ -94,9 +96,9 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
 
     // outer shell
     const shell = ctx.createLinearGradient(x - ox, y, x + w + ox, y)
-    shell.addColorStop(0, '#4a4a54')
-    shell.addColorStop(0.45, '#2e2e36')
-    shell.addColorStop(1, '#1a1a20')
+    shell.addColorStop(0, '#6a6a76')
+    shell.addColorStop(0.45, '#4a4a56')
+    shell.addColorStop(1, '#32323c')
     ctx.beginPath()
     ctx.roundRect(x - ox, y - 2, w + ox * 2, h + oy + 4, 24)
     ctx.fillStyle = shell
@@ -111,10 +113,10 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
 
     // inner cavity
     const inn = ctx.createLinearGradient(x, y, x + w, y + h)
-    inn.addColorStop(0, '#14141a')
-    inn.addColorStop(0.35, '#1d1d24')
-    inn.addColorStop(0.75, '#121218')
-    inn.addColorStop(1, '#0b0b10')
+    inn.addColorStop(0, '#2a2a34')
+    inn.addColorStop(0.35, '#34343e')
+    inn.addColorStop(0.75, '#26262e')
+    inn.addColorStop(1, '#1c1c24')
     ctx.beginPath()
     ctx.roundRect(x + 5, y + 6, w - 10, h - 8, 16)
     ctx.fillStyle = inn

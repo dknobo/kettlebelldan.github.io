@@ -101,13 +101,26 @@ export function startBed() {
   lp.connect(c.destination)
   const state: Bed = { master, timer: 0, step: 0 }
   bed = state
-  const beat = 60 / 92
-  const bass = [0, 0, 7, 3, 0, 5, 7, 3]
-  const lead = [7, 10, 12, 10, 7, 5, 7, 12, 10, 7, 5, 3, 5, 7, 10, 7]
+  const beat = 60 / 86
+  const basses = [
+    [0, 0, 7, 3, 0, 5, 7, 3],
+    [5, 5, 3, 0, 7, 7, 10, 5],
+    [3, 0, 3, 7, 5, 3, 0, 0],
+    [7, 5, 3, 5, 0, 0, 10, 7],
+  ]
+  const leads = [
+    [7, 10, 12, 10, 7, 5, 7, 12, 10, 7, 5, 3, 5, 7, 10, 7],
+    [12, 10, 8, 7, 5, 7, 10, 12, 15, 12, 10, 7, 5, 3, 5, 7],
+    [5, 7, 10, 7, null, 5, 3, 0, 3, 5, 7, 10, 7, 5, 3, 5],
+    [10, 12, 15, 12, 10, 7, 10, 12, 7, 5, 7, 10, 12, 10, 7, 5],
+  ]
   function pulse() {
     if (bed !== state) return
     const t = audio.currentTime + 0.04
     const i = state.step
+    const phrase = Math.floor(i / 16) % 4
+    const bass = basses[phrase]
+    const lead = leads[phrase]
     const b = bass[i % bass.length]
     const o = audio.createOscillator()
     const g = audio.createGain()
@@ -121,16 +134,18 @@ export function startBed() {
     o.stop(t + beat * 1.7)
 
     const n = lead[i % lead.length]
-    const o2 = audio.createOscillator()
-    const g2 = audio.createGain()
-    o2.type = 'triangle'
-    o2.frequency.value = hz(n)
-    g2.gain.setValueAtTime(0.28, t + beat * 0.5)
-    g2.gain.exponentialRampToValueAtTime(0.001, t + beat * 1.1)
-    o2.connect(g2)
-    g2.connect(master)
-    o2.start(t + beat * 0.5)
-    o2.stop(t + beat * 1.15)
+    if (n != null) {
+      const o2 = audio.createOscillator()
+      const g2 = audio.createGain()
+      o2.type = 'triangle'
+      o2.frequency.value = hz(n)
+      g2.gain.setValueAtTime(0.26, t + beat * 0.5)
+      g2.gain.exponentialRampToValueAtTime(0.001, t + beat * 1.15)
+      o2.connect(g2)
+      g2.connect(master)
+      o2.start(t + beat * 0.5)
+      o2.stop(t + beat * 1.2)
+    }
 
     if (i % 2 === 0) {
       const nlen = Math.floor(audio.sampleRate * 0.03)

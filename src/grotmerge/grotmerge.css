@@ -1,20 +1,19 @@
 .grot {
-  min-height: 100dvh;
-  min-height: 100svh;
-  background: #070708;
+  height: 100svh;
+  max-height: 100svh;
+  background: #1a1a22;
   color: #f4f4f5;
   font-family: ui-sans-serif, system-ui, Helvetica, sans-serif;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .grot-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 0;
+  padding: 8px 14px 4px;
   gap: 12px;
 }
 
@@ -149,9 +148,9 @@
   align-items: flex-end;
   justify-content: center;
   gap: 3px;
-  padding: 8px 8px calc(10px + env(safe-area-inset-bottom));
-  background: #0c0c10;
-  border-top: 1px solid #26262c;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: #22222a;
+  border-top: 1px solid #3a3a44;
   z-index: 3;
 }
 
