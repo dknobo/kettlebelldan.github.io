@@ -37,6 +37,7 @@ export function pop() {
   bp.connect(g)
   g.connect(c.destination)
   src.start(t)
+  duckBed()
 
   const o = c.createOscillator()
   const og = c.createGain()
@@ -66,6 +67,104 @@ export function dropClick() {
   g.connect(c.destination)
   o.start(t)
   o.stop(t + 0.08)
+}
+
+type Bed = { master: GainNode; timer: number; step: number }
+let bed: Bed | null = null
+
+function hz(semi: number) {
+  return 196 * Math.pow(2, semi / 12)
+}
+
+export function startBed() {
+  const c = ac()
+  if (!c || bed) return
+  const audio = c
+  const master = audio.createGain()
+  master.gain.value = 0.038
+  const lp = c.createBiquadFilter()
+  lp.type = 'lowpass'
+  lp.frequency.value = 1600
+  master.connect(lp)
+  lp.connect(c.destination)
+  const state: Bed = { master, timer: 0, step: 0 }
+  bed = state
+  const beat = 60 / 92
+  const bass = [0, 0, 7, 3, 0, 5, 7, 3]
+  const lead = [7, 10, 12, 10, 7, 5, 7, 12, 10, 7, 5, 3, 5, 7, 10, 7]
+  function pulse() {
+    if (bed !== state) return
+    const t = audio.currentTime + 0.04
+    const i = state.step
+    const b = bass[i % bass.length]
+    const o = audio.createOscillator()
+    const g = audio.createGain()
+    o.type = 'sine'
+    o.frequency.value = hz(b - 12)
+    g.gain.setValueAtTime(0.55, t)
+    g.gain.exponentialRampToValueAtTime(0.001, t + beat * 1.6)
+    o.connect(g)
+    g.connect(master)
+    o.start(t)
+    o.stop(t + beat * 1.7)
+
+    const n = lead[i % lead.length]
+    const o2 = audio.createOscillator()
+    const g2 = audio.createGain()
+    o2.type = 'triangle'
+    o2.frequency.value = hz(n)
+    g2.gain.setValueAtTime(0.16, t + beat * 0.5)
+    g2.gain.exponentialRampToValueAtTime(0.001, t + beat * 1.1)
+    o2.connect(g2)
+    g2.connect(master)
+    o2.start(t + beat * 0.5)
+    o2.stop(t + beat * 1.15)
+
+    if (i % 2 === 0) {
+      const nlen = Math.floor(audio.sampleRate * 0.03)
+      const buf = audio.createBuffer(1, nlen, audio.sampleRate)
+      const data = buf.getChannelData(0)
+      for (let k = 0; k < nlen; k++) data[k] = (Math.random() * 2 - 1) * (1 - k / nlen)
+      const src = audio.createBufferSource()
+      src.buffer = buf
+      const hp = audio.createBiquadFilter()
+      hp.type = 'highpass'
+      hp.frequency.value = 4000
+      const g3 = audio.createGain()
+      g3.gain.value = 0.08
+      src.connect(hp)
+      hp.connect(g3)
+      g3.connect(master)
+      src.start(t)
+    }
+
+    state.step++
+    state.timer = window.setTimeout(pulse, beat * 1000)
+  }
+  pulse()
+}
+
+export function stopBed() {
+  if (!bed) return
+  window.clearTimeout(bed.timer)
+  const m = bed.master
+  const c = ac()
+  if (c) {
+    m.gain.cancelScheduledValues(c.currentTime)
+    m.gain.linearRampToValueAtTime(0.0001, c.currentTime + 0.25)
+  }
+  bed = null
+}
+
+export function duckBed() {
+  if (!bed) return
+  const c = ac()
+  if (!c) return
+  const g = bed.master.gain
+  const t = c.currentTime
+  g.cancelScheduledValues(t)
+  g.setValueAtTime(0.014, t)
+  g.linearRampToValueAtTime(0.038, t + 0.22)
 }
 
 export function thud() {

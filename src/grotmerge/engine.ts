@@ -5,7 +5,7 @@ export const DROP_MAX = 4
 export const LS_BEST = 'grot-bot-merge-best'
 
 export const TIERS = [
-  { name: 'Pip', color: '#e11d2e' },
+  { name: 'Pip', color: '#f3ead8' },
   { name: 'Spark', color: '#f97316' },
   { name: 'Bolt', color: '#f5c518' },
   { name: 'Pulse', color: '#84cc16' },
@@ -20,9 +20,26 @@ export const TIERS = [
 
 export type Phase = 'title' | 'play' | 'over'
 
-export type Fx = { x: number; y: number; r: number; color: string; t: number }
+export type Fx = {
+  x: number
+  y: number
+  r: number
+  color: string
+  t: number
+  kind: 'ring' | 'spark'
+  vx?: number
+  vy?: number
+}
 
-type BotData = { id: number; tier: number; dead: boolean; overMs: number }
+export type BotData = {
+  id: number
+  tier: number
+  dead: boolean
+  overMs: number
+  age: number
+  squash: number
+  born: number
+}
 
 export type Game = {
   engine: Matter.Engine
@@ -46,6 +63,7 @@ export type Game = {
   overTimer: number
   mergeQ: [Matter.Body, Matter.Body][]
   walls: Matter.Body[]
+  warnMs: number
 }
 
 function radius(tier: number, scale: number) {
@@ -89,13 +107,17 @@ export function createGame(): Game {
     overTimer: 0,
     mergeQ: [],
     walls: [],
+    warnMs: 0,
   }
   Matter.Events.on(engine, 'collisionStart', (e) => {
     for (const p of e.pairs) {
       const a = p.bodyA
       const b = p.bodyB
-      if (a.label !== 'bot' || b.label !== 'bot') continue
-      g.mergeQ.push([a, b])
+      if (a.label === 'bot' && b.label === 'bot') g.mergeQ.push([a, b])
+      const da = a.label === 'bot' ? g.bots.get(a) : undefined
+      const db = b.label === 'bot' ? g.bots.get(b) : undefined
+      if (da && da.age > 40) da.squash = Math.max(da.squash, 1)
+      if (db && db.age > 40) db.squash = Math.max(db.squash, 1)
     }
   })
   return g
@@ -147,8 +169,11 @@ function spawn(g: Game, tier: number, x: number, y: number, opts?: { falling?: b
     label: 'bot',
     sleepThreshold: 40,
   })
-  if (opts?.falling) Matter.Body.setVelocity(body, { x: 0, y: 0.4 })
-  const data: BotData = { id: g.nextId++, tier, dead: false, overMs: 0 }
+  if (opts?.falling) {
+    Matter.Body.setVelocity(body, { x: (Math.random() - 0.5) * 0.35, y: 0.55 })
+    Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.08)
+  }
+  const data: BotData = { id: g.nextId++, tier, dead: false, overMs: 0, age: 0, squash: 0, born: 1 }
   g.bots.set(body, data)
   g.live.push(body)
   Matter.World.add(g.world, body)
@@ -163,6 +188,7 @@ export function startRun(g: Game) {
   g.cooldown = 0
   g.holding = false
   g.overTimer = 0
+  g.warnMs = 0
   g.fx = []
   for (const b of [...g.live]) Matter.World.remove(g.world, b)
   g.live = []
@@ -198,19 +224,46 @@ function mergePair(g: Game, a: Matter.Body, b: Matter.Body) {
   Matter.World.remove(g.world, b)
   g.live = g.live.filter((body) => body !== a && body !== b)
   const next = da.tier + 1
-  spawn(g, next, x, y)
+  const neu = spawn(g, next, x, y)
+  const nd = g.bots.get(neu)
+  if (nd) {
+    nd.born = 1
+    nd.squash = 1
+  }
+  Matter.Body.setAngularVelocity(neu, (Math.random() - 0.5) * 0.12)
   g.score += 2 ** next
   if (g.score > g.best) {
     g.best = g.score
     localStorage.setItem(LS_BEST, String(g.best))
   }
-  g.fx.push({ x, y, r: radius(next, g.scale), color: TIERS[next].color, t: 1 })
+  g.fx.push({ x, y, r: radius(next, g.scale), color: TIERS[next].color, t: 1, kind: 'ring' })
+  for (let i = 0; i < 10; i++) {
+    const a = (Math.PI * 2 * i) / 10 + Math.random() * 0.3
+    const sp = 1.2 + Math.random() * 2.2
+    g.fx.push({
+      x,
+      y,
+      r: 2 + Math.random() * 3,
+      color: TIERS[next].color,
+      t: 1,
+      kind: 'spark',
+      vx: Math.cos(a) * sp,
+      vy: Math.sin(a) * sp,
+    })
+  }
 }
 
 export function step(g: Game, dt: number) {
   if (g.phase !== 'play') return
   g.cooldown = Math.max(0, g.cooldown - dt)
-  g.fx = g.fx.map((f) => ({ ...f, t: f.t - dt / 280 })).filter((f) => f.t > 0)
+  g.fx = g.fx
+    .map((f) => ({
+      ...f,
+      t: f.t - dt / (f.kind === 'spark' ? 420 : 280),
+      x: f.x + (f.vx || 0) * dt * 0.06,
+      y: f.y + (f.vy || 0) * dt * 0.06,
+    }))
+    .filter((f) => f.t > 0)
 
   const pending = g.mergeQ
   g.mergeQ = []
@@ -224,20 +277,26 @@ export function step(g: Game, dt: number) {
 
   Matter.Engine.update(g.engine, Math.min(32, dt))
 
-  let overflowing = false
+  let worst = 0
   for (const body of g.live) {
     const d = g.bots.get(body)
     if (!d || d.dead) continue
-    const top = body.position.y - (body.circleRadius || 0)
-    const settled = body.speed < 0.55
-    if (top < g.dangerY && settled && body.position.y > g.dropY + 8) {
+    d.age += dt
+    d.born = Math.max(0, d.born - dt / 220)
+    d.squash = Math.max(0, d.squash - dt / 160)
+    const r = body.circleRadius || 0
+    const bottom = body.position.y + r
+    const fullyAbove = bottom < g.dangerY - 1
+    const settled = body.speed < 0.7
+    if (fullyAbove && settled && d.age > 350) {
       d.overMs += dt
-      if (d.overMs > 1100) overflowing = true
+      if (d.overMs > worst) worst = d.overMs
     } else {
-      d.overMs = Math.max(0, d.overMs - dt * 0.6)
+      d.overMs = 0
     }
   }
-  if (overflowing) {
+  g.warnMs = worst
+  if (worst >= 5000) {
     g.phase = 'over'
     for (const b of g.live) Matter.Sleeping.set(b, true)
   }

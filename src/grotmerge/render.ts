@@ -43,19 +43,42 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   }
 
-  function sprite(tier: number, x: number, y: number, r: number, rot: number, id: number, alpha = 1) {
+  function sprite(
+    tier: number,
+    x: number,
+    y: number,
+    r: number,
+    rot: number,
+    id: number,
+    alpha = 1,
+    extra?: { born?: number; squash?: number; danger?: number },
+  ) {
     const now = performance.now()
     const img = blinking(id, now) && shut[tier].complete && shut[tier].naturalWidth ? shut[tier] : open[tier]
-    const s = r * 2.14
+    const appear = 1 - Math.min(1, extra?.born ?? 0)
+    const bounce = 0.28 + 0.72 * appear + Math.sin(appear * Math.PI) * 0.2 * appear
+    const sq = extra?.squash ?? 0
+    const sx = r * 2.14 * bounce * (1 + sq * 0.22)
+    const sy = r * 2.14 * bounce * (1 - sq * 0.18)
     ctx.save()
     ctx.globalAlpha = alpha
     ctx.translate(x, y)
     ctx.rotate(rot)
+    ctx.scale(sx / (r * 2.14) || 1, sy / (r * 2.14) || 1)
+    const s = r * 2.14
     if (img.complete && img.naturalWidth) ctx.drawImage(img, -s / 2, -s / 2, s, s)
     else {
       ctx.fillStyle = TIERS[tier].color
       ctx.beginPath()
       ctx.arc(0, 0, r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    if (extra?.danger) {
+      const pulse = 0.25 + Math.sin(now / 90) * 0.12
+      ctx.globalAlpha = pulse * extra.danger
+      ctx.fillStyle = '#ef4444'
+      ctx.beginPath()
+      ctx.arc(0, 0, r * 1.02, 0, Math.PI * 2)
       ctx.fill()
     }
     ctx.restore()
@@ -166,17 +189,28 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
       const d = botOf(g, body)
       if (!d || d.dead) continue
       const r = body.circleRadius || radiusOf(d.tier, g.scale)
-      sprite(d.tier, body.position.x, body.position.y, r, body.angle, d.id)
+      sprite(d.tier, body.position.x, body.position.y, r, body.angle, d.id, 1, {
+        born: d.born,
+        squash: d.squash,
+        danger: d.overMs > 0 ? Math.min(1, d.overMs / 400) : 0,
+      })
     }
 
     for (const f of g.fx) {
       ctx.save()
-      ctx.globalAlpha = Math.max(0, f.t) * 0.75
+      ctx.globalAlpha = Math.max(0, f.t) * 0.8
+      ctx.fillStyle = f.color
       ctx.strokeStyle = f.color
-      ctx.lineWidth = 5 * f.t
-      ctx.beginPath()
-      ctx.arc(f.x, f.y, f.r * (1.15 + (1 - f.t) * 0.8), 0, Math.PI * 2)
-      ctx.stroke()
+      if (f.kind === 'spark') {
+        ctx.beginPath()
+        ctx.arc(f.x, f.y, f.r * f.t, 0, Math.PI * 2)
+        ctx.fill()
+      } else {
+        ctx.lineWidth = 5 * f.t
+        ctx.beginPath()
+        ctx.arc(f.x, f.y, f.r * (1.15 + (1 - f.t) * 0.85), 0, Math.PI * 2)
+        ctx.stroke()
+      }
       ctx.restore()
     }
     ctx.restore()
@@ -211,6 +245,19 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
     ctx.font = '9px ui-sans-serif, Helvetica, sans-serif'
     ctx.textAlign = 'center'
     ctx.fillText('NEXT', px, py + 42)
+
+    if (g.phase === 'play' && g.warnMs > 0) {
+      const left = Math.max(0, 5 - g.warnMs / 1000)
+      ctx.save()
+      ctx.fillStyle = `rgba(239,68,68,${0.75 + Math.sin(performance.now() / 80) * 0.2})`
+      ctx.font = '700 42px ui-sans-serif, Helvetica, sans-serif'
+      ctx.textAlign = 'center'
+      ctx.fillText(left.toFixed(1), vw / 2, g.bowl.y + 48)
+      ctx.font = '10px ui-sans-serif, Helvetica, sans-serif'
+      ctx.fillStyle = 'rgba(239,68,68,0.8)'
+      ctx.fillText('CLEAR THE LINE', vw / 2, g.bowl.y + 64)
+      ctx.restore()
+    }
 
     key(g)
   }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { clampDropX, createGame, drop, layout, startRun, step, type Game, type Phase } from './engine'
 import { createRenderer, type Renderer } from './render'
-import { dropClick, pop, thud, unlockAudio } from './sound'
+import { dropClick, pop, startBed, stopBed, thud, unlockAudio } from './sound'
 import './grotmerge.css'
 
 export default function GrotMergeApp() {
@@ -12,7 +12,7 @@ export default function GrotMergeApp() {
   const renderer = useRef<Renderer | null>(null)
   const last = useRef(0)
   const [phase, setPhase] = useState<Phase>('title')
-  const [hud, setHud] = useState({ score: 0, best: game.current.best })
+  const [hud, setHud] = useState({ score: 0, best: game.current.best, warn: 0 })
 
   useEffect(() => {
     const el = wrap.current!
@@ -39,10 +39,12 @@ export default function GrotMergeApp() {
       if (g.score !== before) pop()
       if (ph === 'play' && g.phase === 'over') {
         thud()
+        stopBed()
         setPhase('over')
       }
-      if (g.score !== hud.score || g.best !== hud.best) {
-        setHud({ score: g.score, best: g.best })
+      const warn = g.warnMs > 0 ? Math.ceil((5000 - g.warnMs) / 1000) : 0
+      if (g.score !== hud.score || g.best !== hud.best || warn !== hud.warn) {
+        setHud({ score: g.score, best: g.best, warn })
       }
       renderer.current?.draw(g)
       raf = requestAnimationFrame(loop)
@@ -51,6 +53,7 @@ export default function GrotMergeApp() {
     return () => {
       cancelAnimationFrame(raf)
       ro.disconnect()
+      stopBed()
     }
     // hud is read inside rAF; we only want this to mount once
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,9 +87,10 @@ export default function GrotMergeApp() {
 
   const play = () => {
     unlockAudio()
+    startBed()
     startRun(game.current)
     setPhase('play')
-    setHud({ score: 0, best: game.current.best })
+    setHud({ score: 0, best: game.current.best, warn: 0 })
   }
 
   useEffect(() => {
@@ -134,7 +138,7 @@ export default function GrotMergeApp() {
               <p>
                 {phase === 'over'
                   ? `You scored ${hud.score}. Two of the same Grot become the next color.`
-                  : 'Drop Grot Bots. Match two of a kind to grow the next logo. Stay under the red line.'}
+                  : 'Drop Grot Bots. Match two of a kind to grow the next. Sitting on the line is fine — fully above it turns red and you have 5 seconds to fix it.'}
               </p>
               <div className="grot-actions">
                 <button className="grot-btn primary" type="button" onClick={play}>
