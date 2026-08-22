@@ -58,14 +58,17 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
     const appear = 1 - Math.min(1, extra?.born ?? 0)
     const bounce = 0.28 + 0.72 * appear + Math.sin(appear * Math.PI) * 0.2 * appear
     const sq = extra?.squash ?? 0
-    const sx = r * 2.14 * bounce * (1 + sq * 0.22)
-    const sy = r * 2.14 * bounce * (1 - sq * 0.18)
+    const sx = r * 1.94 * bounce * (1 + sq * 0.16)
+    const sy = r * 1.94 * bounce * (1 - sq * 0.14)
     ctx.save()
     ctx.globalAlpha = alpha
     ctx.translate(x, y)
     ctx.rotate(rot)
-    ctx.scale(sx / (r * 2.14) || 1, sy / (r * 2.14) || 1)
-    const s = r * 2.14
+    ctx.scale(sx / (r * 1.94) || 1, sy / (r * 1.94) || 1)
+    const s = r * 1.94
+    ctx.shadowColor = 'rgba(0,0,0,0.45)'
+    ctx.shadowBlur = r * 0.35
+    ctx.shadowOffsetY = r * 0.12
     if (img.complete && img.naturalWidth) ctx.drawImage(img, -s / 2, -s / 2, s, s)
     else {
       ctx.fillStyle = TIERS[tier].color
@@ -140,34 +143,13 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
     ctx.stroke()
   }
 
-  function key(_g: Game) {
-    const vw = canvas.clientWidth
-    const vh = canvas.clientHeight
-    const y = vh - 32
-    const n = TIERS.length
-    const span = Math.min(vw - 24, 400)
-    const x0 = (vw - span) / 2
-    const step = span / n
-    ctx.fillStyle = '#6b6b72'
-    ctx.font = '8px ui-sans-serif, Helvetica, sans-serif'
-    ctx.textAlign = 'left'
-    ctx.fillText('LADDER', x0 + 4, y - 20)
-    for (let i = 0; i < n; i++) {
-      const x = x0 + i * step + step / 2
-      const r = 6.5 + i * 0.7
-      sprite(i, x, y, r, 0, 800 + i, 1)
-      if (i < n - 1) {
-        ctx.fillStyle = '#3f3f46'
-        ctx.font = '10px ui-sans-serif, Helvetica, sans-serif'
-        ctx.textAlign = 'center'
-        ctx.fillText('›', x + step / 2 - 2, y + 3)
-      }
-    }
-  }
-
   function draw(g: Game) {
     const vw = canvas.clientWidth
     ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight)
+    if (g.shake > 0.02) {
+      ctx.save()
+      ctx.translate((Math.random() - 0.5) * 10 * g.shake, (Math.random() - 0.5) * 8 * g.shake)
+    }
     bowl(g)
 
     ctx.save()
@@ -259,7 +241,7 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
       ctx.restore()
     }
 
-    key(g)
+    if (g.shake > 0.02) ctx.restore()
   }
 
   return { draw, resize }

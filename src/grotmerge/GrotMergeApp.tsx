@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { clampDropX, createGame, drop, layout, startRun, step, type Game, type Phase } from './engine'
+import { TIERS, clampDropX, createGame, drop, layout, startRun, step, type Game, type Phase } from './engine'
 import { createRenderer, type Renderer } from './render'
 import { dropClick, pop, startBed, stopBed, thud, unlockAudio } from './sound'
 import './grotmerge.css'
@@ -151,6 +151,17 @@ export default function GrotMergeApp() {
             </div>
           </div>
         )}
+      </div>
+      <div className="grot-ladder" aria-label="Merge ladder">
+        <span>Ladder</span>
+        {TIERS.map((_, i) => (
+          <img
+            key={i}
+            src={`/grot_bot_merge/bots/bot_${String(i).padStart(2, '0')}.png`}
+            alt=""
+            style={{ width: 16 + i * 1.6, height: 16 + i * 1.6 }}
+          />
+        ))}
       </div>
     </div>
   )

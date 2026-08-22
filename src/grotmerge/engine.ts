@@ -64,6 +64,8 @@ export type Game = {
   mergeQ: [Matter.Body, Matter.Body][]
   walls: Matter.Body[]
   warnMs: number
+  shake: number
+  floorTop: number
 }
 
 function radius(tier: number, scale: number) {
@@ -82,8 +84,11 @@ function pickDrop() {
 
 export function createGame(): Game {
   const engine = Matter.Engine.create({
-    gravity: { x: 0, y: 1.55, scale: 0.001 },
-    enableSleeping: true,
+    gravity: { x: 0, y: 1.35, scale: 0.001 },
+    enableSleeping: false,
+    positionIterations: 14,
+    velocityIterations: 10,
+    constraintIterations: 4,
   })
   const g: Game = {
     engine,
@@ -108,6 +113,8 @@ export function createGame(): Game {
     mergeQ: [],
     walls: [],
     warnMs: 0,
+    shake: 0,
+    floorTop: 0,
   }
   Matter.Events.on(engine, 'collisionStart', (e) => {
     for (const p of e.pairs) {
@@ -125,12 +132,11 @@ export function createGame(): Game {
 
 export function layout(g: Game, viewW: number, viewH: number) {
   const wall = 16
-  const hud = 88
-  const keyH = 72
-  const w = Math.min(420, Math.max(280, viewW - 28))
-  const h = Math.min(620, Math.max(380, viewH - hud - keyH - 16))
+  const hud = 8
+  const w = Math.min(420, Math.max(280, viewW - 24))
+  const h = Math.min(640, Math.max(360, viewH - hud - 10))
   const x = (viewW - w) / 2
-  const y = hud + 8
+  const y = hud + 4
   g.bowl = { x, y, w, h, wall }
   g.scale = w / 400
   g.dangerY = y + 72 * g.scale
@@ -138,20 +144,25 @@ export function layout(g: Game, viewW: number, viewH: number) {
   if (!g.live.length) g.dropX = x + w / 2
 
   if (g.walls.length) Matter.World.remove(g.world, g.walls)
-  const thick = wall
-  const floor = Matter.Bodies.rectangle(x + w / 2, y + h + thick / 2 - 4, w + thick * 2, thick, {
+  const thick = 22
+  const floorH = 64
+  g.floorTop = y + h - 10
+  const floor = Matter.Bodies.rectangle(x + w / 2, g.floorTop + floorH / 2, w + thick * 3, floorH, {
     isStatic: true,
-    friction: 0.9,
+    friction: 1,
+    restitution: 0,
     label: 'wall',
   })
-  const left = Matter.Bodies.rectangle(x - thick / 2 + 4, y + h / 2, thick, h + thick, {
+  const left = Matter.Bodies.rectangle(x - thick / 2 + 6, y + h / 2, thick, h + thick * 2, {
     isStatic: true,
-    friction: 0.2,
+    friction: 0.35,
+    restitution: 0,
     label: 'wall',
   })
-  const right = Matter.Bodies.rectangle(x + w + thick / 2 - 4, y + h / 2, thick, h + thick, {
+  const right = Matter.Bodies.rectangle(x + w + thick / 2 - 6, y + h / 2, thick, h + thick * 2, {
     isStatic: true,
-    friction: 0.2,
+    friction: 0.35,
+    restitution: 0,
     label: 'wall',
   })
   g.walls = [floor, left, right]
@@ -161,13 +172,12 @@ export function layout(g: Game, viewW: number, viewH: number) {
 function spawn(g: Game, tier: number, x: number, y: number, opts?: { falling?: boolean }) {
   const r = radius(tier, g.scale)
   const body = Matter.Bodies.circle(x, y, r, {
-    restitution: 0.045,
-    friction: 0.42,
-    frictionAir: 0.012,
-    density: 0.0018,
-    slop: 0.04,
+    restitution: 0.02,
+    friction: 0.55,
+    frictionAir: 0.018,
+    density: 0.0024,
+    slop: 0.012,
     label: 'bot',
-    sleepThreshold: 40,
   })
   if (opts?.falling) {
     Matter.Body.setVelocity(body, { x: (Math.random() - 0.5) * 0.35, y: 0.55 })
@@ -236,19 +246,21 @@ function mergePair(g: Game, a: Matter.Body, b: Matter.Body) {
     g.best = g.score
     localStorage.setItem(LS_BEST, String(g.best))
   }
+  g.shake = Math.min(1, g.shake + 0.35 + next * 0.04)
   g.fx.push({ x, y, r: radius(next, g.scale), color: TIERS[next].color, t: 1, kind: 'ring' })
-  for (let i = 0; i < 10; i++) {
-    const a = (Math.PI * 2 * i) / 10 + Math.random() * 0.3
-    const sp = 1.2 + Math.random() * 2.2
+  g.fx.push({ x, y, r: radius(next, g.scale) * 0.55, color: '#fff6e8', t: 0.85, kind: 'ring' })
+  for (let i = 0; i < 16; i++) {
+    const a = (Math.PI * 2 * i) / 16 + Math.random() * 0.25
+    const sp = 1.6 + Math.random() * 3.2
     g.fx.push({
       x,
       y,
-      r: 2 + Math.random() * 3,
-      color: TIERS[next].color,
+      r: 2.2 + Math.random() * 3.6,
+      color: i % 3 === 0 ? '#fff6e8' : TIERS[next].color,
       t: 1,
       kind: 'spark',
       vx: Math.cos(a) * sp,
-      vy: Math.sin(a) * sp,
+      vy: Math.sin(a) * sp - 0.4,
     })
   }
 }
@@ -275,7 +287,11 @@ export function step(g: Game, dt: number) {
     mergePair(g, a, b)
   }
 
-  Matter.Engine.update(g.engine, Math.min(32, dt))
+  const stepMs = Math.min(16.7, dt)
+  Matter.Engine.update(g.engine, stepMs)
+  if (dt > 20) Matter.Engine.update(g.engine, stepMs)
+
+  g.shake = Math.max(0, g.shake - dt / 180)
 
   let worst = 0
   for (const body of g.live) {
@@ -285,6 +301,14 @@ export function step(g: Game, dt: number) {
     d.born = Math.max(0, d.born - dt / 220)
     d.squash = Math.max(0, d.squash - dt / 160)
     const r = body.circleRadius || 0
+    if (body.velocity.y > 14) {
+      Matter.Body.setVelocity(body, { x: body.velocity.x, y: 14 })
+    }
+    const maxY = g.floorTop - r - 0.5
+    if (body.position.y > maxY) {
+      Matter.Body.setPosition(body, { x: body.position.x, y: maxY })
+      Matter.Body.setVelocity(body, { x: body.velocity.x * 0.4, y: Math.min(0, body.velocity.y) })
+    }
     const bottom = body.position.y + r
     const fullyAbove = bottom < g.dangerY - 1
     const settled = body.speed < 0.7

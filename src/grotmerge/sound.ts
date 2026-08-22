@@ -31,8 +31,8 @@ export function pop() {
   bp.frequency.exponentialRampToValueAtTime(420, t + 0.07)
   bp.Q.value = 0.9
   const g = c.createGain()
-  g.gain.setValueAtTime(0.22, t)
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.09)
+  g.gain.setValueAtTime(0.32, t)
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.11)
   src.connect(bp)
   bp.connect(g)
   g.connect(c.destination)
@@ -44,12 +44,24 @@ export function pop() {
   o.type = 'sine'
   o.frequency.setValueAtTime(980, t)
   o.frequency.exponentialRampToValueAtTime(180, t + 0.1)
-  og.gain.setValueAtTime(0.07, t)
-  og.gain.exponentialRampToValueAtTime(0.001, t + 0.1)
+  og.gain.setValueAtTime(0.11, t)
+  og.gain.exponentialRampToValueAtTime(0.001, t + 0.12)
   o.connect(og)
   og.connect(c.destination)
   o.start(t)
-  o.stop(t + 0.11)
+  o.stop(t + 0.13)
+
+  const o3 = c.createOscillator()
+  const g3 = c.createGain()
+  o3.type = 'triangle'
+  o3.frequency.setValueAtTime(520, t)
+  o3.frequency.exponentialRampToValueAtTime(140, t + 0.16)
+  g3.gain.setValueAtTime(0.08, t)
+  g3.gain.exponentialRampToValueAtTime(0.001, t + 0.16)
+  o3.connect(g3)
+  g3.connect(c.destination)
+  o3.start(t)
+  o3.stop(t + 0.17)
 }
 
 export function dropClick() {
@@ -81,7 +93,7 @@ export function startBed() {
   if (!c || bed) return
   const audio = c
   const master = audio.createGain()
-  master.gain.value = 0.038
+  master.gain.value = 0.13
   const lp = c.createBiquadFilter()
   lp.type = 'lowpass'
   lp.frequency.value = 1600
@@ -113,7 +125,7 @@ export function startBed() {
     const g2 = audio.createGain()
     o2.type = 'triangle'
     o2.frequency.value = hz(n)
-    g2.gain.setValueAtTime(0.16, t + beat * 0.5)
+    g2.gain.setValueAtTime(0.28, t + beat * 0.5)
     g2.gain.exponentialRampToValueAtTime(0.001, t + beat * 1.1)
     o2.connect(g2)
     g2.connect(master)
@@ -131,7 +143,7 @@ export function startBed() {
       hp.type = 'highpass'
       hp.frequency.value = 4000
       const g3 = audio.createGain()
-      g3.gain.value = 0.08
+      g3.gain.value = 0.14
       src.connect(hp)
       hp.connect(g3)
       g3.connect(master)
@@ -163,8 +175,8 @@ export function duckBed() {
   const g = bed.master.gain
   const t = c.currentTime
   g.cancelScheduledValues(t)
-  g.setValueAtTime(0.014, t)
-  g.linearRampToValueAtTime(0.038, t + 0.22)
+  g.setValueAtTime(0.05, t)
+  g.linearRampToValueAtTime(0.13, t + 0.22)
 }
 
 export function thud() {
