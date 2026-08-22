@@ -7,15 +7,15 @@ export const LS_BEST = 'grot-bot-merge-best'
 export const TIERS = [
   { name: 'Pip', color: '#f3ead8' },
   { name: 'Spark', color: '#f97316' },
-  { name: 'Bolt', color: '#4ade80' },
-  { name: 'Pulse', color: '#84cc16' },
-  { name: 'Hum', color: '#2dd4bf' },
-  { name: 'Glow', color: '#38bdf8' },
-  { name: 'Orbit', color: '#7c3aed' },
-  { name: 'Nova', color: '#8b5cf6' },
-  { name: 'Quasar', color: '#e11d8a' },
-  { name: 'Core', color: '#eab308' },
-  { name: 'Grot', color: '#f4f4f5' },
+  { name: 'Pop', color: '#ec4899' },
+  { name: 'Gold', color: '#eab308' },
+  { name: 'Bean', color: '#ef4444' },
+  { name: 'Heart', color: '#f9a8d4' },
+  { name: 'Cloud', color: '#facc15' },
+  { name: 'Bloom', color: '#22d3ee' },
+  { name: 'Clover', color: '#fb923c' },
+  { name: 'Stone', color: '#52525b' },
+  { name: 'Grot', color: '#18181b' },
 ] as const
 
 export type Phase = 'title' | 'play' | 'over'
@@ -71,8 +71,10 @@ export type Game = {
   lastMerge: number
 }
 
+const RADII = [16, 20, 25, 31, 38, 47, 58, 70, 84, 100, 118]
+
 function radius(tier: number, scale: number) {
-  return (18 + tier * 0.4) * Math.pow(1.2, tier) * scale
+  return RADII[tier] * scale
 }
 
 function pickDrop() {
