@@ -269,7 +269,8 @@ function mergePair(g: Game, a: Matter.Body, b: Matter.Body) {
   const nd = g.bots.get(neu)
   if (nd) {
     nd.born = 1
-    nd.squash = 1
+    nd.squash = 0
+    nd.landed = true
   }
   Matter.Body.setAngularVelocity(neu, (Math.random() - 0.5) * 0.03)
   g.score += 2 ** next
@@ -355,7 +356,7 @@ export function step(g: Game, dt: number) {
     if (!d || d.dead) continue
     d.age += dt
     d.born = Math.max(0, d.born - dt / 220)
-    d.squash = Math.max(0, d.squash - dt / 160)
+    d.squash = Math.max(0, d.squash - dt / 280)
     const r = body.circleRadius || 0
     if (body.velocity.y > 10) {
       Matter.Body.setVelocity(body, { x: body.velocity.x, y: 10 })

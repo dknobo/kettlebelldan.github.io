@@ -65,16 +65,20 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
     const now = performance.now()
     const img = blinking(id, now) && shut[tier].complete && shut[tier].naturalWidth ? shut[tier] : open[tier]
     const appear = 1 - Math.min(1, extra?.born ?? 0)
-    const bounce = 0.28 + 0.72 * appear + Math.sin(appear * Math.PI) * 0.2 * appear
-    const sq = extra?.squash ?? 0
-    const sx = r * 1.78 * bounce * (1 + sq * 0.14)
-    const sy = r * 1.78 * bounce * (1 - sq * 0.12)
+    const pop = 0.28 + 0.72 * appear + Math.sin(appear * Math.PI) * 0.16 * appear
+    const land = Math.min(1, Math.max(0, extra?.squash ?? 0))
+    const prog = 1 - land
+    const back = 1 + 1.75 * Math.pow(prog - 1, 3) + 0.75 * Math.pow(prog - 1, 2)
+    const remain = 1 - Math.min(1.15, Math.max(0, back))
+    const defX = 1 + 0.16 * remain
+    const defY = 1 - 0.14 * remain
+    const base = r * 1.78 * pop
     ctx.save()
     ctx.globalAlpha = alpha
     ctx.translate(x, y)
     ctx.rotate(rot)
-    ctx.scale(sx / (r * 1.78) || 1, sy / (r * 1.78) || 1)
-    const s = r * 1.78
+    ctx.scale(defX, defY)
+    const s = base
     ctx.shadowColor = 'rgba(0,0,0,0.45)'
     ctx.shadowBlur = r * 0.35
     ctx.shadowOffsetY = r * 0.12
