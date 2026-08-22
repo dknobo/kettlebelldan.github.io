@@ -20,6 +20,8 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
     shut.push(b)
   }
   const blinks = new Map<number, Blink>()
+  const bg = new Image()
+  bg.src = '/grot_bot_merge/bg.jpg'
 
   function blinking(id: number, now: number) {
     let s = blinks.get(id)
@@ -60,14 +62,14 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
     const appear = 1 - Math.min(1, extra?.born ?? 0)
     const bounce = 0.28 + 0.72 * appear + Math.sin(appear * Math.PI) * 0.2 * appear
     const sq = extra?.squash ?? 0
-    const sx = r * 1.94 * bounce * (1 + sq * 0.16)
-    const sy = r * 1.94 * bounce * (1 - sq * 0.14)
+    const sx = r * 1.78 * bounce * (1 + sq * 0.14)
+    const sy = r * 1.78 * bounce * (1 - sq * 0.12)
     ctx.save()
     ctx.globalAlpha = alpha
     ctx.translate(x, y)
     ctx.rotate(rot)
-    ctx.scale(sx / (r * 1.94) || 1, sy / (r * 1.94) || 1)
-    const s = r * 1.94
+    ctx.scale(sx / (r * 1.78) || 1, sy / (r * 1.78) || 1)
+    const s = r * 1.78
     ctx.shadowColor = 'rgba(0,0,0,0.45)'
     ctx.shadowBlur = r * 0.35
     ctx.shadowOffsetY = r * 0.12
@@ -113,10 +115,9 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
 
     // inner cavity
     const inn = ctx.createLinearGradient(x, y, x + w, y + h)
-    inn.addColorStop(0, '#2a2a34')
-    inn.addColorStop(0.35, '#34343e')
-    inn.addColorStop(0.75, '#26262e')
-    inn.addColorStop(1, '#1c1c24')
+    inn.addColorStop(0, 'rgba(36,36,48,0.72)')
+    inn.addColorStop(0.4, 'rgba(48,46,58,0.62)')
+    inn.addColorStop(1, 'rgba(28,26,34,0.78)')
     ctx.beginPath()
     ctx.roundRect(x + 5, y + 6, w - 10, h - 8, 16)
     ctx.fillStyle = inn
@@ -147,7 +148,22 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
 
   function draw(g: Game) {
     const vw = canvas.clientWidth
-    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight)
+    const vh = canvas.clientHeight
+    ctx.clearRect(0, 0, vw, vh)
+    if (bg.complete && bg.naturalWidth) {
+      const s = Math.max(vw / bg.naturalWidth, vh / bg.naturalHeight)
+      const bw = bg.naturalWidth * s
+      const bh = bg.naturalHeight * s
+      ctx.drawImage(bg, (vw - bw) / 2, (vh - bh) / 2, bw, bh)
+      ctx.fillStyle = 'rgba(20,18,28,0.28)'
+      ctx.fillRect(0, 0, vw, vh)
+    } else {
+      const sky = ctx.createLinearGradient(0, 0, 0, vh)
+      sky.addColorStop(0, '#8a92b8')
+      sky.addColorStop(1, '#e8c9a8')
+      ctx.fillStyle = sky
+      ctx.fillRect(0, 0, vw, vh)
+    }
     if (g.shake > 0.02) {
       ctx.save()
       ctx.translate((Math.random() - 0.5) * 10 * g.shake, (Math.random() - 0.5) * 8 * g.shake)
@@ -203,32 +219,14 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
       const r = radiusOf(g.next, g.scale)
       sprite(g.next, g.dropX, g.dropY, r, 0, -1, 0.96)
       ctx.save()
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)'
-      ctx.setLineDash([3, 6])
+      ctx.strokeStyle = 'rgba(255,255,255,0.42)'
+      ctx.lineWidth = 1.25
       ctx.beginPath()
-      ctx.moveTo(g.dropX, g.dropY + r + 4)
-      ctx.lineTo(g.dropX, g.dangerY)
+      ctx.moveTo(g.dropX, g.dropY + r + 2)
+      ctx.lineTo(g.dropX, g.floorTop)
       ctx.stroke()
       ctx.restore()
     }
-
-    const px = vw - 58
-    const py = 44
-    const cell = ctx.createLinearGradient(px - 28, py - 28, px + 28, py + 28)
-    cell.addColorStop(0, '#2a2a32')
-    cell.addColorStop(1, '#141418')
-    ctx.fillStyle = cell
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)'
-    ctx.lineWidth = 1
-    ctx.beginPath()
-    ctx.roundRect(px - 28, py - 28, 56, 56, 14)
-    ctx.fill()
-    ctx.stroke()
-    sprite(g.phase === 'title' ? 0 : g.after, px, py, 18, 0, -2)
-    ctx.fillStyle = '#6b6b72'
-    ctx.font = '9px ui-sans-serif, Helvetica, sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText('NEXT', px, py + 42)
 
     if (g.phase === 'play' && g.warnMs > 0) {
       const left = Math.max(0, 5 - g.warnMs / 1000)

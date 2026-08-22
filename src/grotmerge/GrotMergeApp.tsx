@@ -12,7 +12,7 @@ export default function GrotMergeApp() {
   const renderer = useRef<Renderer | null>(null)
   const last = useRef(0)
   const [phase, setPhase] = useState<Phase>('title')
-  const [hud, setHud] = useState({ score: 0, best: game.current.best, warn: 0 })
+  const [hud, setHud] = useState({ score: 0, best: game.current.best, warn: 0, after: 0 })
 
   useEffect(() => {
     const el = wrap.current!
@@ -43,8 +43,8 @@ export default function GrotMergeApp() {
         setPhase('over')
       }
       const warn = g.warnMs > 0 ? Math.ceil((5000 - g.warnMs) / 1000) : 0
-      if (g.score !== hud.score || g.best !== hud.best || warn !== hud.warn) {
-        setHud({ score: g.score, best: g.best, warn })
+      if (g.score !== hud.score || g.best !== hud.best || warn !== hud.warn || g.after !== hud.after) {
+        setHud({ score: g.score, best: g.best, warn, after: g.after })
       }
       renderer.current?.draw(g)
       raf = requestAnimationFrame(loop)
@@ -90,7 +90,7 @@ export default function GrotMergeApp() {
     startBed()
     startRun(game.current)
     setPhase('play')
-    setHud({ score: 0, best: game.current.best, warn: 0 })
+    setHud({ score: 0, best: game.current.best, warn: 0, after: game.current.after })
   }
 
   useEffect(() => {
@@ -112,6 +112,13 @@ export default function GrotMergeApp() {
           Dan
         </Link>
         <div className="grot-word">Grot Bot Merge</div>
+        <div className="grot-next">
+          <span>Next</span>
+          <img
+            src={`/grot_bot_merge/bots/bot_${String(hud.after).padStart(2, '0')}.png`}
+            alt=""
+          />
+        </div>
         <div className="grot-scores">
           <div>
             <span>Score</span>
@@ -122,6 +129,16 @@ export default function GrotMergeApp() {
             <b>{hud.best}</b>
           </div>
         </div>
+      </div>
+      <div className="grot-ladder" aria-label="Merge ladder">
+        {TIERS.map((_, i) => (
+          <img
+            key={i}
+            src={`/grot_bot_merge/bots/bot_${String(i).padStart(2, '0')}.png`}
+            alt=""
+            style={{ width: 22 + i * 2.2, height: 22 + i * 2.2 }}
+          />
+        ))}
       </div>
       <div className="grot-stage" ref={wrap}>
         <canvas
@@ -134,34 +151,30 @@ export default function GrotMergeApp() {
         {phase !== 'play' && (
           <div className="grot-overlay">
             <div className="grot-card">
-              <h1>{phase === 'over' ? 'Bowl full' : 'Grot Bot Merge'}</h1>
-              <p>
-                {phase === 'over'
-                  ? `You scored ${hud.score}. Two of the same Grot become the next color.`
-                  : 'Drop Grot Bots. Match two of a kind to grow the next. Sitting on the line is fine — fully above it turns red and you have 5 seconds to fix it.'}
-              </p>
-              <div className="grot-actions">
-                <button className="grot-btn primary" type="button" onClick={play}>
-                  {phase === 'over' ? 'Again' : 'Play'}
-                </button>
-                <Link className="grot-btn" to="/">
-                  Home
-                </Link>
-              </div>
+              {phase === 'over' ? (
+                <>
+                  <h1>Grok Bot Overflow</h1>
+                  <p>Game Over</p>
+                  <div className="grot-actions">
+                    <button className="grot-btn primary" type="button" onClick={play}>
+                      Play Again
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h1>Grot Bot Merge</h1>
+                  <p>Match two of a kind. On the line is fine. Fully above it and you have 5 seconds.</p>
+                  <div className="grot-actions">
+                    <button className="grot-btn primary" type="button" onClick={play}>
+                      Play
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
-      </div>
-      <div className="grot-ladder" aria-label="Merge ladder">
-        <span>Ladder</span>
-        {TIERS.map((_, i) => (
-          <img
-            key={i}
-            src={`/grot_bot_merge/bots/bot_${String(i).padStart(2, '0')}.png`}
-            alt=""
-            style={{ width: 16 + i * 1.6, height: 16 + i * 1.6 }}
-          />
-        ))}
       </div>
     </div>
   )

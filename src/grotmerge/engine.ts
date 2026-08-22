@@ -7,7 +7,7 @@ export const LS_BEST = 'grot-bot-merge-best'
 export const TIERS = [
   { name: 'Pip', color: '#f3ead8' },
   { name: 'Spark', color: '#f97316' },
-  { name: 'Bolt', color: '#f5c518' },
+  { name: 'Bolt', color: '#4ade80' },
   { name: 'Pulse', color: '#84cc16' },
   { name: 'Hum', color: '#2dd4bf' },
   { name: 'Glow', color: '#38bdf8' },
@@ -191,17 +191,17 @@ export function layout(g: Game, viewW: number, viewH: number) {
 function spawn(g: Game, tier: number, x: number, y: number, opts?: { falling?: boolean }) {
   const r = radius(tier, g.scale)
   const body = Matter.Bodies.circle(x, y, r, {
-    restitution: 0.005,
-    friction: 0.85,
-    frictionStatic: 0.95,
-    frictionAir: 0.035,
-    density: 0.0032 + (10 - tier) * 0.00025,
-    slop: 0.008,
+    restitution: 0.2,
+    friction: 0.98,
+    frictionStatic: 1.4,
+    frictionAir: 0.022,
+    density: 0.0028 + (10 - tier) * 0.0002,
+    slop: 0.01,
     label: 'bot',
   })
   if (opts?.falling) {
-    Matter.Body.setVelocity(body, { x: (Math.random() - 0.5) * 0.08, y: 0.35 })
-    Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.02)
+    Matter.Body.setVelocity(body, { x: (Math.random() - 0.5) * 0.45, y: 1.1 })
+    Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.06)
   }
   const data: BotData = { id: g.nextId++, tier, dead: false, overMs: 0, age: 0, squash: 0, born: 1 }
   g.bots.set(body, data)
@@ -333,8 +333,9 @@ export function step(g: Game, dt: number) {
       Matter.Body.setVelocity(body, { x: Math.sign(body.velocity.x) * 6, y: body.velocity.y })
     }
     Matter.Body.setAngularVelocity(body, body.angularVelocity * 0.92)
-    if (Math.abs(body.velocity.x) < 0.18 && body.speed < 0.45) {
-      Matter.Body.setVelocity(body, { x: body.velocity.x * 0.6, y: body.velocity.y })
+    if (body.speed < 0.55) {
+      Matter.Body.setVelocity(body, { x: body.velocity.x * 0.72, y: body.velocity.y * 0.86 })
+      Matter.Body.setAngularVelocity(body, body.angularVelocity * 0.7)
     }
     const maxY = g.floorTop - r - 0.5
     if (body.position.y > maxY) {

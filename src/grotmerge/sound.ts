@@ -81,7 +81,7 @@ export function dropClick() {
   o.stop(t + 0.08)
 }
 
-type Bed = { master: GainNode; timer: number; step: number }
+type Bed = { master: GainNode; timer: number; step: number; hiss: AudioBufferSourceNode }
 let bed: Bed | null = null
 
 function hz(semi: number) {
@@ -99,56 +99,81 @@ export function startBed() {
   lp.frequency.value = 1600
   master.connect(lp)
   lp.connect(c.destination)
-  const state: Bed = { master, timer: 0, step: 0 }
+  const beat = 60 / 72
+  // Imaj7, vi7, IVmaj7, V7 — lo-fi game lounge
+  const chords = [
+    [0, 4, 7, 11],
+    [-3, 0, 4, 7],
+    [-7, -3, 0, 4],
+    [-5, -1, 2, 5],
+  ]
+  const hooks = [
+    [11, null, 12, 11, 7, null, 9, 7],
+    [12, 14, 12, 7, null, 4, 7, 9],
+    [7, null, 4, 7, 9, 7, 4, null],
+    [14, 12, 11, 7, 9, null, 7, 4],
+  ]
+  // looping vinyl hiss
+  const hissN = audio.sampleRate * 2
+  const hiss = audio.createBuffer(1, hissN, audio.sampleRate)
+  const hd = hiss.getChannelData(0)
+  for (let i = 0; i < hissN; i++) hd[i] = (Math.random() * 2 - 1) * 0.04
+  const hissSrc = audio.createBufferSource()
+  hissSrc.buffer = hiss
+  hissSrc.loop = true
+  const hissG = audio.createGain()
+  hissG.gain.value = 0.22
+  const hissF = audio.createBiquadFilter()
+  hissF.type = 'highpass'
+  hissF.frequency.value = 1800
+  hissSrc.connect(hissF)
+  hissF.connect(hissG)
+  hissG.connect(master)
+  hissSrc.start()
+  const state: Bed = { master, timer: 0, step: 0, hiss: hissSrc }
   bed = state
-  const beat = 60 / 86
-  const basses = [
-    [0, 0, 7, 3, 0, 5, 7, 3],
-    [5, 5, 3, 0, 7, 7, 10, 5],
-    [3, 0, 3, 7, 5, 3, 0, 0],
-    [7, 5, 3, 5, 0, 0, 10, 7],
-  ]
-  const leads = [
-    [7, 10, 12, 10, 7, 5, 7, 12, 10, 7, 5, 3, 5, 7, 10, 7],
-    [12, 10, 8, 7, 5, 7, 10, 12, 15, 12, 10, 7, 5, 3, 5, 7],
-    [5, 7, 10, 7, null, 5, 3, 0, 3, 5, 7, 10, 7, 5, 3, 5],
-    [10, 12, 15, 12, 10, 7, 10, 12, 7, 5, 7, 10, 12, 10, 7, 5],
-  ]
-  function pulse() {
-    if (bed !== state) return
-    const t = audio.currentTime + 0.04
-    const i = state.step
-    const phrase = Math.floor(i / 16) % 4
-    const bass = basses[phrase]
-    const lead = leads[phrase]
-    const b = bass[i % bass.length]
+
+  function tone(freq: number, type: OscillatorType, start: number, dur: number, gain: number) {
     const o = audio.createOscillator()
     const g = audio.createGain()
-    o.type = 'sine'
-    o.frequency.value = hz(b - 12)
-    g.gain.setValueAtTime(0.55, t)
-    g.gain.exponentialRampToValueAtTime(0.001, t + beat * 1.6)
+    o.type = type
+    o.frequency.value = freq
+    g.gain.setValueAtTime(0.0001, start)
+    g.gain.exponentialRampToValueAtTime(gain, start + 0.03)
+    g.gain.exponentialRampToValueAtTime(0.0001, start + dur)
     o.connect(g)
     g.connect(master)
-    o.start(t)
-    o.stop(t + beat * 1.7)
+    o.start(start)
+    o.stop(start + dur + 0.02)
+  }
 
-    const n = lead[i % lead.length]
-    if (n != null) {
-      const o2 = audio.createOscillator()
-      const g2 = audio.createGain()
-      o2.type = 'triangle'
-      o2.frequency.value = hz(n)
-      g2.gain.setValueAtTime(0.26, t + beat * 0.5)
-      g2.gain.exponentialRampToValueAtTime(0.001, t + beat * 1.15)
-      o2.connect(g2)
-      g2.connect(master)
-      o2.start(t + beat * 0.5)
-      o2.stop(t + beat * 1.2)
+  function pulse() {
+    if (bed !== state) return
+    const t = audio.currentTime + 0.05
+    const i = state.step
+    const bar = Math.floor(i / 8)
+    const chord = chords[bar % chords.length]
+    const hook = hooks[bar % hooks.length]
+    const stepIn = i % 8
+
+    if (stepIn === 0) {
+      for (const s of chord) {
+        tone(hz(s - 12), 'sine', t, beat * 7.4, 0.11)
+        tone(hz(s), 'triangle', t, beat * 7.2, 0.045)
+      }
     }
 
-    if (i % 2 === 0) {
-      const nlen = Math.floor(audio.sampleRate * 0.03)
+    const note = hook[stepIn]
+    if (note != null && (bar + stepIn) % 3 !== 0) {
+      const swing = stepIn % 2 === 1 ? beat * 0.12 : 0
+      tone(hz(note + 12), 'sine', t + swing, beat * 1.4, 0.07)
+    }
+
+    if (stepIn === 0 || stepIn === 4) {
+      tone(hz(-24), 'sine', t, beat * 0.35, 0.09)
+    }
+    if (stepIn % 2 === 0) {
+      const nlen = Math.floor(audio.sampleRate * 0.025)
       const buf = audio.createBuffer(1, nlen, audio.sampleRate)
       const data = buf.getChannelData(0)
       for (let k = 0; k < nlen; k++) data[k] = (Math.random() * 2 - 1) * (1 - k / nlen)
@@ -156,13 +181,13 @@ export function startBed() {
       src.buffer = buf
       const hp = audio.createBiquadFilter()
       hp.type = 'highpass'
-      hp.frequency.value = 4000
+      hp.frequency.value = 5000
       const g3 = audio.createGain()
-      g3.gain.value = 0.14
+      g3.gain.value = 0.05
       src.connect(hp)
       hp.connect(g3)
       g3.connect(master)
-      src.start(t)
+      src.start(t + (stepIn % 4 === 2 ? beat * 0.1 : 0))
     }
 
     state.step++
@@ -174,6 +199,11 @@ export function startBed() {
 export function stopBed() {
   if (!bed) return
   window.clearTimeout(bed.timer)
+  try {
+    bed.hiss.stop()
+  } catch {
+    /* already stopped */
+  }
   const m = bed.master
   const c = ac()
   if (c) {
