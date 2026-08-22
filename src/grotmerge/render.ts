@@ -26,12 +26,17 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
   function blinking(id: number, now: number) {
     let s = blinks.get(id)
     if (!s) {
-      s = { until: 0, next: now + 500 + Math.random() * 2400 }
+      s = { until: 0, next: now + 2500 + Math.random() * 6000 }
       blinks.set(id, s)
     }
+    const active = [...blinks.values()].filter((b) => now < b.until).length
     if (now >= s.next) {
-      s.until = now + 85 + Math.random() * 55
-      s.next = now + 800 + Math.random() * 3400
+      if (active >= 2 || (active === 1 && Math.random() < 0.75)) {
+        s.next = now + 1800 + Math.random() * 4000
+        return false
+      }
+      s.until = now + 90 + Math.random() * 40
+      s.next = now + 5000 + Math.random() * 9000
     }
     return now < s.until
   }
@@ -93,57 +98,41 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
 
   function bowl(g: Game) {
     const { x, y, w, h } = g.bowl
-    const ox = 7
-    const oy = 9
+    const r = 18
 
-    // outer shell
-    const shell = ctx.createLinearGradient(x - ox, y, x + w + ox, y)
-    shell.addColorStop(0, '#6a6a76')
-    shell.addColorStop(0.45, '#4a4a56')
-    shell.addColorStop(1, '#32323c')
+    ctx.save()
+    ctx.shadowColor = 'rgba(0,0,0,0.28)'
+    ctx.shadowBlur = 18
+    ctx.shadowOffsetY = 6
+    const glass = ctx.createLinearGradient(x, y, x + w, y + h)
+    glass.addColorStop(0, 'rgba(255,255,255,0.14)')
+    glass.addColorStop(0.18, 'rgba(255,255,255,0.05)')
+    glass.addColorStop(1, 'rgba(12,12,16,0.38)')
     ctx.beginPath()
-    ctx.roundRect(x - ox, y - 2, w + ox * 2, h + oy + 4, 24)
-    ctx.fillStyle = shell
+    ctx.roundRect(x, y, w, h, r)
+    ctx.fillStyle = glass
     ctx.fill()
+    ctx.restore()
 
-    // top rim highlight
-    ctx.strokeStyle = 'rgba(255,255,255,0.22)'
-    ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.roundRect(x - ox + 1.5, y - 0.5, w + ox * 2 - 3, 14, 10)
+    ctx.roundRect(x + 0.6, y + 0.6, w - 1.2, h - 1.2, r - 0.5)
+    ctx.strokeStyle = 'rgba(255,255,255,0.38)'
+    ctx.lineWidth = 1.15
     ctx.stroke()
 
-    // inner cavity
-    const inn = ctx.createLinearGradient(x, y, x + w, y + h)
-    inn.addColorStop(0, 'rgba(36,36,48,0.72)')
-    inn.addColorStop(0.4, 'rgba(48,46,58,0.62)')
-    inn.addColorStop(1, 'rgba(28,26,34,0.78)')
     ctx.beginPath()
-    ctx.roundRect(x + 5, y + 6, w - 10, h - 8, 16)
-    ctx.fillStyle = inn
-    ctx.fill()
-
-    // left inner light
-    const left = ctx.createLinearGradient(x + 6, y, x + 48, y)
-    left.addColorStop(0, 'rgba(255,255,255,0.07)')
-    left.addColorStop(1, 'rgba(255,255,255,0)')
-    ctx.fillStyle = left
-    ctx.fillRect(x + 6, y + 8, 42, h - 14)
-
-    // floor
-    const floor = ctx.createLinearGradient(x, y + h - 56, x, y + h)
-    floor.addColorStop(0, 'rgba(255,255,255,0)')
-    floor.addColorStop(1, 'rgba(255,255,255,0.05)')
-    ctx.fillStyle = floor
-    ctx.fillRect(x + 8, y + h - 52, w - 16, 44)
-
-    // inner lip shadow
-    ctx.strokeStyle = 'rgba(0,0,0,0.5)'
-    ctx.lineWidth = 5
-    ctx.beginPath()
-    ctx.moveTo(x + 10, y + 8)
-    ctx.lineTo(x + w - 10, y + 8)
+    ctx.roundRect(x + 2.2, y + 2.2, w - 4.4, h - 4.4, r - 2)
+    ctx.strokeStyle = 'rgba(0,0,0,0.22)'
+    ctx.lineWidth = 1
     ctx.stroke()
+
+    const sheen = ctx.createLinearGradient(x, y, x, y + 28)
+    sheen.addColorStop(0, 'rgba(255,255,255,0.16)')
+    sheen.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = sheen
+    ctx.beginPath()
+    ctx.roundRect(x + 3, y + 3, w - 6, 22, 12)
+    ctx.fill()
   }
 
   function draw(g: Game) {
@@ -172,7 +161,7 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
 
     ctx.save()
     ctx.beginPath()
-    ctx.roundRect(g.bowl.x + 5, g.bowl.y + 6, g.bowl.w - 10, g.bowl.h - 8, 16)
+    ctx.roundRect(g.bowl.x + 2, g.bowl.y + 2, g.bowl.w - 4, g.bowl.h - 4, 16)
     ctx.clip()
 
     ctx.save()
@@ -201,14 +190,14 @@ export function createRenderer(canvas: HTMLCanvasElement): Renderer {
       ctx.globalAlpha = Math.max(0, f.t) * 0.8
       ctx.fillStyle = f.color
       ctx.strokeStyle = f.color
-      if (f.kind === 'spark') {
+      if (f.kind === 'spark' || f.kind === 'ray') {
         ctx.beginPath()
-        ctx.arc(f.x, f.y, f.r * f.t, 0, Math.PI * 2)
+        ctx.arc(f.x, f.y, f.r * (f.kind === 'ray' ? 1.4 : 1) * f.t, 0, Math.PI * 2)
         ctx.fill()
       } else {
-        ctx.lineWidth = 5 * f.t
+        ctx.lineWidth = (f.kind === 'halo' ? 2.2 : 5) * f.t
         ctx.beginPath()
-        ctx.arc(f.x, f.y, f.r * (1.15 + (1 - f.t) * 0.85), 0, Math.PI * 2)
+        ctx.arc(f.x, f.y, f.r * (1.1 + (1 - f.t) * (f.kind === 'halo' ? 1.35 : 0.85)), 0, Math.PI * 2)
         ctx.stroke()
       }
       ctx.restore()

@@ -26,7 +26,7 @@ export type Fx = {
   r: number
   color: string
   t: number
-  kind: 'ring' | 'spark'
+  kind: 'ring' | 'spark' | 'halo' | 'ray'
   vx?: number
   vy?: number
 }
@@ -39,6 +39,7 @@ export type BotData = {
   age: number
   squash: number
   born: number
+  landed: boolean
 }
 
 export type Game = {
@@ -67,6 +68,7 @@ export type Game = {
   shake: number
   floorTop: number
   acc: number
+  lastMerge: number
 }
 
 function radius(tier: number, scale: number) {
@@ -117,6 +119,7 @@ export function createGame(): Game {
     shake: 0,
     floorTop: 0,
     acc: 0,
+    lastMerge: -1,
   }
   Matter.Events.on(engine, 'collisionStart', (e) => {
     for (const p of e.pairs) {
@@ -125,8 +128,15 @@ export function createGame(): Game {
       if (a.label === 'bot' && b.label === 'bot') g.mergeQ.push([a, b])
       const da = a.label === 'bot' ? g.bots.get(a) : undefined
       const db = b.label === 'bot' ? g.bots.get(b) : undefined
-      if (da && da.age > 40) da.squash = Math.max(da.squash, 1)
-      if (db && db.age > 40) db.squash = Math.max(db.squash, 1)
+      const twitching = g.live.filter((b) => (g.bots.get(b)?.squash || 0) > 0.2).length
+      if (da && !da.landed && da.age > 80) {
+        da.landed = true
+        if (twitching < 2) da.squash = 1
+      }
+      if (db && !db.landed && db.age > 80) {
+        db.landed = true
+        if (twitching < 2) db.squash = 1
+      }
     }
   })
   return g
@@ -203,7 +213,7 @@ function spawn(g: Game, tier: number, x: number, y: number, opts?: { falling?: b
     Matter.Body.setVelocity(body, { x: (Math.random() - 0.5) * 0.45, y: 1.1 })
     Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.06)
   }
-  const data: BotData = { id: g.nextId++, tier, dead: false, overMs: 0, age: 0, squash: 0, born: 1 }
+  const data: BotData = { id: g.nextId++, tier, dead: false, overMs: 0, age: 0, squash: 0, born: 1, landed: false }
   g.bots.set(body, data)
   g.live.push(body)
   Matter.World.add(g.world, body)
@@ -220,6 +230,7 @@ export function startRun(g: Game) {
   g.overTimer = 0
   g.warnMs = 0
   g.fx = []
+  g.lastMerge = -1
   for (const b of [...g.live]) Matter.World.remove(g.world, b)
   g.live = []
   g.dropX = g.bowl.x + g.bowl.w / 2
@@ -283,15 +294,35 @@ function mergePair(g: Game, a: Matter.Body, b: Matter.Body) {
       vy: Math.sin(a) * sp - 0.4,
     })
   }
+  g.lastMerge = next
+  if (next >= 6) {
+    g.shake = Math.min(1, g.shake + 0.2)
+    g.fx.push({ x, y, r: radius(next, g.scale) * 1.4, color: 'rgba(255,236,200,0.9)', t: 1, kind: 'halo' })
+    g.fx.push({ x, y, r: radius(next, g.scale) * 0.7, color: TIERS[next].color, t: 0.9, kind: 'halo' })
+    for (let i = 0; i < 8; i++) {
+      const a = (Math.PI * 2 * i) / 8
+      g.fx.push({
+        x,
+        y,
+        r: 1.6,
+        color: i % 2 ? '#fff4d6' : TIERS[next].color,
+        t: 1,
+        kind: 'ray',
+        vx: Math.cos(a) * 2.4,
+        vy: Math.sin(a) * 2.4,
+      })
+    }
+  }
 }
 
 export function step(g: Game, dt: number) {
   if (g.phase !== 'play') return
+  g.lastMerge = -1
   g.cooldown = Math.max(0, g.cooldown - dt)
   g.fx = g.fx
     .map((f) => ({
       ...f,
-      t: f.t - dt / (f.kind === 'spark' ? 420 : 280),
+      t: f.t - dt / (f.kind === 'spark' || f.kind === 'ray' ? 480 : f.kind === 'halo' ? 620 : 280),
       x: f.x + (f.vx || 0) * dt * 0.06,
       y: f.y + (f.vy || 0) * dt * 0.06,
     }))

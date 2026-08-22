@@ -224,6 +224,27 @@ export function duckBed() {
   g.linearRampToValueAtTime(0.13, t + 0.22)
 }
 
+export function flourish() {
+  const c = ac()
+  if (!c) return
+  const t = c.currentTime
+  const notes = [523.25, 659.25, 783.99]
+  notes.forEach((f, i) => {
+    const o = c.createOscillator()
+    const g = c.createGain()
+    o.type = 'sine'
+    o.frequency.value = f
+    const st = t + i * 0.055
+    g.gain.setValueAtTime(0.0001, st)
+    g.gain.exponentialRampToValueAtTime(0.055, st + 0.02)
+    g.gain.exponentialRampToValueAtTime(0.0001, st + 0.28)
+    o.connect(g)
+    g.connect(c.destination)
+    o.start(st)
+    o.stop(st + 0.3)
+  })
+}
+
 export function thud() {
   const c = ac()
   if (!c) return
