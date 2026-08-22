@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Grot Sprite Lab</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, Helvetica, sans-serif;
+      background: #14141a;
+      color: #f4f4f5;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(16,16,22,.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #2a2a32;
+      padding: 14px 18px 12px;
+    }
+    h1 { margin: 0; font-size: 22px; letter-spacing: -.04em; }
+    p.lead { margin: 6px 0 10px; color: #a1a1aa; font-size: 14px; }
+    .pick {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      min-height: 36px;
+    }
+    .pick b { letter-spacing: .08em; font-size: 13px; }
+    .nums { color: #fde68a; font-variant-numeric: tabular-nums; font-size: 15px; }
+    button {
+      appearance: none; border: 1px solid #3f3f46; background: #1f1f24;
+      color: #f4f4f5; border-radius: 999px; padding: 6px 12px; cursor: pointer;
+      font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    }
+    button.primary { background: #f4f4f5; color: #111; border-color: #f4f4f5; }
+    main { max-width: 1100px; margin: 0 auto; padding: 18px 16px 80px; }
+    h2 { font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: #a1a1aa; margin: 22px 0 12px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .card {
+      background: #1c1c22;
+      border: 2px solid #2a2a32;
+      border-radius: 16px;
+      padding: 10px 8px 12px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .card:hover { border-color: #52525b; }
+    .card.on { border-color: #fde68a; background: #26231a; }
+    .card img {
+      width: 100%; aspect-ratio: 1; object-fit: contain;
+      background: radial-gradient(circle at 50% 40%, #2a2a32, #141418 70%);
+      border-radius: 12px;
+    }
+    .num {
+      display: inline-block; margin-top: 8px;
+      font-size: 18px; font-weight: 700; letter-spacing: -.03em;
+    }
+    .lab { display: block; font-size: 11px; color: #a1a1aa; margin-top: 2px; }
+    .count { color: #a1a1aa; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Grot Sprite Lab</h1>
+    <p class="lead">Click up to 11 sprites. Tell me the numbers (or copy them).</p>
+    <div class="pick">
+      <b>Your 11:</b>
+      <span class="nums" id="nums">none yet</span>
+      <span class="count" id="count">0 / 11</span>
+      <button class="primary" id="copy" type="button">Copy numbers</button>
+      <button id="clear" type="button">Clear</button>
+    </div>
+  </header>
+  <main>
+    <h2>In the game now</h2>
+    <div class="grid" id="cur"></div>
+    <h2>New variations</h2>
+    <div class="grid" id="neu"></div>
+  </main>
+  <script>
+    const meta = [
+      {n:1, src:"cands/01.png", label:"Cream circle, black eyes", set:"current"},
+      {n:2, src:"cands/02.png", label:"Orange circle", set:"current"},
+      {n:3, src:"cands/03.png", label:"Apple green circle", set:"current"},
+      {n:4, src:"cands/04.png", label:"Red bean", set:"current"},
+      {n:5, src:"cands/05.png", label:"Blue drop", set:"current"},
+      {n:6, src:"cands/06.png", label:"Gray heart", set:"current"},
+      {n:7, src:"cands/07.png", label:"Purple circle", set:"current"},
+      {n:8, src:"cands/08.png", label:"Teal 3-lobe cloud", set:"current"},
+      {n:9, src:"cands/09.png", label:"Orange 4-lobe clover", set:"current"},
+      {n:10, src:"cands/10.png", label:"Charcoal clover", set:"current"},
+      {n:11, src:"cands/11.png", label:"Black circle, white eyes", set:"current"},
+      {n:12, src:"cands/12.png", label:"Yellow circle", set:"new"},
+      {n:13, src:"cands/13.png", label:"Hot pink circle", set:"new"},
+      {n:14, src:"cands/14.png", label:"Sky blue circle", set:"new"},
+      {n:15, src:"cands/15.png", label:"Gold circle", set:"new"},
+      {n:16, src:"cands/16.png", label:"Mint drop", set:"new"},
+      {n:17, src:"cands/17.png", label:"Pink heart", set:"new"},
+      {n:18, src:"cands/18.png", label:"Leaf green clover", set:"new"},
+      {n:19, src:"cands/19.png", label:"Purple bean", set:"new"},
+      {n:20, src:"cands/20.png", label:"Navy circle", set:"new"},
+      {n:21, src:"cands/21.png", label:"Coral drop", set:"new"},
+      {n:22, src:"cands/22.png", label:"Yellow 3-lobe cloud", set:"new"},
+      {n:23, src:"cands/23.png", label:"Cyan clover", set:"new"},
+      {n:24, src:"cands/24.png", label:"White circle, black eyes", set:"new"},
+      {n:25, src:"cands/25.png", label:"Red star", set:"new"},
+      {n:26, src:"cands/26.png", label:"Yellow moon", set:"new"},
+      {n:27, src:"cands/27.png", label:"Aqua diamond", set:"new"},
+    ];
+    const sel = new Set();
+    function render() {
+      const nums = [...sel].sort((a,b)=>a-b);
+      document.getElementById("nums").textContent = nums.length ? nums.join(", ") : "none yet";
+      document.getElementById("count").textContent = nums.length + " / 11";
+      document.querySelectorAll(".card").forEach((el) => {
+        el.classList.toggle("on", sel.has(Number(el.dataset.n)));
+      });
+    }
+    function card(item) {
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = "card";
+      el.dataset.n = String(item.n);
+      el.innerHTML = `<img src="${item.src}" alt="${item.label}"><span class="num">${item.n}</span><span class="lab">${item.label}</span>`;
+      el.onclick = () => {
+        const n = item.n;
+        if (sel.has(n)) sel.delete(n);
+        else if (sel.size < 11) sel.add(n);
+        render();
+      };
+      return el;
+    }
+    const cur = document.getElementById("cur");
+    const neu = document.getElementById("neu");
+    meta.forEach((m) => (m.set === "current" ? cur : neu).appendChild(card(m)));
+    document.getElementById("clear").onclick = () => { sel.clear(); render(); };
+    document.getElementById("copy").onclick = async () => {
+      const t = [...sel].sort((a,b)=>a-b).join(", ");
+      try { await navigator.clipboard.writeText(t); } catch {}
+    };
+  </script>
+</body>
+</html>

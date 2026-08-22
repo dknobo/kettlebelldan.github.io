@@ -1,0 +1,164 @@
+[
+  {
+    "n": 1,
+    "src": "cands/01.png",
+    "label": "Cream circle, black eyes",
+    "set": "current"
+  },
+  {
+    "n": 2,
+    "src": "cands/02.png",
+    "label": "Orange circle",
+    "set": "current"
+  },
+  {
+    "n": 3,
+    "src": "cands/03.png",
+    "label": "Apple green circle",
+    "set": "current"
+  },
+  {
+    "n": 4,
+    "src": "cands/04.png",
+    "label": "Red bean",
+    "set": "current"
+  },
+  {
+    "n": 5,
+    "src": "cands/05.png",
+    "label": "Blue drop",
+    "set": "current"
+  },
+  {
+    "n": 6,
+    "src": "cands/06.png",
+    "label": "Gray heart",
+    "set": "current"
+  },
+  {
+    "n": 7,
+    "src": "cands/07.png",
+    "label": "Purple circle",
+    "set": "current"
+  },
+  {
+    "n": 8,
+    "src": "cands/08.png",
+    "label": "Teal 3-lobe cloud",
+    "set": "current"
+  },
+  {
+    "n": 9,
+    "src": "cands/09.png",
+    "label": "Orange 4-lobe clover",
+    "set": "current"
+  },
+  {
+    "n": 10,
+    "src": "cands/10.png",
+    "label": "Charcoal clover",
+    "set": "current"
+  },
+  {
+    "n": 11,
+    "src": "cands/11.png",
+    "label": "Black circle, white eyes",
+    "set": "current"
+  },
+  {
+    "n": 12,
+    "src": "cands/12.png",
+    "label": "Yellow circle",
+    "set": "new"
+  },
+  {
+    "n": 13,
+    "src": "cands/13.png",
+    "label": "Hot pink circle",
+    "set": "new"
+  },
+  {
+    "n": 14,
+    "src": "cands/14.png",
+    "label": "Sky blue circle",
+    "set": "new"
+  },
+  {
+    "n": 15,
+    "src": "cands/15.png",
+    "label": "Gold circle",
+    "set": "new"
+  },
+  {
+    "n": 16,
+    "src": "cands/16.png",
+    "label": "Mint drop",
+    "set": "new"
+  },
+  {
+    "n": 17,
+    "src": "cands/17.png",
+    "label": "Pink heart",
+    "set": "new"
+  },
+  {
+    "n": 18,
+    "src": "cands/18.png",
+    "label": "Leaf green clover",
+    "set": "new"
+  },
+  {
+    "n": 19,
+    "src": "cands/19.png",
+    "label": "Purple bean",
+    "set": "new"
+  },
+  {
+    "n": 20,
+    "src": "cands/20.png",
+    "label": "Navy circle",
+    "set": "new"
+  },
+  {
+    "n": 21,
+    "src": "cands/21.png",
+    "label": "Coral drop",
+    "set": "new"
+  },
+  {
+    "n": 22,
+    "src": "cands/22.png",
+    "label": "Yellow 3-lobe cloud",
+    "set": "new"
+  },
+  {
+    "n": 23,
+    "src": "cands/23.png",
+    "label": "Cyan clover",
+    "set": "new"
+  },
+  {
+    "n": 24,
+    "src": "cands/24.png",
+    "label": "White circle, black eyes",
+    "set": "new"
+  },
+  {
+    "n": 25,
+    "src": "cands/25.png",
+    "label": "Red star",
+    "set": "new"
+  },
+  {
+    "n": 26,
+    "src": "cands/26.png",
+    "label": "Yellow moon",
+    "set": "new"
+  },
+  {
+    "n": 27,
+    "src": "cands/27.png",
+    "label": "Aqua diamond",
+    "set": "new"
+  }
+]
