@@ -1,4 +1,4 @@
-import { useRef, type ReactNode, type RefObject } from 'react'
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import IronField from '../site/IronField'
@@ -35,16 +35,6 @@ const PAIR = [
     alt: 'Linocut of a coffee brewing still life',
   },
 ]
-
-function useFocusScale(target: RefObject<HTMLElement | null>, reduced: boolean) {
-  const { scrollYProgress } = useScroll({
-    target,
-    offset: ['start end', 'end start'],
-  })
-  const raw = useTransform(scrollYProgress, [0, 0.5, 1], [0.985, 1.015, 0.99])
-  const scale = useSpring(raw, { stiffness: 80, damping: 28, restDelta: 0.001 })
-  return reduced ? undefined : { scale }
-}
 
 export default function HomePage() {
   usePageMeta('Kettlebell Dan')
@@ -111,12 +101,10 @@ export default function HomePage() {
           <ul className="iron-games">
             {games.map((game) => (
               <li key={game.path}>
-                <ScaleCard reduced={reduced}>
-                  <Link className="iron-game" to={game.path}>
-                    <img src={game.thumb} alt="" />
-                    <span>{game.name}</span>
-                  </Link>
-                </ScaleCard>
+                <Link className="iron-game" to={game.path}>
+                  <img src={game.thumb} alt="" />
+                  <span>{game.name}</span>
+                </Link>
               </li>
             ))}
           </ul>
@@ -129,20 +117,19 @@ export default function HomePage() {
             <h2>Tees</h2>
             <div className="iron-tees">
               {TEES.map((tee) => (
-                <ScaleCard key={tee.href} reduced={reduced}>
-                  <a
-                    className="iron-tee"
-                    href={tee.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <img src={tee.image} alt={tee.alt} />
-                    <div className="iron-tee-meta">
-                      <span>{tee.name}</span>
-                      <span>{tee.price}</span>
-                    </div>
-                  </a>
-                </ScaleCard>
+                <a
+                  key={tee.href}
+                  className="iron-tee"
+                  href={tee.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img src={tee.image} alt={tee.alt} />
+                  <div className="iron-tee-meta">
+                    <span>{tee.name}</span>
+                    <span>{tee.price}</span>
+                  </div>
+                </a>
               ))}
             </div>
             <p className="iron-fine">Fulfilled by Printful</p>
@@ -232,18 +219,3 @@ function ImmersivePrint({
   )
 }
 
-function ScaleCard({
-  children,
-  reduced,
-}: {
-  children: ReactNode
-  reduced: boolean
-}) {
-  const ref = useRef<HTMLDivElement>(null)
-  const scale = useFocusScale(ref, reduced)
-  return (
-    <motion.div ref={ref} style={scale}>
-      {children}
-    </motion.div>
-  )
-}
