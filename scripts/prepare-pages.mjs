@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync } from 'node:fs'
+import { copyFileSync, mkdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 
 const spaPaths = [
@@ -26,6 +26,7 @@ const spaPaths = [
 
 const dist = 'dist'
 copyFileSync('CNAME', join(dist, 'CNAME'))
+rmSync(join(dist, 'previews'), { recursive: true, force: true })
 
 for (const path of spaPaths) {
   const dir = join(dist, path)
