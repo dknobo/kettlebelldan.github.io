@@ -72,19 +72,20 @@
 }
 
 .iron-wordmark {
-  margin: 0 0 1.15rem;
+  margin: 0 0 1.25rem;
+  max-width: 100%;
   font-family: Anton, Impact, sans-serif;
-  font-size: clamp(2.2rem, 8vw, 4.4rem);
-  letter-spacing: 0.08em;
-  line-height: 0.95;
+  font-size: clamp(2.6rem, 10vw, 6.5rem);
+  letter-spacing: 0.055em;
+  line-height: 0.88;
   text-transform: uppercase;
   color: var(--bone);
 }
 
 .iron-portrait-wrap {
-  width: min(17rem, 52vw);
+  width: min(22rem, 68vw);
   aspect-ratio: 1;
-  padding: 0.4rem;
+  padding: 0.45rem;
   border: 1px solid rgba(243, 234, 216, 0.28);
   background: #2a2118;
   box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
@@ -433,6 +434,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .iron-hero,
+  .iron-immerse {
+    min-height: 100svh;
+  }
+
+  .iron-hero-pin,
+  .iron-immerse-pin {
+    position: relative;
+  }
+
   .iron-game img {
     transition: none;
   }

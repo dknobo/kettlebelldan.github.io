@@ -78,7 +78,7 @@ export default function HomePage() {
           <div className="iron-hero-id">
             <p className="iron-wordmark">Kettlebell Dan</p>
             <div className="iron-portrait-wrap">
-              <img src="/images/dan.jpg" alt="Dan" width={280} height={280} />
+              <img src="/images/dan.jpg" alt="Dan" width={352} height={352} />
             </div>
           </div>
           <p className="iron-scroll-hint">Scroll the iron</p>
