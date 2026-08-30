@@ -1,0 +1,657 @@
+.iron-page {
+  --bone: #f3ead8;
+  --bone-dim: #cfc4ae;
+  --ink: #110e0c;
+  --iron: #1a1613;
+  --rust: #c43a1a;
+  --rust-deep: #8a2410;
+  --steel: #8d8578;
+  --pad: clamp(1.1rem, 4vw, 2.75rem);
+  --max: 72rem;
+  position: relative;
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: "Source Serif 4", "Times New Roman", serif;
+}
+
+.iron-page a {
+  color: inherit;
+}
+
+.iron-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.iron-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.18;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+
+.iron-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem var(--pad);
+  background: linear-gradient(to bottom, rgba(17, 14, 12, 0.82), rgba(17, 14, 12, 0));
+}
+
+.iron-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  font-family: Anton, Impact, sans-serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+}
+
+.iron-brand svg {
+  width: 1.15rem;
+  height: auto;
+  color: var(--rust);
+}
+
+.iron-bar nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.1rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.iron-bar nav a {
+  text-decoration: none;
+  color: var(--bone-dim);
+}
+
+.iron-bar nav a:hover {
+  color: var(--bone);
+}
+
+.iron-hero {
+  position: relative;
+  z-index: 2;
+  min-height: 220vh;
+}
+
+.iron-hero-pin {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  display: grid;
+  align-items: end;
+  padding: 5.5rem var(--pad) 2.4rem;
+  overflow: hidden;
+}
+
+.iron-hero-bg {
+  position: absolute;
+  inset: -12% -8%;
+  background: url("/images/art/linocut-iron-field.jpg") center/cover no-repeat;
+  opacity: 0.22;
+  filter: contrast(1.15) saturate(0.85);
+  pointer-events: none;
+}
+
+.iron-hero-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 46rem;
+}
+
+.iron-chips {
+  margin: 0 0 0.85rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+
+.iron-name {
+  margin: 0;
+  font-family: Anton, Impact, sans-serif;
+  font-size: clamp(5.4rem, 22vw, 13.5rem);
+  line-height: 0.78;
+  letter-spacing: 0.01em;
+  background: url("/images/art/linocut-iron-field.jpg") 50% 40% / 140% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: contrast(1.2);
+}
+
+.iron-sub {
+  margin: 0.35rem 0 0;
+  font-family: Anton, Impact, sans-serif;
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  letter-spacing: 0.18em;
+  color: var(--bone);
+}
+
+.iron-handle {
+  margin: 0.55rem 0 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--bone-dim);
+}
+
+.iron-lede {
+  margin: 1.2rem 0 0;
+  max-width: 36rem;
+  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+  line-height: 1.45;
+}
+
+.iron-portrait-wrap {
+  margin-top: 1.6rem;
+  width: min(11rem, 42vw);
+  aspect-ratio: 1;
+  padding: 0.4rem;
+  border: 1px solid rgba(243, 234, 216, 0.28);
+  background: #2a2118;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+.iron-portrait-wrap img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+.iron-bell-stage {
+  position: absolute;
+  right: -6vw;
+  bottom: -8vh;
+  width: min(52vw, 34rem);
+  color: var(--rust);
+  pointer-events: none;
+  transform-origin: 50% 8%;
+  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.45));
+}
+
+.iron-bell-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.iron-scroll-hint {
+  position: absolute;
+  right: var(--pad);
+  bottom: 1.4rem;
+  z-index: 3;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.iron-manifesto {
+  position: relative;
+  z-index: 3;
+  min-height: 180vh;
+  background: linear-gradient(180deg, transparent, #2a120c 18%, #4a180e 55%, var(--ink) 100%);
+}
+
+.iron-manifesto-pin {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 5rem var(--pad);
+}
+
+.iron-manifesto h2 {
+  margin: 0;
+  text-align: center;
+  font-family: Anton, Impact, sans-serif;
+  font-size: clamp(3.6rem, 14vw, 9.5rem);
+  line-height: 0.84;
+  letter-spacing: 0.02em;
+}
+
+.iron-bolts {
+  display: flex;
+  justify-content: center;
+  gap: 1.4rem;
+  margin-bottom: 0.8rem;
+  color: var(--rust);
+}
+
+.iron-bolts svg {
+  width: 1.1rem;
+  height: auto;
+}
+
+.iron-krue-stamp {
+  display: block;
+  width: min(16rem, 80%);
+  margin: 0 0 0.6rem;
+  color: var(--bone);
+}
+
+.iron-manifesto em {
+  font-style: normal;
+  color: var(--bone);
+}
+
+.iron-manifesto strong {
+  color: #ffb199;
+}
+
+.iron-chapter {
+  position: relative;
+  z-index: 3;
+  min-height: 165vh;
+}
+
+.iron-chapter-pin {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: center;
+  padding: 5.5rem var(--pad) 2.5rem;
+}
+
+.iron-chapter.is-odd .iron-chapter-pin {
+  background: #161210;
+}
+
+.iron-chapter.is-even .iron-chapter-pin {
+  background: #110e0c;
+}
+
+.iron-chapter-art {
+  position: relative;
+}
+
+.iron-chapter-art img {
+  display: block;
+  width: 100%;
+  max-height: 78vh;
+  object-fit: cover;
+  border: 8px solid #f3ead8;
+  box-shadow: 12px 16px 0 rgba(196, 58, 26, 0.22);
+}
+
+.iron-chapter-index {
+  position: absolute;
+  top: -0.7rem;
+  left: -0.4rem;
+  font-family: Anton, Impact, sans-serif;
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 1;
+  color: var(--rust);
+  text-shadow: 0 0 0 var(--ink);
+}
+
+.iron-chapter-copy {
+  max-width: 32rem;
+}
+
+.iron-kicker {
+  margin: 0 0 0.6rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+
+.iron-chapter-copy h3 {
+  margin: 0;
+  font-family: Anton, Impact, sans-serif;
+  font-size: clamp(2.6rem, 6vw, 4.6rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+}
+
+.iron-chapter-copy p {
+  margin: 1rem 0 0;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: var(--bone-dim);
+}
+
+.iron-chapter-copy .iron-line {
+  color: var(--bone);
+  font-size: 1.35rem;
+}
+
+.iron-days {
+  position: relative;
+  z-index: 3;
+  padding: 4rem 0 3rem;
+  overflow: hidden;
+  border-top: 1px solid rgba(243, 234, 216, 0.12);
+  border-bottom: 1px solid rgba(243, 234, 216, 0.12);
+  background: #0d0b09;
+}
+
+.iron-ticker {
+  display: flex;
+  width: max-content;
+  gap: 2.5rem;
+  font-family: Anton, Impact, sans-serif;
+  font-size: clamp(1.8rem, 5vw, 3.4rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bone);
+  animation: iron-marquee 32s linear infinite;
+}
+
+.iron-ticker span {
+  white-space: nowrap;
+}
+
+.iron-ticker i {
+  font-style: normal;
+  color: var(--rust);
+}
+
+@keyframes iron-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.iron-block {
+  position: relative;
+  z-index: 3;
+  padding: clamp(3.5rem, 8vw, 6rem) var(--pad);
+}
+
+.iron-block-inner {
+  width: min(var(--max), 100%);
+  margin: 0 auto;
+}
+
+.iron-block h2 {
+  margin: 0 0 1.4rem;
+  font-family: Anton, Impact, sans-serif;
+  font-size: clamp(2.8rem, 7vw, 5.2rem);
+  line-height: 0.9;
+}
+
+.iron-games {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.iron-game {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  overflow: hidden;
+  text-decoration: none;
+  background: #1c1713;
+  border: 1px solid rgba(243, 234, 216, 0.14);
+}
+
+.iron-game img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: #111;
+  transition: transform 0.6s ease;
+}
+
+.iron-game:hover img {
+  transform: scale(1.04);
+}
+
+.iron-game span {
+  padding: 0.95rem 1rem 1.1rem;
+  font-family: Anton, Impact, sans-serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+}
+
+.iron-quiet {
+  background: #0d0b09;
+}
+
+.iron-quiet-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.iron-tees {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+}
+
+.iron-tee {
+  display: block;
+  overflow: hidden;
+  text-decoration: none;
+  background: #ece8e1;
+  color: var(--ink);
+}
+
+.iron-tee img {
+  display: block;
+  width: 100%;
+}
+
+.iron-tee div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem 0.85rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.iron-notes p {
+  margin: 0 0 1rem;
+  color: var(--bone-dim);
+}
+
+.iron-signup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.iron-signup input,
+.iron-signup button {
+  min-height: 3rem;
+  border: 1px solid rgba(243, 234, 216, 0.22);
+  background: #161210;
+  color: var(--bone);
+  font: inherit;
+}
+
+.iron-signup input {
+  flex: 1 1 12rem;
+  padding: 0.7rem 0.9rem;
+}
+
+.iron-signup input::placeholder {
+  color: var(--steel);
+}
+
+.iron-signup button {
+  padding: 0 1.1rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.iron-fine {
+  margin: 0.65rem 0 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--steel);
+}
+
+.iron-foot {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 1.4rem var(--pad) 2rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--steel);
+}
+
+.iron-foot a {
+  text-decoration: none;
+  color: var(--bone-dim);
+}
+
+.chrome {
+  min-height: 100vh;
+  background: #110e0c;
+  color: #f3ead8;
+  font-family: "Source Serif 4", "Times New Roman", serif;
+}
+
+.chrome-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.8rem 1.5rem;
+  padding: 0.9rem clamp(1.1rem, 4vw, 2.75rem);
+  border-bottom: 1px solid rgba(243, 234, 216, 0.12);
+}
+
+.chrome-brand {
+  font-family: Anton, Impact, sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.chrome-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.chrome-nav a {
+  color: #cfc4ae;
+  text-decoration: none;
+}
+
+.chrome-page {
+  width: min(72rem, 100%);
+  margin: 0 auto;
+  padding: 2.5rem clamp(1.1rem, 4vw, 2.75rem) 4rem;
+}
+
+.chrome-page h1 {
+  margin: 0 0 0.7rem;
+  font-family: Anton, Impact, sans-serif;
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  line-height: 0.9;
+}
+
+.chrome-page .lede {
+  max-width: 38rem;
+  color: #cfc4ae;
+}
+
+.chrome-page .more {
+  margin-top: 1.5rem;
+}
+
+.chrome-page .more a {
+  color: #f3ead8;
+}
+
+@media (max-width: 860px) {
+  .iron-hero-pin {
+    align-items: center;
+  }
+
+  .iron-bell-stage {
+    width: min(70vw, 20rem);
+    right: -14vw;
+    bottom: auto;
+    top: 18vh;
+    opacity: 0.55;
+  }
+
+  .iron-chapter-pin,
+  .iron-quiet-grid,
+  .iron-games,
+  .iron-tees {
+    grid-template-columns: 1fr;
+  }
+
+  .iron-chapter-art img {
+    max-height: 46vh;
+  }
+
+  .iron-name {
+    font-size: clamp(4.6rem, 28vw, 8rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iron-ticker {
+    animation: none;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0 var(--pad);
+  }
+
+  .iron-game img {
+    transition: none;
+  }
+}
