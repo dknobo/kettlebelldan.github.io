@@ -1,7 +1,6 @@
-import { useRef } from 'react'
+import { useRef, type ReactNode, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
-import { BellMark } from '../site/graphics'
 import IronField from '../site/IronField'
 import { games } from '../site/games'
 import { usePrefersReducedMotion } from '../site/motion'
@@ -31,7 +30,7 @@ const PILLARS = [
     line: 'No mercy. Only iron.',
     body: 'Founder of the Kettlebell Krüe. Discipline, iron, and showing up when it is hard.',
     art: '/images/art/linocut-krue.jpg',
-    alt: 'Linocut of a worn kettlebell and a heavy chain',
+    alt: 'Linocut of worn iron and a heavy chain',
   },
   {
     id: 'x',
@@ -51,17 +50,28 @@ const PILLARS = [
   {
     id: 'coffee',
     kicker: 'COFFEE',
-    line: 'Aeropress. V60. Chemex.',
-    body: 'Aeropress, V60, and Chemex every morning. Small daily rituals that make a big difference.',
+    body: 'Coffee every morning. Small daily rituals that make a big difference.',
     art: '/images/art/linocut-coffee.jpg',
-    alt: 'Linocut of an Aeropress, V60, and Chemex',
+    alt: 'Linocut of a coffee brewing still life',
   },
 ]
+
+function useFocusScale(target: RefObject<HTMLElement | null>, reduced: boolean) {
+  const { scrollYProgress } = useScroll({
+    target,
+    offset: ['start end', 'end start'],
+  })
+  const raw = useTransform(scrollYProgress, [0, 0.48, 1], [0.9, 1.045, 0.93])
+  const scale = useSpring(raw, { stiffness: 70, damping: 26, restDelta: 0.001 })
+  return reduced ? undefined : { scale }
+}
 
 export default function HomePage() {
   usePageMeta('Kettlebell Dan')
   const reduced = usePrefersReducedMotion()
   const heroRef = useRef<HTMLElement>(null)
+  const portraitRef = useRef<HTMLDivElement>(null)
+  const portraitScale = useFocusScale(portraitRef, reduced)
 
   const heroScroll = useScroll({
     target: heroRef,
@@ -77,8 +87,6 @@ export default function HomePage() {
   const nameY = useTransform(heroProgress, [0, 1], [0, -90])
   const nameScale = useTransform(heroProgress, [0, 1], [1, 0.72])
   const bgY = useTransform(heroProgress, [0, 1], [0, 140])
-  const bellRotate = useTransform(heroProgress, [0, 1], [-16, 22])
-  const bellY = useTransform(heroProgress, [0, 1], [20, -70])
 
   return (
     <div className="iron-page">
@@ -87,7 +95,6 @@ export default function HomePage() {
 
       <header className="iron-bar">
         <a className="iron-brand" href="#top">
-          <BellMark className="iron-brand-mark" />
           DAN
         </a>
         <nav aria-label="On this page">
@@ -106,18 +113,6 @@ export default function HomePage() {
             style={reduced ? undefined : { y: bgY }}
             aria-hidden
           />
-          <motion.div
-            className="iron-print"
-            style={reduced ? undefined : { y: bgY }}
-          >
-            <img src="/images/art/linocut-bell.jpg" alt="" />
-          </motion.div>
-          <motion.div
-            className="iron-bell-stage"
-            style={reduced ? undefined : { rotate: bellRotate, y: bellY }}
-          >
-            <BellMark />
-          </motion.div>
           <div className="iron-hero-copy">
             <p className="iron-chips">KRÜE · X · DAD · COFFEE</p>
             <motion.div style={reduced ? undefined : { y: nameY, scale: nameScale }}>
@@ -129,9 +124,9 @@ export default function HomePage() {
               Proud X employee and founder of the Kettlebell Krüe. I spend my days
               building with AI, swinging iron, and trying to be the dad my kids deserve.
             </p>
-            <div className="iron-portrait-wrap">
+            <motion.div className="iron-portrait-wrap" ref={portraitRef} style={portraitScale}>
               <img src="/images/dan.jpg" alt="Dan" width={176} height={176} />
-            </div>
+            </motion.div>
           </div>
           <p className="iron-scroll-hint">Scroll the iron</p>
         </div>
@@ -149,10 +144,12 @@ export default function HomePage() {
           <ul className="iron-games">
             {games.map((game) => (
               <li key={game.path}>
-                <Link className="iron-game" to={game.path}>
-                  <img src={game.thumb} alt="" />
-                  <span>{game.name}</span>
-                </Link>
+                <ScaleCard reduced={reduced}>
+                  <Link className="iron-game" to={game.path}>
+                    <img src={game.thumb} alt="" />
+                    <span>{game.name}</span>
+                  </Link>
+                </ScaleCard>
               </li>
             ))}
           </ul>
@@ -165,19 +162,20 @@ export default function HomePage() {
             <h2>Tees</h2>
             <div className="iron-tees">
               {TEES.map((tee) => (
-                <a
-                  key={tee.href}
-                  className="iron-tee"
-                  href={tee.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src={tee.image} alt={tee.alt} />
-                  <div>
-                    <span>{tee.name}</span>
-                    <span>{tee.price}</span>
-                  </div>
-                </a>
+                <ScaleCard key={tee.href} reduced={reduced}>
+                  <a
+                    className="iron-tee"
+                    href={tee.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img src={tee.image} alt={tee.alt} />
+                    <div>
+                      <span>{tee.name}</span>
+                      <span>{tee.price}</span>
+                    </div>
+                  </a>
+                </ScaleCard>
               ))}
             </div>
             <p className="iron-fine">Fulfilled by Printful</p>
@@ -227,12 +225,7 @@ function Chapter({
   reduced: boolean
 }) {
   const ref = useRef<HTMLElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  })
-  const artY = useTransform(scrollYProgress, [0, 1], [50, -50])
-  const copyY = useTransform(scrollYProgress, [0, 1], [30, -20])
+  const artScale = useFocusScale(ref, reduced)
 
   return (
     <section
@@ -241,15 +234,31 @@ function Chapter({
       ref={ref}
     >
       <div className="iron-chapter-pin">
-        <motion.div className="iron-chapter-art" style={reduced ? undefined : { y: artY }}>
+        <motion.div className="iron-chapter-art" style={artScale}>
           <img src={pillar.art} alt={pillar.alt} />
         </motion.div>
-        <motion.div className="iron-chapter-copy" style={reduced ? undefined : { y: copyY }}>
+        <div className="iron-chapter-copy">
           <p className="iron-kicker">{pillar.kicker}</p>
           {'line' in pillar && pillar.line ? <p className="iron-line">{pillar.line}</p> : null}
           <p>{pillar.body}</p>
-        </motion.div>
+        </div>
       </div>
     </section>
+  )
+}
+
+function ScaleCard({
+  children,
+  reduced,
+}: {
+  children: ReactNode
+  reduced: boolean
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const scale = useFocusScale(ref, reduced)
+  return (
+    <motion.div ref={ref} style={scale}>
+      {children}
+    </motion.div>
   )
 }
