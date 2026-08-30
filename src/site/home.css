@@ -181,6 +181,23 @@
   object-position: 50% 18%;
 }
 
+.iron-print {
+  position: absolute;
+  right: clamp(1rem, 8vw, 7rem);
+  top: 18vh;
+  width: min(28vw, 18rem);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.iron-print img {
+  display: block;
+  width: 100%;
+  border: 7px solid #f3ead8;
+  box-shadow: 10px 14px 0 rgba(196, 58, 26, 0.25);
+  transform: rotate(4deg);
+}
+
 .iron-bell-stage {
   position: absolute;
   right: -6vw;
@@ -618,12 +635,19 @@
     align-items: center;
   }
 
+  .iron-print {
+    width: min(34vw, 8.5rem);
+    top: 12vh;
+    right: 0.6rem;
+    opacity: 0.9;
+  }
+
   .iron-bell-stage {
     width: min(70vw, 20rem);
     right: -14vw;
     bottom: auto;
-    top: 18vh;
-    opacity: 0.55;
+    top: 28vh;
+    opacity: 0.45;
   }
 
   .iron-chapter-pin,

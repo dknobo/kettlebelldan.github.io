@@ -135,6 +135,12 @@ export default function HomePage() {
             aria-hidden
           />
           <motion.div
+            className="iron-print"
+            style={reduced ? undefined : { y: bgY }}
+          >
+            <img src="/images/art/linocut-bell.jpg" alt="" />
+          </motion.div>
+          <motion.div
             className="iron-bell-stage"
             style={reduced ? undefined : { rotate: bellRotate, y: bellY }}
           >
