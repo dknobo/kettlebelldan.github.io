@@ -2,6 +2,7 @@ import { useRef, type ReactNode, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import IronField from '../site/IronField'
+import LivingArt, { type LifeKind } from '../site/LivingArt'
 import { games } from '../site/games'
 import { usePrefersReducedMotion } from '../site/motion'
 import { usePageMeta } from '../site/usePageMeta'
@@ -23,7 +24,14 @@ const TEES = [
   },
 ]
 
-const PILLARS = [
+const PILLARS: {
+  id: LifeKind
+  kicker: string
+  line?: string
+  body: string
+  art: string
+  alt: string
+}[] = [
   {
     id: 'krue',
     kicker: 'KRÜE',
@@ -44,7 +52,7 @@ const PILLARS = [
     kicker: 'DAD',
     line: 'Cooking from scratch for the kids.',
     body: 'Present, active, and trying to be the dad my kids deserve. Cooking foods from scratch for our kids is important.',
-    art: '/images/art/linocut-dad.jpg',
+    art: '/images/art/linocut-steak.jpg',
     alt: 'Linocut of a steak searing in a cast-iron skillet',
   },
   {
@@ -235,7 +243,7 @@ function Chapter({
     >
       <div className="iron-chapter-pin">
         <motion.div className="iron-chapter-art" style={artScale}>
-          <img src={pillar.art} alt={pillar.alt} />
+          <LivingArt src={pillar.art} alt={pillar.alt} life={pillar.id} reduced={reduced} />
         </motion.div>
         <div className="iron-chapter-copy">
           <p className="iron-kicker">{pillar.kicker}</p>
