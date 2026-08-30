@@ -134,7 +134,7 @@ export default function MainSite() {
         </p>
       </Section>
 
-      <Section kicker="Krüe Tees" title="Wear the mark">
+      <Section kicker="Krüe Tees" title="KRÜE on a shirt">
         <div className="tee-grid">
           {TEES.map((tee) => (
             <a
