@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
-import { BellMark, BoltMark, KrueStamp } from '../site/graphics'
+import { BellMark } from '../site/graphics'
 import IronField from '../site/IronField'
 import { games } from '../site/games'
 import { usePrefersReducedMotion } from '../site/motion'
@@ -26,40 +26,31 @@ const TEES = [
 
 const PILLARS = [
   {
-    id: 'x',
-    index: '01',
-    kicker: 'X',
-    title: 'Ship fast',
-    line: 'Grok Build. Idea to live.',
-    body: "I work at X. I'm genuinely excited about what we're building, especially tools like Grok Build that let me ship personal projects in minutes instead of hours.",
-    art: '/images/art/linocut-x.jpg',
-    alt: 'Linocut of crossed steel beams forming an X',
-  },
-  {
     id: 'krue',
-    index: '02',
     kicker: 'KRÜE',
-    title: 'Only iron',
     line: 'No mercy. Only iron.',
     body: 'Founder of the Kettlebell Krüe. Discipline, iron, and showing up when it is hard.',
     art: '/images/art/linocut-krue.jpg',
     alt: 'Linocut of a worn kettlebell and a heavy chain',
   },
   {
+    id: 'x',
+    kicker: 'X',
+    body: "I work at X. I'm genuinely excited about what we're building, especially tools like Grok Build that let me ship personal projects in minutes instead of hours.",
+    art: '/images/art/linocut-x.jpg',
+    alt: 'Linocut of crossed steel beams forming an X',
+  },
+  {
     id: 'dad',
-    index: '03',
     kicker: 'DAD',
-    title: 'Present',
     line: 'Cooking from scratch for the kids.',
     body: 'Present, active, and trying to be the dad my kids deserve. Cooking foods from scratch for our kids is important.',
     art: '/images/art/linocut-dad.jpg',
-    alt: 'Linocut of a cast-iron skillet and food cooked from scratch',
+    alt: 'Linocut of a steak searing in a cast-iron skillet',
   },
   {
     id: 'coffee',
-    index: '04',
     kicker: 'COFFEE',
-    title: 'Morning rite',
     line: 'Aeropress. V60. Chemex.',
     body: 'Aeropress, V60, and Chemex every morning. Small daily rituals that make a big difference.',
     art: '/images/art/linocut-coffee.jpg',
@@ -67,35 +58,19 @@ const PILLARS = [
   },
 ]
 
-const DAYS = [
-  'Building with AI',
-  'Swinging iron',
-  'Trying to be the dad his kids deserve',
-]
-
 export default function HomePage() {
   usePageMeta('Kettlebell Dan')
   const reduced = usePrefersReducedMotion()
   const heroRef = useRef<HTMLElement>(null)
-  const manifestoRef = useRef<HTMLElement>(null)
 
   const heroScroll = useScroll({
     target: heroRef,
     offset: ['start start', 'end start'],
   })
-  const manifestoScroll = useScroll({
-    target: manifestoRef,
-    offset: ['start end', 'end start'],
-  })
 
   const heroProgress = useSpring(heroScroll.scrollYProgress, {
     stiffness: 70,
     damping: 24,
-    restDelta: 0.001,
-  })
-  const manifestoProgress = useSpring(manifestoScroll.scrollYProgress, {
-    stiffness: 60,
-    damping: 22,
     restDelta: 0.001,
   })
 
@@ -104,9 +79,6 @@ export default function HomePage() {
   const bgY = useTransform(heroProgress, [0, 1], [0, 140])
   const bellRotate = useTransform(heroProgress, [0, 1], [-16, 22])
   const bellY = useTransform(heroProgress, [0, 1], [20, -70])
-  const mercyX = useTransform(manifestoProgress, [0.15, 0.45], [-70, 0])
-  const ironX = useTransform(manifestoProgress, [0.35, 0.7], [80, 0])
-  const manifestoOp = useTransform(manifestoProgress, [0.1, 0.3, 0.85, 1], [0.15, 1, 1, 0.4])
 
   return (
     <div className="iron-page">
@@ -115,7 +87,7 @@ export default function HomePage() {
 
       <header className="iron-bar">
         <a className="iron-brand" href="#top">
-          <BellMark />
+          <BellMark className="iron-brand-mark" />
           DAN
         </a>
         <nav aria-label="On this page">
@@ -147,7 +119,7 @@ export default function HomePage() {
             <BellMark />
           </motion.div>
           <div className="iron-hero-copy">
-            <p className="iron-chips">X · KRÜE · DAD · COFFEE</p>
+            <p className="iron-chips">KRÜE · X · DAD · COFFEE</p>
             <motion.div style={reduced ? undefined : { y: nameY, scale: nameScale }}>
               <h1 className="iron-name">DAN</h1>
               <p className="iron-sub">KETTLEBELL DAN</p>
@@ -165,44 +137,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="iron-manifesto" ref={manifestoRef} aria-label="Krüe line">
-        <div className="iron-manifesto-pin">
-          <motion.h2 style={reduced ? undefined : { opacity: manifestoOp }}>
-            <span className="iron-bolts" aria-hidden>
-              <BoltMark />
-              <BoltMark />
-            </span>
-            <motion.em style={reduced ? undefined : { x: mercyX }}>NO MERCY.</motion.em>
-            <br />
-            <motion.strong style={reduced ? undefined : { x: ironX }}>ONLY IRON.</motion.strong>
-          </motion.h2>
-        </div>
-      </section>
-
       <div id="pillars">
         {PILLARS.map((pillar, i) => (
           <Chapter key={pillar.id} pillar={pillar} odd={i % 2 === 0} reduced={reduced} />
         ))}
       </div>
 
-      <section className="iron-days" aria-hidden>
-        <div className="iron-ticker">
-          {[0, 1].map((copy) => (
-            <span key={copy}>
-              {DAYS.map((day) => (
-                <span key={`${copy}-${day}`}>
-                  {day} <i>/</i>{' '}
-                </span>
-              ))}
-            </span>
-          ))}
-        </div>
-      </section>
-
       <section id="games" className="iron-block">
         <div className="iron-block-inner">
-          <p className="iron-kicker">Shipped</p>
-          <h2>Three games</h2>
+          <h2>Games</h2>
           <ul className="iron-games">
             {games.map((game) => (
               <li key={game.path}>
@@ -216,11 +159,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="iron-block iron-quiet" aria-label="Krüe tees and notes">
-        <div className="iron-block-inner iron-quiet-grid">
-          <div>
-            <p className="iron-kicker">Krüe</p>
-            <KrueStamp className="iron-krue-stamp" />
+      <section className="iron-block iron-quiet" aria-label="Krüe tees and newsletter">
+        <div className="iron-block-inner iron-quiet-stack">
+          <div className="iron-tees-block">
             <h2>Tees</h2>
             <div className="iron-tees">
               {TEES.map((tee) => (
@@ -242,9 +183,7 @@ export default function HomePage() {
             <p className="iron-fine">Fulfilled by Printful</p>
           </div>
           <div className="iron-notes">
-            <p className="iron-kicker">Notes</p>
-            <h2>Occasional</h2>
-            <p>Training, code, and the small things I am into.</p>
+            <h2>Sign up for my newsletter</h2>
             <form
               className="iron-signup"
               action="https://buttondown.com/api/emails/embed-subscribe/kettlebellkrue"
@@ -303,13 +242,11 @@ function Chapter({
     >
       <div className="iron-chapter-pin">
         <motion.div className="iron-chapter-art" style={reduced ? undefined : { y: artY }}>
-          <span className="iron-chapter-index">{pillar.index}</span>
           <img src={pillar.art} alt={pillar.alt} />
         </motion.div>
         <motion.div className="iron-chapter-copy" style={reduced ? undefined : { y: copyY }}>
           <p className="iron-kicker">{pillar.kicker}</p>
-          <h3>{pillar.title}</h3>
-          <p className="iron-line">{pillar.line}</p>
+          {'line' in pillar && pillar.line ? <p className="iron-line">{pillar.line}</p> : null}
           <p>{pillar.body}</p>
         </motion.div>
       </div>

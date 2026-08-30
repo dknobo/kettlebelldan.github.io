@@ -52,20 +52,25 @@
   background: linear-gradient(to bottom, rgba(17, 14, 12, 0.82), rgba(17, 14, 12, 0));
 }
 
-.iron-brand {
+.iron-brand,
+.chrome-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
   text-decoration: none;
   font-family: Anton, Impact, sans-serif;
-  font-size: 1.35rem;
+  font-size: 1.45rem;
   letter-spacing: 0.08em;
+  line-height: 1;
 }
 
-.iron-brand svg {
-  width: 1.15rem;
+.iron-brand-mark,
+.chrome-brand-mark {
+  display: block;
+  width: 1.85rem;
   height: auto;
   color: var(--rust);
+  flex: 0 0 auto;
 }
 
 .iron-bar nav {
@@ -227,60 +232,6 @@
   color: var(--steel);
 }
 
-.iron-manifesto {
-  position: relative;
-  z-index: 3;
-  min-height: 180vh;
-  background: linear-gradient(180deg, transparent, #2a120c 18%, #4a180e 55%, var(--ink) 100%);
-}
-
-.iron-manifesto-pin {
-  position: sticky;
-  top: 0;
-  min-height: 100svh;
-  display: grid;
-  place-items: center;
-  padding: 5rem var(--pad);
-}
-
-.iron-manifesto h2 {
-  margin: 0;
-  text-align: center;
-  font-family: Anton, Impact, sans-serif;
-  font-size: clamp(3.6rem, 14vw, 9.5rem);
-  line-height: 0.84;
-  letter-spacing: 0.02em;
-}
-
-.iron-bolts {
-  display: flex;
-  justify-content: center;
-  gap: 1.4rem;
-  margin-bottom: 0.8rem;
-  color: var(--rust);
-}
-
-.iron-bolts svg {
-  width: 1.1rem;
-  height: auto;
-}
-
-.iron-krue-stamp {
-  display: block;
-  width: min(16rem, 80%);
-  margin: 0 0 0.6rem;
-  color: var(--bone);
-}
-
-.iron-manifesto em {
-  font-style: normal;
-  color: var(--bone);
-}
-
-.iron-manifesto strong {
-  color: #ffb199;
-}
-
 .iron-chapter {
   position: relative;
   z-index: 3;
@@ -291,11 +242,13 @@
   position: sticky;
   top: 0;
   min-height: 100svh;
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: clamp(1.5rem, 4vw, 4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  gap: clamp(1.4rem, 3vw, 2.4rem);
   padding: 5.5rem var(--pad) 2.5rem;
+  text-align: center;
 }
 
 .iron-chapter.is-odd .iron-chapter-pin {
@@ -307,31 +260,22 @@
 }
 
 .iron-chapter-art {
-  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .iron-chapter-art img {
   display: block;
-  width: 100%;
-  max-height: 78vh;
-  object-fit: cover;
+  width: min(100%, 26rem);
+  max-height: 58vh;
+  object-fit: contain;
   border: 8px solid #f3ead8;
   box-shadow: 12px 16px 0 rgba(196, 58, 26, 0.22);
 }
 
-.iron-chapter-index {
-  position: absolute;
-  top: -0.7rem;
-  left: -0.4rem;
-  font-family: Anton, Impact, sans-serif;
-  font-size: clamp(3rem, 8vw, 6rem);
-  line-height: 1;
-  color: var(--rust);
-  text-shadow: 0 0 0 var(--ink);
-}
-
 .iron-chapter-copy {
-  max-width: 32rem;
+  max-width: 36rem;
 }
 
 .iron-kicker {
@@ -343,64 +287,19 @@
   color: var(--rust);
 }
 
-.iron-chapter-copy h3 {
-  margin: 0;
-  font-family: Anton, Impact, sans-serif;
-  font-size: clamp(2.6rem, 6vw, 4.6rem);
-  line-height: 0.9;
-  letter-spacing: 0.02em;
-}
-
 .iron-chapter-copy p {
-  margin: 1rem 0 0;
+  margin: 0.85rem 0 0;
   font-size: 1.2rem;
   line-height: 1.5;
   color: var(--bone-dim);
 }
 
 .iron-chapter-copy .iron-line {
+  margin-top: 0.35rem;
   color: var(--bone);
-  font-size: 1.35rem;
-}
-
-.iron-days {
-  position: relative;
-  z-index: 3;
-  padding: 4rem 0 3rem;
-  overflow: hidden;
-  border-top: 1px solid rgba(243, 234, 216, 0.12);
-  border-bottom: 1px solid rgba(243, 234, 216, 0.12);
-  background: #0d0b09;
-}
-
-.iron-ticker {
-  display: flex;
-  width: max-content;
-  gap: 2.5rem;
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
   font-family: Anton, Impact, sans-serif;
-  font-size: clamp(1.8rem, 5vw, 3.4rem);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--bone);
-  animation: iron-marquee 32s linear infinite;
-}
-
-.iron-ticker span {
-  white-space: nowrap;
-}
-
-.iron-ticker i {
-  font-style: normal;
-  color: var(--rust);
-}
-
-@keyframes iron-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+  letter-spacing: 0.03em;
 }
 
 .iron-block {
@@ -419,6 +318,7 @@
   font-family: Anton, Impact, sans-serif;
   font-size: clamp(2.8rem, 7vw, 5.2rem);
   line-height: 0.9;
+  text-align: center;
 }
 
 .iron-games {
@@ -464,21 +364,30 @@
   background: #0d0b09;
 }
 
-.iron-quiet-grid {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: clamp(2rem, 5vw, 4rem);
-  align-items: start;
+.iron-quiet-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(3rem, 7vw, 5rem);
+  text-align: center;
+}
+
+.iron-tees-block,
+.iron-notes {
+  width: min(100%, 38rem);
 }
 
 .iron-tees {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.85rem;
+  gap: 1rem;
+  align-items: stretch;
 }
 
 .iron-tee {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   overflow: hidden;
   text-decoration: none;
   background: #ece8e1;
@@ -488,22 +397,26 @@
 .iron-tee img {
   display: block;
   width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center top;
 }
 
 .iron-tee div {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   gap: 0.5rem;
-  padding: 0.7rem 0.8rem 0.85rem;
+  margin-top: auto;
+  padding: 0.75rem 0.85rem 0.9rem;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.iron-notes p {
-  margin: 0 0 1rem;
-  color: var(--bone-dim);
+.iron-notes .iron-signup {
+  justify-content: center;
 }
 
 .iron-signup {
@@ -582,11 +495,10 @@
   border-bottom: 1px solid rgba(243, 234, 216, 0.12);
 }
 
-.chrome-brand {
-  font-family: Anton, Impact, sans-serif;
-  font-size: 1.5rem;
-  letter-spacing: 0.08em;
-  text-decoration: none;
+.chrome-brand-mark {
+  width: 1.85rem;
+  height: auto;
+  color: #c43a1a;
 }
 
 .chrome-nav {
@@ -650,15 +562,13 @@
     opacity: 0.45;
   }
 
-  .iron-chapter-pin,
-  .iron-quiet-grid,
   .iron-games,
   .iron-tees {
     grid-template-columns: 1fr;
   }
 
   .iron-chapter-art img {
-    max-height: 46vh;
+    max-height: 42vh;
   }
 
   .iron-name {
@@ -667,14 +577,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .iron-ticker {
-    animation: none;
-    width: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 0 var(--pad);
-  }
-
   .iron-game img {
     transition: none;
   }

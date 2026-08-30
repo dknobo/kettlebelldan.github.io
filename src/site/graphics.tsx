@@ -18,35 +18,3 @@ export function BellMark({ className }: MarkProps) {
     </svg>
   )
 }
-
-export function BoltMark({ className }: MarkProps) {
-  return (
-    <svg className={className} viewBox="0 0 24 40" aria-hidden>
-      <path fill="currentColor" d="M13 0 0 22h9L7 40l17-24h-9L17 0H13z" />
-    </svg>
-  )
-}
-
-export function KrueStamp({ className }: MarkProps) {
-  return (
-    <svg className={className} viewBox="0 0 280 120" fill="currentColor" aria-hidden>
-      <text
-        x="140"
-        y="58"
-        textAnchor="middle"
-        fontFamily="Anton, Impact, sans-serif"
-        fontSize="52"
-        letterSpacing="6"
-      >
-        KRÜE
-      </text>
-      <g transform="translate(118 72)">
-        <path d="M12 10c0-6 4-10 10-10s10 4 10 10" fill="none" stroke="currentColor" strokeWidth="4" />
-        <rect x="8" y="8" width="7" height="5" rx="1" />
-        <rect x="29" y="8" width="7" height="5" rx="1" />
-        <ellipse cx="22" cy="28" rx="16" ry="14" />
-      </g>
-    </svg>
-  )
-}
-
