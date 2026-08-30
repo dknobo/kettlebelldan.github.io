@@ -59,23 +59,15 @@ export function ExampleBanner() {
   )
 }
 
-export function GameGrid({ limit }: { limit?: number }) {
-  const list = limit ? games.slice(0, limit) : games
+export function GameGrid() {
   return (
-    <ul className="game-grid">
-      {list.map((game) => (
+    <ul className="game-thumbs">
+      {games.map((game) => (
         <li key={game.path}>
-          {game.external ? (
-            <a className={`game-card tone-${game.tone}`} href={`${game.path}/`}>
-              <strong>{game.name}</strong>
-              <span>{game.blurb}</span>
-            </a>
-          ) : (
-            <Link className={`game-card tone-${game.tone}`} to={game.path}>
-              <strong>{game.name}</strong>
-              <span>{game.blurb}</span>
-            </Link>
-          )}
+          <Link className="game-thumb" to={game.path}>
+            <img src={game.thumb} alt="" />
+            <span>{game.name}</span>
+          </Link>
         </li>
       ))}
     </ul>

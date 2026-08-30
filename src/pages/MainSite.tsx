@@ -125,13 +125,8 @@ export default function MainSite() {
       </Section>
 
       <Section id="games" kicker="Lab" title="Games">
-        <p className="section-copy">
-          Things I shipped. The URLs did not move. This is the index.
-        </p>
+        <p className="section-copy">Three I keep on the front. Click the still to play.</p>
         <GameGrid />
-        <p className="more">
-          <Link to="/games">All games and aliases</Link>
-        </p>
       </Section>
 
       <Section kicker="Krüe Tees" title="KRÜE on a shirt">
