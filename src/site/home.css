@@ -60,9 +60,9 @@
 .iron-hero-bg {
   position: absolute;
   inset: -16% -10%;
-  background: url("/images/art/linocut-hero-epic.jpg") center/cover no-repeat;
-  opacity: 0.5;
-  filter: contrast(1.28) saturate(0.82) brightness(0.78);
+  background: url("/images/art/linocut-hero-epic.jpg") 46% 42%/cover no-repeat;
+  opacity: 0.62;
+  filter: contrast(1.32) saturate(0.88) brightness(0.88);
   pointer-events: none;
 }
 
@@ -71,8 +71,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 58% at 50% 42%, rgba(17, 14, 12, 0.12) 0%, rgba(17, 14, 12, 0.55) 62%, #110e0c 100%),
-    linear-gradient(180deg, rgba(17, 14, 12, 0.35) 0%, transparent 22%, transparent 68%, #110e0c 100%);
+    radial-gradient(ellipse 58% 52% at 50% 40%, rgba(17, 14, 12, 0.08) 0%, rgba(17, 14, 12, 0.42) 70%, #110e0c 100%),
+    linear-gradient(180deg, rgba(17, 14, 12, 0.28) 0%, transparent 18%, transparent 72%, #110e0c 100%);
 }
 
 .iron-hero-id {
@@ -88,7 +88,7 @@
 }
 
 .iron-wordmark {
-  margin: 0 0 1.35rem;
+  margin: 0 0 0.85rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -101,29 +101,30 @@
   font-family: Anton, Impact, sans-serif;
   font-weight: 400;
   text-transform: uppercase;
-  line-height: 0.82;
+  line-height: 0.8;
 }
 
 .iron-wordmark-lead {
-  font-size: clamp(1.35rem, 4.6vw, 2.35rem);
-  letter-spacing: 0.34em;
-  padding-left: 0.34em;
-  color: var(--bone-dim);
+  font-size: clamp(1.7rem, 5.8vw, 2.9rem);
+  letter-spacing: 0.28em;
+  padding-left: 0.28em;
+  color: var(--bone);
 }
 
 .iron-wordmark-name {
-  margin-top: 0.08em;
-  font-size: clamp(5.2rem, 20vw, 11.5rem);
-  letter-spacing: 0.06em;
-  text-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  margin-top: 0.02em;
+  font-size: clamp(5.4rem, 21vw, 12rem);
+  letter-spacing: 0.05em;
+  text-shadow: 0 16px 44px rgba(0, 0, 0, 0.5);
 }
 
 .iron-portrait-wrap {
-  width: min(17.5rem, 54vw);
+  position: relative;
+  width: min(18.75rem, 58vw);
   aspect-ratio: 1;
   overflow: hidden;
-  border: 1px solid rgba(243, 234, 216, 0.2);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(243, 234, 216, 0.18);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.58);
 }
 
 .iron-portrait-wrap img {
@@ -131,9 +132,18 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 18%;
-  transform: scale(1.08);
-  filter: sepia(0.32) saturate(0.7) contrast(1.14) brightness(0.9);
+  object-position: 50% 16%;
+  transform: scale(1.1);
+  filter: sepia(0.48) hue-rotate(-8deg) saturate(0.62) contrast(1.2) brightness(0.82);
+}
+
+.iron-portrait-grade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(17, 14, 12, 0.08) 0%, rgba(80, 28, 14, 0.22) 100%);
+  mix-blend-mode: multiply;
 }
 
 .iron-scroll-hint {
@@ -165,37 +175,62 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.35rem;
-  padding: 4.5rem var(--pad) 3rem;
+  overflow: hidden;
+  padding: 4.25rem var(--pad) 3rem;
   background: #100d0b;
 }
 
-.iron-immerse:nth-of-type(2) .iron-immerse-pin {
-  background: #14110e;
+.iron-immerse-wash {
+  position: absolute;
+  inset: -12%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.18;
+  filter: blur(18px) saturate(0.7) brightness(0.45);
+  pointer-events: none;
 }
 
 .iron-immerse-art {
+  position: relative;
+  z-index: 1;
   margin: 0;
-  width: min(38rem, 86vw);
+  width: min(46rem, 90vw);
 }
 
 .iron-immerse-art img {
   display: block;
   width: 100%;
-  max-height: 70vh;
+  max-height: 74vh;
   object-fit: contain;
-  border: 1px solid rgba(243, 234, 216, 0.16);
-  background: #1a1613;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.42);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5);
+}
+
+.iron-immerse-art::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34%;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(17, 14, 12, 0.78));
 }
 
 .iron-immerse-word {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1.15rem;
+  z-index: 2;
   margin: 0;
+  text-align: center;
   font-family: Anton, Impact, sans-serif;
-  font-size: clamp(1.8rem, 5vw, 3rem);
-  letter-spacing: 0.22em;
+  font-size: clamp(2.1rem, 6vw, 3.6rem);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--bone);
+  text-shadow: 0 10px 28px rgba(0, 0, 0, 0.72);
 }
 
 .iron-block {
@@ -262,9 +297,10 @@
 .iron-game span {
   padding: 1rem 1.05rem 1.15rem;
   font-family: "Source Serif 4", "Times New Roman", serif;
-  font-size: 1.15rem;
+  font-size: 1.22rem;
   font-weight: 600;
   letter-spacing: -0.02em;
+  color: var(--bone);
 }
 
 .iron-quiet {
@@ -309,6 +345,7 @@
   object-fit: cover;
   object-position: center 12%;
   background: #cfc8bc;
+  filter: sepia(0.12) saturate(0.88) contrast(1.04) brightness(0.92);
 }
 
 .iron-tee-meta {
@@ -317,18 +354,18 @@
   align-items: baseline;
   gap: 0.5rem;
   margin-top: auto;
-  padding: 0.85rem 0.95rem 0.95rem;
-  border-top: 1px solid rgba(243, 234, 216, 0.12);
-  background: #12100d;
+  padding: 0.95rem 1rem 1.05rem;
+  border-top: 1px solid rgba(243, 234, 216, 0.16);
+  background: #1a1612;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--bone);
 }
 
 .iron-tee-meta span:last-child {
-  color: var(--bone-dim);
+  color: #fff8ea;
 }
 
 .iron-notes .iron-signup {
@@ -499,7 +536,11 @@
   }
 
   .iron-immerse-art img {
-    max-height: 56vh;
+    max-height: 62vh;
+  }
+
+  .iron-immerse-word {
+    bottom: 0.85rem;
   }
 }
 

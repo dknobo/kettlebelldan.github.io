@@ -88,6 +88,7 @@ export default function HomePage() {
             </h1>
             <div className="iron-portrait-wrap">
               <img src="/images/dan.jpg" alt="Dan" width={320} height={320} />
+              <span className="iron-portrait-grade" aria-hidden />
             </div>
           </motion.div>
           <motion.p
@@ -193,26 +194,37 @@ function ImmersivePrint({
     offset: ['start end', 'end start'],
   })
   const flow = useSpring(scrollYProgress, { stiffness: 36, damping: 22, restDelta: 0.001 })
-  const imgY = useTransform(flow, [0, 1], [56, -56])
-  const imgScale = useTransform(flow, [0, 0.5, 1], [0.94, 1.04, 1])
-  const wordY = useTransform(flow, [0, 0.48, 1], [28, 0, -16])
-  const wordOp = useTransform(flow, [0.16, 0.4, 0.78, 1], [0, 1, 1, 0.7])
+  const washY = useTransform(flow, [0, 1], [40, -80])
+  const washScale = useTransform(flow, [0, 1], [1.08, 1.2])
+  const imgY = useTransform(flow, [0, 1], [40, -40])
+  const imgScale = useTransform(flow, [0, 0.5, 1], [0.96, 1.03, 1])
+  const wordY = useTransform(flow, [0, 0.5, 1], [20, 0, -12])
+  const wordOp = useTransform(flow, [0.18, 0.42, 0.8, 1], [0, 1, 1, 0.75])
 
   return (
     <section className="iron-immerse" ref={ref} aria-label={item.word}>
       <div className="iron-immerse-pin">
+        <motion.div
+          className="iron-immerse-wash"
+          style={
+            reduced
+              ? { backgroundImage: `url(${item.src})` }
+              : { backgroundImage: `url(${item.src})`, y: washY, scale: washScale }
+          }
+          aria-hidden
+        />
         <motion.figure
           className="iron-immerse-art"
           style={reduced ? undefined : { y: imgY, scale: imgScale }}
         >
           <img src={item.src} alt={item.alt} />
+          <motion.figcaption
+            className="iron-immerse-word"
+            style={reduced ? undefined : { y: wordY, opacity: wordOp }}
+          >
+            {item.word}
+          </motion.figcaption>
         </motion.figure>
-        <motion.p
-          className="iron-immerse-word"
-          style={reduced ? undefined : { y: wordY, opacity: wordOp }}
-        >
-          {item.word}
-        </motion.p>
       </div>
     </section>
   )
