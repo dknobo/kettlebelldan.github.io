@@ -52,23 +52,43 @@
 
 .iron-hero-bg {
   position: absolute;
-  inset: -10% -6%;
-  background: url("/images/art/linocut-hero-bells.jpg") center/cover no-repeat;
-  opacity: 0.28;
-  filter: contrast(1.12) saturate(0.8);
+  inset: -14% -8%;
+  background: url("/images/art/linocut-hero-epic.jpg") center/cover no-repeat;
+  opacity: 0.42;
+  filter: contrast(1.2) saturate(0.9);
   pointer-events: none;
 }
 
-.iron-portrait-wrap {
-  position: absolute;
-  top: clamp(1.2rem, 4vw, 2.2rem);
-  left: var(--pad);
+.iron-hero-id {
+  position: relative;
   z-index: 2;
-  width: min(6.5rem, 22vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 5.5rem var(--pad) 4.5rem;
+  text-align: center;
+}
+
+.iron-wordmark {
+  margin: 0 0 1.25rem;
+  max-width: 100%;
+  font-family: Anton, Impact, sans-serif;
+  font-size: clamp(2.6rem, 10vw, 6.5rem);
+  letter-spacing: 0.055em;
+  line-height: 0.88;
+  text-transform: uppercase;
+  color: var(--bone);
+}
+
+.iron-portrait-wrap {
+  width: min(22rem, 68vw);
   aspect-ratio: 1;
-  padding: 0.28rem;
-  border: 1px solid rgba(243, 234, 216, 0.22);
+  padding: 0.45rem;
+  border: 1px solid rgba(243, 234, 216, 0.28);
   background: #2a2118;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
 }
 
 .iron-portrait-wrap img {
@@ -77,19 +97,6 @@
   height: 100%;
   object-fit: cover;
   object-position: 50% 18%;
-}
-
-.iron-wordmark {
-  position: absolute;
-  top: clamp(1.5rem, 4.5vw, 2.5rem);
-  right: var(--pad);
-  z-index: 2;
-  margin: 0;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(243, 234, 216, 0.42);
 }
 
 .iron-scroll-hint {
@@ -107,35 +114,49 @@
   color: var(--steel);
 }
 
-.iron-pair {
+.iron-immerse {
   position: relative;
   z-index: 3;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(1rem, 3vw, 2rem);
-  padding: clamp(3rem, 8vw, 6rem) var(--pad);
+  min-height: 190vh;
 }
 
-.iron-pair-card {
+.iron-immerse-pin {
+  position: sticky;
+  top: 0;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: 4.5rem var(--pad) 2.5rem;
+  background: #110e0c;
+}
+
+.iron-immerse:nth-of-type(2) .iron-immerse-pin {
+  background: #161210;
+}
+
+.iron-immerse-art {
   margin: 0;
-  text-align: center;
+  width: min(34rem, 88vw);
 }
 
-.iron-pair-card img {
+.iron-immerse-art img {
   display: block;
   width: 100%;
-  max-height: 62vh;
+  max-height: 68vh;
   object-fit: contain;
   border: 8px solid #f3ead8;
   box-shadow: 12px 16px 0 rgba(196, 58, 26, 0.22);
   background: #1a1613;
 }
 
-.iron-pair-card figcaption {
-  margin: 0.85rem 0 0;
+.iron-immerse-word {
+  margin: 0;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.78rem;
-  letter-spacing: 0.28em;
+  font-size: clamp(0.95rem, 2.4vw, 1.2rem);
+  letter-spacing: 0.32em;
   text-transform: uppercase;
   color: var(--bone);
 }
@@ -402,18 +423,27 @@
 }
 
 @media (max-width: 860px) {
-  .iron-pair,
   .iron-games,
   .iron-tees {
     grid-template-columns: 1fr;
   }
 
-  .iron-pair-card img {
-    max-height: 48vh;
+  .iron-immerse-art img {
+    max-height: 52vh;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .iron-hero,
+  .iron-immerse {
+    min-height: 100svh;
+  }
+
+  .iron-hero-pin,
+  .iron-immerse-pin {
+    position: relative;
+  }
+
   .iron-game img {
     transition: none;
   }

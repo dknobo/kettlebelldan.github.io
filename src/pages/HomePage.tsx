@@ -60,7 +60,8 @@ export default function HomePage() {
     damping: 24,
     restDelta: 0.001,
   })
-  const bgY = useTransform(heroProgress, [0, 1], [0, 80])
+  const bgY = useTransform(heroProgress, [0, 1], [0, 110])
+  const bgScale = useTransform(heroProgress, [0, 1], [1.08, 1])
 
   return (
     <div className="iron-page">
@@ -71,25 +72,22 @@ export default function HomePage() {
         <div className="iron-hero-pin">
           <motion.div
             className="iron-hero-bg"
-            style={reduced ? undefined : { y: bgY }}
+            style={reduced ? undefined : { y: bgY, scale: bgScale }}
             aria-hidden
           />
-          <div className="iron-portrait-wrap">
-            <img src="/images/dan.jpg" alt="Dan" width={176} height={176} />
+          <div className="iron-hero-id">
+            <p className="iron-wordmark">Kettlebell Dan</p>
+            <div className="iron-portrait-wrap">
+              <img src="/images/dan.jpg" alt="Dan" width={352} height={352} />
+            </div>
           </div>
-          <p className="iron-wordmark">Kettlebell Dan</p>
           <p className="iron-scroll-hint">Scroll the iron</p>
         </div>
       </section>
 
-      <section className="iron-pair" aria-label="KRÜE and Rituals">
-        {PAIR.map((item) => (
-          <figure key={item.word} className="iron-pair-card">
-            <img src={item.src} alt={item.alt} />
-            <figcaption>{item.word}</figcaption>
-          </figure>
-        ))}
-      </section>
+      {PAIR.map((item) => (
+        <ImmersivePrint key={item.word} item={item} reduced={reduced} />
+      ))}
 
       <section id="games" className="iron-block">
         <div className="iron-block-inner">
@@ -165,6 +163,44 @@ export default function HomePage() {
         </a>
       </footer>
     </div>
+  )
+}
+
+function ImmersivePrint({
+  item,
+  reduced,
+}: {
+  item: (typeof PAIR)[number]
+  reduced: boolean
+}) {
+  const ref = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ['start end', 'end start'],
+  })
+  const flow = useSpring(scrollYProgress, { stiffness: 46, damping: 20, restDelta: 0.001 })
+  const imgY = useTransform(flow, [0, 1], [90, -90])
+  const imgScale = useTransform(flow, [0, 0.48, 1], [0.78, 1.1, 0.9])
+  const wordY = useTransform(flow, [0, 0.45, 1], [56, 0, -28])
+  const wordOp = useTransform(flow, [0.12, 0.38, 0.82, 1], [0, 1, 1, 0.55])
+
+  return (
+    <section className="iron-immerse" ref={ref} aria-label={item.word}>
+      <div className="iron-immerse-pin">
+        <motion.figure
+          className="iron-immerse-art"
+          style={reduced ? undefined : { y: imgY, scale: imgScale }}
+        >
+          <img src={item.src} alt={item.alt} />
+        </motion.figure>
+        <motion.p
+          className="iron-immerse-word"
+          style={reduced ? undefined : { y: wordY, opacity: wordOp }}
+        >
+          {item.word}
+        </motion.p>
+      </div>
+    </section>
   )
 }
 
