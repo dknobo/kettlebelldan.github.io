@@ -2,7 +2,6 @@ import { useRef, type ReactNode, type RefObject } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import IronField from '../site/IronField'
-import LivingArt, { type LifeKind } from '../site/LivingArt'
 import { games } from '../site/games'
 import { usePrefersReducedMotion } from '../site/motion'
 import { usePageMeta } from '../site/usePageMeta'
@@ -24,42 +23,15 @@ const TEES = [
   },
 ]
 
-const PILLARS: {
-  id: LifeKind
-  kicker: string
-  line?: string
-  body: string
-  art: string
-  alt: string
-}[] = [
+const PAIR = [
   {
-    id: 'krue',
-    kicker: 'KRÜE',
-    line: 'No mercy. Only iron.',
-    body: 'Founder of the Kettlebell Krüe. Discipline, iron, and showing up when it is hard.',
-    art: '/images/art/linocut-krue.jpg',
-    alt: 'Linocut of worn iron and a heavy chain',
+    word: 'KRÜE',
+    src: '/images/art/linocut-krue.jpg',
+    alt: 'Linocut of a kettlebell',
   },
   {
-    id: 'x',
-    kicker: 'X',
-    body: "I work at X. I'm genuinely excited about what we're building, especially tools like Grok Build that let me ship personal projects in minutes instead of hours.",
-    art: '/images/art/linocut-x.jpg',
-    alt: 'Linocut of crossed steel beams forming an X',
-  },
-  {
-    id: 'dad',
-    kicker: 'DAD',
-    line: 'Cooking from scratch for the kids.',
-    body: 'Present, active, and trying to be the dad my kids deserve. Cooking foods from scratch for our kids is important.',
-    art: '/images/art/linocut-steak.jpg',
-    alt: 'Linocut of a steak searing in a cast-iron skillet',
-  },
-  {
-    id: 'coffee',
-    kicker: 'COFFEE',
-    body: 'Coffee every morning. Small daily rituals that make a big difference.',
-    art: '/images/art/linocut-coffee.jpg',
+    word: 'RITUALS',
+    src: '/images/art/linocut-coffee.jpg',
     alt: 'Linocut of a coffee brewing still life',
   },
 ]
@@ -78,41 +50,22 @@ export default function HomePage() {
   usePageMeta('Kettlebell Dan')
   const reduced = usePrefersReducedMotion()
   const heroRef = useRef<HTMLElement>(null)
-  const portraitRef = useRef<HTMLDivElement>(null)
-  const portraitScale = useFocusScale(portraitRef, reduced)
 
   const heroScroll = useScroll({
     target: heroRef,
     offset: ['start start', 'end start'],
   })
-
   const heroProgress = useSpring(heroScroll.scrollYProgress, {
     stiffness: 70,
     damping: 24,
     restDelta: 0.001,
   })
-
-  const nameY = useTransform(heroProgress, [0, 1], [0, -90])
-  const nameScale = useTransform(heroProgress, [0, 1], [1, 0.72])
-  const bgY = useTransform(heroProgress, [0, 1], [0, 140])
+  const bgY = useTransform(heroProgress, [0, 1], [0, 80])
 
   return (
     <div className="iron-page">
       <IronField />
       <div className="iron-grain" aria-hidden />
-
-      <header className="iron-bar">
-        <a className="iron-brand" href="#top">
-          DAN
-        </a>
-        <nav aria-label="On this page">
-          <a href="#pillars">Pillars</a>
-          <a href="#games">Games</a>
-          <a href="https://x.com/KettlebellDan" target="_blank" rel="noopener noreferrer">
-            @KettlebellDan
-          </a>
-        </nav>
-      </header>
 
       <section id="top" className="iron-hero" ref={heroRef}>
         <div className="iron-hero-pin">
@@ -121,30 +74,22 @@ export default function HomePage() {
             style={reduced ? undefined : { y: bgY }}
             aria-hidden
           />
-          <div className="iron-hero-copy">
-            <p className="iron-chips">KRÜE · X · DAD · COFFEE</p>
-            <motion.div style={reduced ? undefined : { y: nameY, scale: nameScale }}>
-              <h1 className="iron-name">DAN</h1>
-              <p className="iron-sub">KETTLEBELL DAN</p>
-            </motion.div>
-            <p className="iron-handle">@KettlebellDan on X</p>
-            <p className="iron-lede">
-              Proud X employee and founder of the Kettlebell Krüe. I spend my days
-              building with AI, swinging iron, and trying to be the dad my kids deserve.
-            </p>
-            <motion.div className="iron-portrait-wrap" ref={portraitRef} style={portraitScale}>
-              <img src="/images/dan.jpg" alt="Dan" width={176} height={176} />
-            </motion.div>
+          <div className="iron-portrait-wrap">
+            <img src="/images/dan.jpg" alt="Dan" width={176} height={176} />
           </div>
+          <p className="iron-wordmark">Kettlebell Dan</p>
           <p className="iron-scroll-hint">Scroll the iron</p>
         </div>
       </section>
 
-      <div id="pillars">
-        {PILLARS.map((pillar, i) => (
-          <Chapter key={pillar.id} pillar={pillar} odd={i % 2 === 0} reduced={reduced} />
+      <section className="iron-pair" aria-label="KRÜE and Rituals">
+        {PAIR.map((item) => (
+          <figure key={item.word} className="iron-pair-card">
+            <img src={item.src} alt={item.alt} />
+            <figcaption>{item.word}</figcaption>
+          </figure>
         ))}
-      </div>
+      </section>
 
       <section id="games" className="iron-block">
         <div className="iron-block-inner">
@@ -220,38 +165,6 @@ export default function HomePage() {
         </a>
       </footer>
     </div>
-  )
-}
-
-function Chapter({
-  pillar,
-  odd,
-  reduced,
-}: {
-  pillar: (typeof PILLARS)[number]
-  odd: boolean
-  reduced: boolean
-}) {
-  const ref = useRef<HTMLElement>(null)
-  const artScale = useFocusScale(ref, reduced)
-
-  return (
-    <section
-      id={pillar.id}
-      className={odd ? 'iron-chapter is-odd' : 'iron-chapter is-even'}
-      ref={ref}
-    >
-      <div className="iron-chapter-pin">
-        <motion.div className="iron-chapter-art" style={artScale}>
-          <LivingArt src={pillar.art} alt={pillar.alt} life={pillar.id} reduced={reduced} />
-        </motion.div>
-        <div className="iron-chapter-copy">
-          <p className="iron-kicker">{pillar.kicker}</p>
-          {'line' in pillar && pillar.line ? <p className="iron-line">{pillar.line}</p> : null}
-          <p>{pillar.body}</p>
-        </div>
-      </div>
-    </section>
   )
 }
 

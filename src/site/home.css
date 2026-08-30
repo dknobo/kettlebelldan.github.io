@@ -4,7 +4,6 @@
   --ink: #110e0c;
   --iron: #1a1613;
   --rust: #c43a1a;
-  --rust-deep: #8a2410;
   --steel: #8d8578;
   --pad: clamp(1.1rem, 4vw, 2.75rem);
   --max: 72rem;
@@ -38,135 +37,38 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
 }
 
-.iron-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.85rem var(--pad);
-  background: linear-gradient(to bottom, rgba(17, 14, 12, 0.82), rgba(17, 14, 12, 0));
-}
-
-.iron-brand,
-.chrome-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  text-decoration: none;
-  font-family: Anton, Impact, sans-serif;
-  font-size: 1.45rem;
-  letter-spacing: 0.08em;
-  line-height: 1;
-}
-
-.iron-bar nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.1rem;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.iron-bar nav a {
-  text-decoration: none;
-  color: var(--bone-dim);
-}
-
-.iron-bar nav a:hover {
-  color: var(--bone);
-}
-
 .iron-hero {
   position: relative;
   z-index: 2;
-  min-height: 220vh;
+  min-height: 180vh;
 }
 
 .iron-hero-pin {
   position: sticky;
   top: 0;
   min-height: 100svh;
-  display: grid;
-  align-items: end;
-  padding: 5.5rem var(--pad) 2.4rem;
   overflow: hidden;
 }
 
 .iron-hero-bg {
   position: absolute;
-  inset: -12% -8%;
-  background: url("/images/art/linocut-iron-field.jpg") center/cover no-repeat;
-  opacity: 0.22;
-  filter: contrast(1.15) saturate(0.85);
+  inset: -10% -6%;
+  background: url("/images/art/linocut-hero-bells.jpg") center/cover no-repeat;
+  opacity: 0.28;
+  filter: contrast(1.12) saturate(0.8);
   pointer-events: none;
 }
 
-.iron-hero-copy {
-  position: relative;
-  z-index: 2;
-  max-width: 46rem;
-}
-
-.iron-chips {
-  margin: 0 0 0.85rem;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--rust);
-}
-
-.iron-name {
-  margin: 0;
-  font-family: Anton, Impact, sans-serif;
-  font-size: clamp(5.4rem, 22vw, 13.5rem);
-  line-height: 0.78;
-  letter-spacing: 0.01em;
-  background: url("/images/art/linocut-iron-field.jpg") 50% 40% / 140% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: contrast(1.2);
-}
-
-.iron-sub {
-  margin: 0.35rem 0 0;
-  font-family: Anton, Impact, sans-serif;
-  font-size: clamp(1.4rem, 4vw, 2.4rem);
-  letter-spacing: 0.18em;
-  color: var(--bone);
-}
-
-.iron-handle {
-  margin: 0.55rem 0 0;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.95rem;
-  letter-spacing: 0.04em;
-  color: var(--bone-dim);
-}
-
-.iron-lede {
-  margin: 1.2rem 0 0;
-  max-width: 36rem;
-  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
-  line-height: 1.45;
-}
-
 .iron-portrait-wrap {
-  margin-top: 1.6rem;
-  width: min(11rem, 42vw);
+  position: absolute;
+  top: clamp(1.2rem, 4vw, 2.2rem);
+  left: var(--pad);
+  z-index: 2;
+  width: min(6.5rem, 22vw);
   aspect-ratio: 1;
-  padding: 0.4rem;
-  border: 1px solid rgba(243, 234, 216, 0.28);
+  padding: 0.28rem;
+  border: 1px solid rgba(243, 234, 216, 0.22);
   background: #2a2118;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
 }
 
 .iron-portrait-wrap img {
@@ -177,101 +79,65 @@
   object-position: 50% 18%;
 }
 
+.iron-wordmark {
+  position: absolute;
+  top: clamp(1.5rem, 4.5vw, 2.5rem);
+  right: var(--pad);
+  z-index: 2;
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(243, 234, 216, 0.42);
+}
+
 .iron-scroll-hint {
   position: absolute;
-  right: var(--pad);
-  bottom: 1.4rem;
+  left: 0;
+  right: 0;
+  bottom: 1.6rem;
   z-index: 3;
+  margin: 0;
+  text-align: center;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.68rem;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--steel);
 }
 
-.iron-chapter {
+.iron-pair {
   position: relative;
   z-index: 3;
-  min-height: 165vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: clamp(3rem, 8vw, 6rem) var(--pad);
 }
 
-.iron-chapter-pin {
-  position: sticky;
-  top: 0;
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: clamp(1.4rem, 3vw, 2.4rem);
-  padding: 5.5rem var(--pad) 2.5rem;
+.iron-pair-card {
+  margin: 0;
   text-align: center;
 }
 
-.iron-chapter.is-odd .iron-chapter-pin {
-  background: #161210;
-}
-
-.iron-chapter.is-even .iron-chapter-pin {
-  background: #110e0c;
-}
-
-.iron-chapter-art {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  transform-origin: center center;
-}
-
-.iron-living {
-  position: relative;
-  width: min(100%, 26rem);
-  max-height: 58vh;
-}
-
-.iron-living img {
+.iron-pair-card img {
   display: block;
   width: 100%;
-  max-height: 58vh;
+  max-height: 62vh;
   object-fit: contain;
   border: 8px solid #f3ead8;
   box-shadow: 12px 16px 0 rgba(196, 58, 26, 0.22);
+  background: #1a1613;
 }
 
-.iron-living-fx {
-  position: absolute;
-  inset: 8px;
-  width: calc(100% - 16px);
-  height: calc(100% - 16px);
-  pointer-events: none;
-}
-
-.iron-chapter-copy {
-  max-width: 36rem;
-}
-
-.iron-kicker {
-  margin: 0 0 0.6rem;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.74rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--rust);
-}
-
-.iron-chapter-copy p {
+.iron-pair-card figcaption {
   margin: 0.85rem 0 0;
-  font-size: 1.2rem;
-  line-height: 1.5;
-  color: var(--bone-dim);
-}
-
-.iron-chapter-copy .iron-line {
-  margin-top: 0.35rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
   color: var(--bone);
-  font-size: clamp(1.6rem, 4vw, 2.3rem);
-  font-family: Anton, Impact, sans-serif;
-  letter-spacing: 0.03em;
 }
 
 .iron-block {
@@ -476,6 +342,15 @@
   border-bottom: 1px solid rgba(243, 234, 216, 0.12);
 }
 
+.chrome-brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  font-family: Anton, Impact, sans-serif;
+  font-size: 1.45rem;
+  letter-spacing: 0.08em;
+}
+
 .chrome-nav {
   display: flex;
   flex-wrap: wrap;
@@ -495,6 +370,15 @@
   width: min(72rem, 100%);
   margin: 0 auto;
   padding: 2.5rem clamp(1.1rem, 4vw, 2.75rem) 4rem;
+}
+
+.chrome-page .iron-kicker {
+  margin: 0 0 0.4rem;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #c43a1a;
 }
 
 .chrome-page h1 {
@@ -518,22 +402,14 @@
 }
 
 @media (max-width: 860px) {
-  .iron-hero-pin {
-    align-items: center;
-  }
-
+  .iron-pair,
   .iron-games,
   .iron-tees {
     grid-template-columns: 1fr;
   }
 
-  .iron-living,
-  .iron-living img {
-    max-height: 42vh;
-  }
-
-  .iron-name {
-    font-size: clamp(4.6rem, 28vw, 8rem);
+  .iron-pair-card img {
+    max-height: 48vh;
   }
 }
 
