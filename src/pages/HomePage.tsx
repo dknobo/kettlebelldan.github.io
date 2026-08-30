@@ -41,8 +41,8 @@ function useFocusScale(target: RefObject<HTMLElement | null>, reduced: boolean) 
     target,
     offset: ['start end', 'end start'],
   })
-  const raw = useTransform(scrollYProgress, [0, 0.48, 1], [0.9, 1.045, 0.93])
-  const scale = useSpring(raw, { stiffness: 70, damping: 26, restDelta: 0.001 })
+  const raw = useTransform(scrollYProgress, [0, 0.5, 1], [0.985, 1.015, 0.99])
+  const scale = useSpring(raw, { stiffness: 80, damping: 28, restDelta: 0.001 })
   return reduced ? undefined : { scale }
 }
 
@@ -56,12 +56,14 @@ export default function HomePage() {
     offset: ['start start', 'end start'],
   })
   const heroProgress = useSpring(heroScroll.scrollYProgress, {
-    stiffness: 70,
-    damping: 24,
+    stiffness: 48,
+    damping: 22,
     restDelta: 0.001,
   })
-  const bgY = useTransform(heroProgress, [0, 1], [0, 110])
-  const bgScale = useTransform(heroProgress, [0, 1], [1.08, 1])
+  const bgY = useTransform(heroProgress, [0, 1], [0, 140])
+  const bgScale = useTransform(heroProgress, [0, 1], [1.12, 1.02])
+  const lockY = useTransform(heroProgress, [0, 1], [0, -36])
+  const hintOp = useTransform(heroProgress, [0, 0.35], [1, 0])
 
   return (
     <div className="iron-page">
@@ -75,13 +77,25 @@ export default function HomePage() {
             style={reduced ? undefined : { y: bgY, scale: bgScale }}
             aria-hidden
           />
-          <div className="iron-hero-id">
-            <p className="iron-wordmark">Kettlebell Dan</p>
+          <div className="iron-hero-veil" aria-hidden />
+          <motion.div
+            className="iron-hero-id"
+            style={reduced ? undefined : { y: lockY }}
+          >
+            <h1 className="iron-wordmark">
+              <span className="iron-wordmark-lead">Kettlebell</span>
+              <span className="iron-wordmark-name">Dan</span>
+            </h1>
             <div className="iron-portrait-wrap">
-              <img src="/images/dan.jpg" alt="Dan" width={352} height={352} />
+              <img src="/images/dan.jpg" alt="Dan" width={320} height={320} />
             </div>
-          </div>
-          <p className="iron-scroll-hint">Scroll the iron</p>
+          </motion.div>
+          <motion.p
+            className="iron-scroll-hint"
+            style={reduced ? undefined : { opacity: hintOp }}
+          >
+            Scroll the iron
+          </motion.p>
         </div>
       </section>
 
@@ -121,7 +135,7 @@ export default function HomePage() {
                     rel="noopener noreferrer"
                   >
                     <img src={tee.image} alt={tee.alt} />
-                    <div>
+                    <div className="iron-tee-meta">
                       <span>{tee.name}</span>
                       <span>{tee.price}</span>
                     </div>
@@ -178,11 +192,11 @@ function ImmersivePrint({
     target: ref,
     offset: ['start end', 'end start'],
   })
-  const flow = useSpring(scrollYProgress, { stiffness: 46, damping: 20, restDelta: 0.001 })
-  const imgY = useTransform(flow, [0, 1], [90, -90])
-  const imgScale = useTransform(flow, [0, 0.48, 1], [0.78, 1.1, 0.9])
-  const wordY = useTransform(flow, [0, 0.45, 1], [56, 0, -28])
-  const wordOp = useTransform(flow, [0.12, 0.38, 0.82, 1], [0, 1, 1, 0.55])
+  const flow = useSpring(scrollYProgress, { stiffness: 36, damping: 22, restDelta: 0.001 })
+  const imgY = useTransform(flow, [0, 1], [56, -56])
+  const imgScale = useTransform(flow, [0, 0.5, 1], [0.94, 1.04, 1])
+  const wordY = useTransform(flow, [0, 0.48, 1], [28, 0, -16])
+  const wordOp = useTransform(flow, [0.16, 0.4, 0.78, 1], [0, 1, 1, 0.7])
 
   return (
     <section className="iron-immerse" ref={ref} aria-label={item.word}>
