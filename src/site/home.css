@@ -64,15 +64,6 @@
   line-height: 1;
 }
 
-.iron-brand-mark,
-.chrome-brand-mark {
-  display: block;
-  width: 1.85rem;
-  height: auto;
-  color: var(--rust);
-  flex: 0 0 auto;
-}
-
 .iron-bar nav {
   display: flex;
   flex-wrap: wrap;
@@ -186,40 +177,6 @@
   object-position: 50% 18%;
 }
 
-.iron-print {
-  position: absolute;
-  right: clamp(1rem, 8vw, 7rem);
-  top: 18vh;
-  width: min(28vw, 18rem);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.iron-print img {
-  display: block;
-  width: 100%;
-  border: 7px solid #f3ead8;
-  box-shadow: 10px 14px 0 rgba(196, 58, 26, 0.25);
-  transform: rotate(4deg);
-}
-
-.iron-bell-stage {
-  position: absolute;
-  right: -6vw;
-  bottom: -8vh;
-  width: min(52vw, 34rem);
-  color: var(--rust);
-  pointer-events: none;
-  transform-origin: 50% 8%;
-  filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.45));
-}
-
-.iron-bell-stage svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
 .iron-scroll-hint {
   position: absolute;
   right: var(--pad);
@@ -263,6 +220,7 @@
   display: flex;
   justify-content: center;
   width: 100%;
+  transform-origin: center center;
 }
 
 .iron-chapter-art img {
@@ -328,6 +286,12 @@
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.iron-games > li,
+.iron-tees > * {
+  min-width: 0;
+  height: 100%;
 }
 
 .iron-game {
@@ -495,12 +459,6 @@
   border-bottom: 1px solid rgba(243, 234, 216, 0.12);
 }
 
-.chrome-brand-mark {
-  width: 1.85rem;
-  height: auto;
-  color: #c43a1a;
-}
-
 .chrome-nav {
   display: flex;
   flex-wrap: wrap;
@@ -545,21 +503,6 @@
 @media (max-width: 860px) {
   .iron-hero-pin {
     align-items: center;
-  }
-
-  .iron-print {
-    width: min(34vw, 8.5rem);
-    top: 12vh;
-    right: 0.6rem;
-    opacity: 0.9;
-  }
-
-  .iron-bell-stage {
-    width: min(70vw, 20rem);
-    right: -14vw;
-    bottom: auto;
-    top: 28vh;
-    opacity: 0.45;
   }
 
   .iron-games,
