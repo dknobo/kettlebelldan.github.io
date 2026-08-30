@@ -47,7 +47,7 @@
 .iron-hero {
   position: relative;
   z-index: 2;
-  min-height: 165vh;
+  min-height: 175vh;
 }
 
 .iron-hero-pin {
@@ -164,7 +164,7 @@
 .iron-immerse {
   position: relative;
   z-index: 3;
-  min-height: 180vh;
+  min-height: 210vh;
 }
 
 .iron-immerse-pin {
@@ -182,12 +182,12 @@
 
 .iron-immerse-wash {
   position: absolute;
-  inset: -12%;
+  inset: -18%;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  opacity: 0.18;
-  filter: blur(18px) saturate(0.7) brightness(0.45);
+  opacity: 0.22;
+  filter: blur(22px) saturate(0.75) brightness(0.42);
   pointer-events: none;
 }
 

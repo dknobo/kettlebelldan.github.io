@@ -60,10 +60,11 @@ export default function HomePage() {
     damping: 22,
     restDelta: 0.001,
   })
-  const bgY = useTransform(heroProgress, [0, 1], [0, 140])
-  const bgScale = useTransform(heroProgress, [0, 1], [1.12, 1.02])
-  const lockY = useTransform(heroProgress, [0, 1], [0, -36])
-  const hintOp = useTransform(heroProgress, [0, 0.35], [1, 0])
+  const bgY = useTransform(heroProgress, [0, 1], [0, 180])
+  const bgScale = useTransform(heroProgress, [0, 1], [1.16, 1.02])
+  const lockY = useTransform(heroProgress, [0, 1], [0, -48])
+  const lockScale = useTransform(heroProgress, [0, 1], [1, 0.94])
+  const hintOp = useTransform(heroProgress, [0, 0.28], [1, 0])
 
   return (
     <div className="iron-page">
@@ -80,7 +81,7 @@ export default function HomePage() {
           <div className="iron-hero-veil" aria-hidden />
           <motion.div
             className="iron-hero-id"
-            style={reduced ? undefined : { y: lockY }}
+            style={reduced ? undefined : { y: lockY, scale: lockScale }}
           >
             <h1 className="iron-wordmark">
               <span className="iron-wordmark-lead">Kettlebell</span>
@@ -193,13 +194,14 @@ function ImmersivePrint({
     target: ref,
     offset: ['start end', 'end start'],
   })
-  const flow = useSpring(scrollYProgress, { stiffness: 36, damping: 22, restDelta: 0.001 })
-  const washY = useTransform(flow, [0, 1], [40, -80])
-  const washScale = useTransform(flow, [0, 1], [1.08, 1.2])
-  const imgY = useTransform(flow, [0, 1], [40, -40])
-  const imgScale = useTransform(flow, [0, 0.5, 1], [0.96, 1.03, 1])
-  const wordY = useTransform(flow, [0, 0.5, 1], [20, 0, -12])
-  const wordOp = useTransform(flow, [0.18, 0.42, 0.8, 1], [0, 1, 1, 0.75])
+  const flow = useSpring(scrollYProgress, { stiffness: 28, damping: 24, restDelta: 0.001 })
+  const washY = useTransform(flow, [0, 1], [60, -120])
+  const washScale = useTransform(flow, [0, 1], [1.1, 1.28])
+  const imgY = useTransform(flow, [0, 1], [72, -64])
+  const imgScale = useTransform(flow, [0, 0.46, 1], [0.9, 1.045, 1.01])
+  const imgOp = useTransform(flow, [0.08, 0.32], [0.35, 1])
+  const wordY = useTransform(flow, [0, 0.48, 1], [36, 0, -18])
+  const wordOp = useTransform(flow, [0.22, 0.44, 0.82, 1], [0, 1, 1, 0.82])
 
   return (
     <section className="iron-immerse" ref={ref} aria-label={item.word}>
@@ -215,7 +217,7 @@ function ImmersivePrint({
         />
         <motion.figure
           className="iron-immerse-art"
-          style={reduced ? undefined : { y: imgY, scale: imgScale }}
+          style={reduced ? undefined : { y: imgY, scale: imgScale, opacity: imgOp }}
         >
           <img src={item.src} alt={item.alt} />
           <motion.figcaption
