@@ -2,7 +2,6 @@ import { copyFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 const spaPaths = [
-  'v2',
   'imposter',
   'party',
   'math_imposter',
@@ -22,10 +21,7 @@ const spaPaths = [
   'x_the_game_v2',
   'grot_bot_merge',
   'grot-bot-merge',
-  'exclusive',
-  'digest',
   'games',
-  'dashboard',
 ]
 
 const dist = 'dist'
