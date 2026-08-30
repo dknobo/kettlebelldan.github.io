@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prepare-pages.mjs",
     "preview": "vite preview",
-    "deploy": "npm run build && cp CNAME dist/ 2>/dev/null || true && mkdir -p dist/imposter dist/party dist/v2 dist/knicks dist/rocket_catch_game dist/math_imposter dist/imposter_simple dist/imposter_image dist/imposter_party dist/impasta_party dist/3D_Sudoku dist/spacex_tetris dist/x_blaster dist/starbase dist/orb dist/x_the_game dist/x_the_game_v2 dist/grot_bot_merge dist/grot-bot-merge && cp dist/index.html dist/imposter/index.html && cp dist/index.html dist/party/index.html && cp dist/index.html dist/v2/index.html && cp dist/index.html dist/knicks/index.html && cp dist/index.html dist/rocket_catch_game/index.html && cp dist/index.html dist/math_imposter/index.html && cp dist/index.html dist/imposter_simple/index.html && cp dist/index.html dist/imposter_image/index.html && cp dist/index.html dist/imposter_party/index.html && cp dist/index.html dist/impasta_party/index.html && cp dist/index.html dist/3D_Sudoku/index.html && cp dist/index.html dist/spacex_tetris/index.html && cp dist/index.html dist/x_blaster/index.html && cp dist/index.html dist/starbase/index.html && cp dist/index.html dist/orb/index.html && cp dist/index.html dist/x_the_game/index.html && cp dist/index.html dist/x_the_game_v2/index.html && cp dist/index.html dist/grot_bot_merge/index.html && cp dist/index.html dist/grot-bot-merge/index.html && gh-pages -d dist --dotfiles"
+    "deploy": "npm run build && gh-pages -d dist --dotfiles"
   },
   "dependencies": {
     "framer-motion": "^12.40.0",

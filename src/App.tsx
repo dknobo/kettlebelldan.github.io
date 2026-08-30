@@ -1,7 +1,14 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import ContentPost from './pages/ContentPost'
+import DashboardPage from './pages/DashboardPage'
+import DigestIndex from './pages/DigestIndex'
+import ExclusiveIndex from './pages/ExclusiveIndex'
+import GamesPage from './pages/GamesPage'
 import MainSite from './pages/MainSite'
+import NotFound from './pages/NotFound'
 import V2Experience from './pages/V2Experience'
+import SiteLayout from './site/SiteLayout'
 import ImposterApp from './imposter/ImposterApp'
 import MathImposter from './imposter/MathImposter'
 import SimpleImposter from './imposter/SimpleImposter'
@@ -30,7 +37,15 @@ function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
-        <Route path="/" element={<MainSite />} />
+        <Route element={<SiteLayout />}>
+          <Route path="/" element={<MainSite />} />
+          <Route path="/exclusive" element={<ExclusiveIndex />} />
+          <Route path="/exclusive/:slug" element={<ContentPost kind="exclusive" />} />
+          <Route path="/digest" element={<DigestIndex />} />
+          <Route path="/digest/:slug" element={<ContentPost kind="digest" />} />
+          <Route path="/games" element={<GamesPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+        </Route>
         <Route path="/v2" element={<V2Experience />} />
         <Route path="/imposter" element={<ImposterApp />} />
         <Route path="/party" element={<ImposterApp />} />
@@ -128,6 +143,9 @@ function App() {
             </Suspense>
           }
         />
+        <Route element={<SiteLayout />}>
+          <Route path="*" element={<NotFound />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
