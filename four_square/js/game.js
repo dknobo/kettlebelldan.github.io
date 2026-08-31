@@ -64,7 +64,7 @@
       if (!this.ctx) {
         this.ctx = new Ctx();
         this.master = this.ctx.createGain();
-        this.master.gain.value = 0.62;
+        this.master.gain.value = 0.85;
         this.master.connect(this.ctx.destination);
       }
       if (this.ctx.state === "suspended") this.ctx.resume();
@@ -88,39 +88,75 @@
       o.start(t);
       o.stop(t + dur + 0.02);
     },
+    noise(dur, vol, type, startHz, endHz) {
+      this.unlock();
+      if (!this.ready()) return;
+      const n = Math.max(1, (this.ctx.sampleRate * dur) | 0);
+      const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) data[i] = Math.random() * 2 - 1;
+      const src = this.ctx.createBufferSource();
+      src.buffer = buf;
+      const f = this.ctx.createBiquadFilter();
+      f.type = type || "bandpass";
+      const t = this.ctx.currentTime;
+      f.frequency.setValueAtTime(startHz, t);
+      if (endHz) f.frequency.exponentialRampToValueAtTime(Math.max(40, endHz), t + dur);
+      f.Q.value = 0.7;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(f);
+      f.connect(g);
+      g.connect(this.master);
+      src.start(t);
+      src.stop(t + dur + 0.02);
+    },
     hit() {
       this.unlock();
       if (!this.ready()) return;
       const now = this.ctx.currentTime;
       if (now < this.hitGate) return;
-      this.hitGate = now + 0.018;
-      this.tone(240 + Math.random() * 55, 0.032, "sine", 0.028, 130);
+      this.hitGate = now + 0.02;
+      const f = 310 + Math.random() * 80;
+      this.tone(f, 0.055, "triangle", 0.14, f * 0.45);
+      this.noise(0.04, 0.08, "highpass", 900, 1400);
     },
     power(kind) {
       this.unlock();
       if (!this.ready()) return;
-      if (kind === "triple") {
-        this.tone(392, 0.1, "square", 0.16);
-        this.tone(523, 0.12, "square", 0.14);
-        window.setTimeout(() => this.tone(659, 0.2, "square", 0.18), 70);
-      } else if (kind === "speed") {
-        this.tone(480, 0.24, "sawtooth", 0.18, 1680);
-        this.tone(720, 0.14, "triangle", 0.1, 1400);
+      if (kind === "speed") {
+        this.noise(0.28, 0.28, "bandpass", 400, 2400);
+        this.noise(0.22, 0.16, "lowpass", 1800, 280);
+        this.tone(180, 0.2, "sine", 0.08, 90);
+      } else if (kind === "double") {
+        const notes = [523, 659, 784, 1046];
+        notes.forEach((f, i) => {
+          window.setTimeout(() => {
+            this.tone(f, 0.16, "triangle", 0.2);
+            this.tone(f * 2, 0.1, "sine", 0.06);
+          }, i * 70);
+        });
       } else if (kind === "lightning") {
-        this.tone(980, 0.08, "square", 0.14, 220);
-        this.tone(1600, 0.16, "sawtooth", 0.12, 280);
-        this.tone(420, 0.12, "triangle", 0.1);
-      } else {
-        this.tone(196, 0.16, "square", 0.2);
-        this.tone(294, 0.22, "triangle", 0.15, 160);
+        this.noise(0.18, 0.32, "highpass", 1800, 400);
+        this.noise(0.1, 0.22, "bandpass", 3200, 600);
+        this.tone(90, 0.16, "sawtooth", 0.14, 40);
+        this.tone(1800, 0.06, "square", 0.12, 240);
+      } else if (kind === "triple") {
+        [0, 90, 180].forEach((ms, i) => {
+          window.setTimeout(() => {
+            const f = 330 * (i + 1);
+            this.tone(f, 0.12, "square", 0.14);
+            this.tone(f * 1.5, 0.16, "triangle", 0.1);
+          }, ms);
+        });
       }
     },
     zap() {
       this.unlock();
       if (!this.ready()) return;
-      const now = this.ctx.currentTime;
-      if (now < this.hitGate + 0.01) { /* allow alongside hit */ }
-      this.tone(1400 + Math.random() * 400, 0.045, "square", 0.045, 320);
+      this.noise(0.07, 0.18, "highpass", 2200, 500);
+      this.tone(1200 + Math.random() * 600, 0.05, "square", 0.08, 280);
     },
   };
 
