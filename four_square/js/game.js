@@ -4,6 +4,9 @@
   const canvas = document.querySelector("#world");
   const ctx = canvas.getContext("2d", { alpha: false });
   const standingsEl = document.querySelector("#standings");
+  const historyCanvas = document.querySelector("#history-plot");
+  const historyCtx = historyCanvas.getContext("2d");
+  const HISTORY_MAX = 120;
 
   const PLAYERS = 4;
   const MAX_BALLS_PER_TEAM = 36;
@@ -45,6 +48,8 @@
   let particles = [];
   let tileFill = [];
   let standingRows = [];
+  let history = [];
+  let historyTimer = 0;
 
   const audio = {
     ctx: null,
@@ -202,7 +207,13 @@
     fadingOut = false;
     previousTime = performance.now();
     if (!standingRows.length) buildStandings();
+    history = [];
+    historyTimer = 0;
+    sizeHistoryCanvas();
     refreshLeader();
+    const start = ownership();
+    recordHistory(start.counts);
+    drawHistory();
   }
 
   function spawnBall(gx, gy, owner, cellW, cellH, brick, random, x, y, angle) {
@@ -488,6 +499,60 @@
     });
   }
 
+  function sizeHistoryCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = historyCanvas.getBoundingClientRect();
+    const w = Math.max(1, Math.floor(rect.width));
+    const h = Math.max(1, Math.floor(rect.height));
+    historyCanvas.width = Math.floor(w * dpr);
+    historyCanvas.height = Math.floor(h * dpr);
+    historyCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    historyCanvas._cssW = w;
+    historyCanvas._cssH = h;
+  }
+
+  function recordHistory(counts) {
+    history.push([counts[0], counts[1], counts[2], counts[3]]);
+    if (history.length > HISTORY_MAX) history.shift();
+  }
+
+  function drawHistory() {
+    const w = historyCanvas._cssW || historyCanvas.clientWidth;
+    const h = historyCanvas._cssH || historyCanvas.clientHeight;
+    if (!w || !h) return;
+    historyCtx.clearRect(0, 0, w, h);
+    if (history.length < 2 || !world) return;
+    let lo = Infinity;
+    let hi = 0;
+    for (const sample of history) {
+      for (let t = 0; t < PLAYERS; t++) {
+        const v = sample[t];
+        if (v < lo) lo = v;
+        if (v > hi) hi = v;
+      }
+    }
+    const padY = Math.max(6, (hi - lo) * 0.2);
+    lo = Math.max(0, lo - padY);
+    hi = hi + padY;
+    if (hi <= lo) hi = lo + 1;
+    const pad = 1.5;
+    const span = Math.max(history.length - 1, 1);
+    for (let t = 0; t < PLAYERS; t++) {
+      historyCtx.beginPath();
+      historyCtx.lineWidth = 1.7;
+      historyCtx.strokeStyle = ACCENT[t];
+      historyCtx.lineJoin = "round";
+      historyCtx.lineCap = "round";
+      for (let i = 0; i < history.length; i++) {
+        const x = pad + (i / span) * (w - pad * 2);
+        const y = h - pad - ((history[i][t] - lo) / (hi - lo)) * (h - pad * 2);
+        if (i === 0) historyCtx.moveTo(x, y);
+        else historyCtx.lineTo(x, y);
+      }
+      historyCtx.stroke();
+    }
+  }
+
   function update(dt) {
     if (!world || fadingOut) return;
     const maxStep = 1 / 120;
@@ -517,6 +582,12 @@
 
     const { counts, best } = ownership();
     refreshLeader();
+    historyTimer += dt;
+    if (historyTimer >= 0.12) {
+      historyTimer = 0;
+      recordHistory(counts);
+      drawHistory();
+    }
     if (counts[best] / world.cells.length > 0.96) {
       dominateTimer += dt;
       if (dominateTimer > 5.5) startFade();
