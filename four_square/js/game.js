@@ -61,13 +61,17 @@
       if (!this.ctx) {
         this.ctx = new Ctx();
         this.master = this.ctx.createGain();
-        this.master.gain.value = 0.5;
+        this.master.gain.value = 0.62;
         this.master.connect(this.ctx.destination);
       }
       if (this.ctx.state === "suspended") this.ctx.resume();
     },
+    ready() {
+      return this.ctx && this.ctx.state === "running";
+    },
     tone(freq, dur, type, vol, slide) {
-      if (!this.ctx || this.ctx.state !== "running") return;
+      this.unlock();
+      if (!this.ready()) return;
       const t = this.ctx.currentTime;
       const o = this.ctx.createOscillator();
       const g = this.ctx.createGain();
@@ -82,23 +86,26 @@
       o.stop(t + dur + 0.02);
     },
     hit() {
-      if (!this.ctx || this.ctx.state !== "running") return;
+      this.unlock();
+      if (!this.ready()) return;
       const now = this.ctx.currentTime;
       if (now < this.hitGate) return;
       this.hitGate = now + 0.018;
-      this.tone(210 + Math.random() * 50, 0.028, "sine", 0.016, 120);
+      this.tone(240 + Math.random() * 55, 0.032, "sine", 0.028, 130);
     },
     power(kind) {
+      this.unlock();
+      if (!this.ready()) return;
       if (kind === "triple") {
-        this.tone(392, 0.09, "square", 0.11);
-        this.tone(523, 0.11, "square", 0.1);
-        window.setTimeout(() => this.tone(659, 0.18, "square", 0.13), 70);
+        this.tone(392, 0.1, "square", 0.16);
+        this.tone(523, 0.12, "square", 0.14);
+        window.setTimeout(() => this.tone(659, 0.2, "square", 0.18), 70);
       } else if (kind === "speed") {
-        this.tone(480, 0.22, "sawtooth", 0.13, 1680);
-        this.tone(720, 0.12, "triangle", 0.07, 1400);
+        this.tone(480, 0.24, "sawtooth", 0.18, 1680);
+        this.tone(720, 0.14, "triangle", 0.1, 1400);
       } else {
-        this.tone(196, 0.14, "square", 0.14);
-        this.tone(294, 0.2, "triangle", 0.11, 160);
+        this.tone(196, 0.16, "square", 0.2);
+        this.tone(294, 0.22, "triangle", 0.15, 160);
       }
     },
   };
@@ -774,15 +781,16 @@
     resizeTimer = window.setTimeout(() => resetWorld(world ? world.seed : undefined), 80);
   });
   const unlockAudio = () => audio.unlock();
-  window.addEventListener("pointerdown", unlockAudio, { once: true });
-  window.addEventListener("keydown", unlockAudio, { once: true });
+  window.addEventListener("pointerdown", unlockAudio);
+  window.addEventListener("pointermove", unlockAudio, { once: true });
+  window.addEventListener("keydown", unlockAudio);
+  window.addEventListener("touchstart", unlockAudio, { passive: true });
   window.addEventListener("keydown", (e) => {
     if (e.code === "Space" || e.code === "KeyR") {
       e.preventDefault();
       if (!fadingOut) startFade();
     }
   });
-  audio.unlock();
 
   window.__VOID = () => world;
   resetWorld();
