@@ -14,7 +14,8 @@
   const MAX_SPEED_MUL = 7;
   const MAX_BURST = 32;
   const SPEED_STEP = 1.38;
-  const MAX_CAPSULES = 10;
+  const MAX_CAPSULES = 12;
+  const MAX_BOLTS = 8;
 
   const PALETTE = [
     "#0b6e68",
@@ -34,6 +35,7 @@
     triple: { color: "#d46bff", glow: "rgba(180,80,255,0.75)" },
     speed:  { color: "#3ad4e6", glow: "rgba(50,210,230,0.75)" },
     double: { color: "#e0a24a", glow: "rgba(220,150,60,0.75)" },
+    lightning: { color: "#b8f0ff", glow: "rgba(170,230,255,0.9)" },
   };
 
   let world = null;
@@ -50,6 +52,7 @@
   let standingRows = [];
   let history = [];
   let historyTimer = 0;
+  let bolts = [];
 
   const audio = {
     ctx: null,
@@ -103,10 +106,21 @@
       } else if (kind === "speed") {
         this.tone(480, 0.24, "sawtooth", 0.18, 1680);
         this.tone(720, 0.14, "triangle", 0.1, 1400);
+      } else if (kind === "lightning") {
+        this.tone(980, 0.08, "square", 0.14, 220);
+        this.tone(1600, 0.16, "sawtooth", 0.12, 280);
+        this.tone(420, 0.12, "triangle", 0.1);
       } else {
         this.tone(196, 0.16, "square", 0.2);
         this.tone(294, 0.22, "triangle", 0.15, 160);
       }
+    },
+    zap() {
+      this.unlock();
+      if (!this.ready()) return;
+      const now = this.ctx.currentTime;
+      if (now < this.hitGate + 0.01) { /* allow alongside hit */ }
+      this.tone(1400 + Math.random() * 400, 0.045, "square", 0.045, 320);
     },
   };
 
@@ -192,6 +206,7 @@
       speedMul: 1,
       burst: 1,
       triples: 0,
+      bolts: 0,
     }));
 
     const balls = seeds.map((s, owner) => spawnBall(s.x, s.y, owner, cellW, cellH, brick, random));
@@ -204,6 +219,7 @@
       powerups: new Map(),
     };
     particles = [];
+    bolts = [];
     accumulatedTime = 0;
     spawnTimer = 0.35;
     spawnPowerup();
@@ -365,6 +381,11 @@
       return;
     }
 
+    if (kind === "lightning") {
+      team.bolts = Math.min(MAX_BOLTS, team.bolts + 1);
+      return;
+    }
+
     if (kind === "triple") {
       team.triples += 1;
       const mine = world.balls.filter((b) => b.owner === owner);
@@ -392,6 +413,84 @@
     }
   }
 
+  function cellCenter(index) {
+    return {
+      x: ((index % world.cols) + 0.5) * world.cellW,
+      y: (Math.floor(index / world.cols) + 0.5) * world.cellH,
+    };
+  }
+
+  function jaggedPath(x1, y1, x2, y2, segs) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const dist = Math.hypot(dx, dy) || 1;
+    const nx = -dy / dist;
+    const ny = dx / dist;
+    const n = segs || Math.max(7, Math.min(16, (dist / 22) | 0));
+    const pts = [{ x: x1, y: y1 }];
+    for (let i = 1; i < n; i++) {
+      const t = i / n;
+      const fall = Math.sin(t * Math.PI);
+      const j = (Math.random() * 2 - 1) * Math.min(26, dist * 0.16) * fall;
+      pts.push({ x: x1 + dx * t + nx * j, y: y1 + dy * t + ny * j });
+    }
+    pts.push({ x: x2, y: y2 });
+    return pts;
+  }
+
+  function fireLightning(from, owner, count) {
+    const fc = from % world.cols;
+    const fr = Math.floor(from / world.cols);
+    const pool = [];
+    for (let i = 0; i < world.cells.length; i++) {
+      if (i === from || world.cells[i] === owner) continue;
+      if (isProtected(i, owner)) continue;
+      const c = i % world.cols;
+      const r = Math.floor(i / world.cols);
+      const d = Math.abs(c - fc) + Math.abs(r - fr);
+      if (d < 2) continue;
+      pool.push({ i, d });
+    }
+    if (!pool.length) return;
+    pool.sort((a, b) => a.d - b.d);
+    const near = pool.slice(0, Math.min(48, pool.length));
+    const used = new Set();
+    const origin = cellCenter(from);
+    let fired = 0;
+    for (let k = 0; k < count && fired < count; k++) {
+      let pick = null;
+      for (let t = 0; t < 8; t++) {
+        const cand = near[(Math.random() * near.length) | 0];
+        if (!used.has(cand.i)) { pick = cand; break; }
+      }
+      if (!pick) break;
+      used.add(pick.i);
+      world.cells[pick.i] = owner;
+      maybeCollect(pick.i, owner);
+      const dest = cellCenter(pick.i);
+      const pts = jaggedPath(origin.x, origin.y, dest.x, dest.y);
+      const branches = [];
+      const mid = pts[(pts.length * (0.35 + Math.random() * 0.3)) | 0];
+      if (mid) {
+        const ang = Math.random() * Math.PI * 2;
+        const len = 18 + Math.random() * 34;
+        branches.push(jaggedPath(mid.x, mid.y, mid.x + Math.cos(ang) * len, mid.y + Math.sin(ang) * len, 5));
+      }
+      bolts.push({
+        pts,
+        branches,
+        tx: dest.x,
+        ty: dest.y,
+        color: ACCENT[owner],
+        age: 0,
+        life: 0.16 + Math.random() * 0.08,
+      });
+      fired++;
+    }
+    if (fired && bolts.length > 48) bolts.splice(0, bolts.length - 48);
+    if (fired) audio.zap();
+  }
+
   function burst(x, y, color, n) {
     for (let i = 0; i < n; i++) {
       const a = Math.random() * Math.PI * 2;
@@ -406,7 +505,7 @@
   function spawnPowerup() {
     if (world.powerups.size >= MAX_CAPSULES) return;
     const roll = world.random();
-    const kind = roll < 0.36 ? "triple" : roll < 0.68 ? "speed" : "double";
+    const kind = roll < 0.24 ? "triple" : roll < 0.48 ? "speed" : roll < 0.72 ? "double" : "lightning";
     for (let tries = 0; tries < 40; tries++) {
       const col = 2 + ((world.random() * (world.cols - 4)) | 0);
       const row = 2 + ((world.random() * (world.rows - 4)) | 0);
@@ -440,6 +539,8 @@
       ball.captureCooldown = 0.028;
       const burstN = world.teams[ball.owner].burst;
       if (burstN > 1) captureBurst(hit.index, ball.owner, burstN);
+      const arcs = world.teams[ball.owner].bolts;
+      if (arcs > 0) fireLightning(hit.index, ball.owner, arcs);
     }
 
     if (!picked) audio.hit();
@@ -586,6 +687,8 @@
       p.vy *= 0.96;
     }
     particles = particles.filter((p) => p.age < p.life);
+    for (const b of bolts) b.age += dt;
+    bolts = bolts.filter((b) => b.age < b.life);
 
     const { counts, best } = ownership();
     refreshLeader();
@@ -659,6 +762,16 @@
         ctx.lineTo(x - r * 0.12, r * 0.28);
       }
       ctx.stroke();
+    } else if (kind === "lightning") {
+      ctx.beginPath();
+      ctx.moveTo(r * 0.08, -r * 0.38);
+      ctx.lineTo(-r * 0.06, -r * 0.02);
+      ctx.lineTo(r * 0.16, -r * 0.02);
+      ctx.lineTo(-r * 0.1, r * 0.4);
+      ctx.lineTo(r * 0.04, r * 0.04);
+      ctx.lineTo(-r * 0.16, r * 0.04);
+      ctx.closePath();
+      ctx.fill();
     } else {
       ctx.beginPath();
       ctx.arc(0, 0, r * 0.42, 0, Math.PI * 2);
@@ -675,6 +788,53 @@
     }
 
     ctx.restore();
+  }
+
+  function strokePath(c, pts) {
+    if (!pts || pts.length < 2) return;
+    c.beginPath();
+    c.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) c.lineTo(pts[i].x, pts[i].y);
+    c.stroke();
+  }
+
+  function drawBolts() {
+    if (!bolts.length) return;
+    for (const b of bolts) {
+      const a = 1 - b.age / b.life;
+      const flick = 0.72 + Math.random() * 0.28;
+      ctx.save();
+      ctx.globalAlpha = a * flick;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.shadowColor = "#d8f7ff";
+      ctx.shadowBlur = 16;
+      ctx.strokeStyle = b.color;
+      ctx.lineWidth = 6.2;
+      strokePath(ctx, b.pts);
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle = "#9beeff";
+      ctx.lineWidth = 2.6;
+      strokePath(ctx, b.pts);
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "#f7fdff";
+      ctx.lineWidth = 1.05;
+      strokePath(ctx, b.pts);
+      for (const br of b.branches) {
+        ctx.strokeStyle = "#9beeff";
+        ctx.lineWidth = 1.7;
+        strokePath(ctx, br);
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 0.7;
+        strokePath(ctx, br);
+      }
+      ctx.globalAlpha = a * 0.85;
+      ctx.fillStyle = "#f4fcff";
+      ctx.beginPath();
+      ctx.arc(b.tx, b.ty, 3.2 + (1 - a) * 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
   }
 
   function draw() {
@@ -711,6 +871,7 @@
       ctx.fillRect(p.x, p.y, p.size, p.size);
     }
     ctx.globalAlpha = 1;
+    drawBolts();
 
     for (const ball of world.balls) {
       const color = ACCENT[ball.owner];
