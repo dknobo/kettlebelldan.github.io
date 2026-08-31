@@ -26,39 +26,46 @@ html, body {
     radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.62) 100%);
 }
 
-#leader {
+#standings {
   position: fixed;
   top: 14px;
   right: 14px;
   z-index: 5;
+  width: 168px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: #000;
+  border: 1px solid #141414;
+  padding: 8px 8px 7px;
+  pointer-events: none;
+}
+
+#standings .row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #000;
-  color: #e8e8e8;
-  border: 1px solid #141414;
-  padding: 8px 12px 8px 11px;
-  pointer-events: none;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  line-height: 1;
+  gap: 6px;
 }
 
-#leader .lbl {
-  color: #bdbdbd;
+#standings .track {
+  flex: 1;
+  height: 8px;
+  background: #0c0c0c;
+  overflow: hidden;
 }
 
-#leader-swatch {
-  width: 14px;
-  height: 14px;
-  background: #222;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+#standings .bar {
+  height: 100%;
+  width: 0;
+  transition: width 0.12s linear;
 }
 
-#leader-delta {
-  min-width: 3.2em;
+#standings .n {
+  min-width: 2.6em;
   text-align: right;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
-  color: #fff;
+  color: #cfcfcf;
 }

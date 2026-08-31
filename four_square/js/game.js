@@ -3,8 +3,7 @@
 
   const canvas = document.querySelector("#world");
   const ctx = canvas.getContext("2d", { alpha: false });
-  const swatchEl = document.querySelector("#leader-swatch");
-  const deltaEl = document.querySelector("#leader-delta");
+  const standingsEl = document.querySelector("#standings");
 
   const PLAYERS = 4;
   const MAX_BALLS_PER_TEAM = 36;
@@ -45,8 +44,7 @@
   let resizeTimer = 0;
   let particles = [];
   let tileFill = [];
-  let lastLeader = -1;
-  let lastDelta = -1;
+  let standingRows = [];
 
   const audio = {
     ctx: null,
@@ -202,10 +200,9 @@
     dominateTimer = 0;
     fade = 0;
     fadingOut = false;
-    lastLeader = -1;
-    lastDelta = -1;
     previousTime = performance.now();
-    refreshLeader(true);
+    if (!standingRows.length) buildStandings();
+    refreshLeader();
   }
 
   function spawnBall(gx, gy, owner, cellW, cellH, brick, random, x, y, angle) {
@@ -450,23 +447,45 @@
     const counts = new Uint32Array(PLAYERS);
     for (let i = 0; i < world.cells.length; i++) counts[world.cells[i]]++;
     let best = 0;
-    let second = 0;
-    for (let i = 1; i < PLAYERS; i++) {
-      if (counts[i] > counts[best]) { second = best; best = i; }
-      else if (counts[i] > counts[second]) second = i;
-    }
-    if (best === second) second = (best + 1) % PLAYERS;
-    return { counts, best, lead: counts[best] - counts[second] };
+    for (let i = 1; i < PLAYERS; i++) if (counts[i] > counts[best]) best = i;
+    return { counts, best };
   }
 
-  function refreshLeader(force) {
-    if (!world) return;
-    const { best, lead } = ownership();
-    if (!force && best === lastLeader && lead === lastDelta) return;
-    lastLeader = best;
-    lastDelta = lead;
-    swatchEl.style.background = mixHex(PALETTE[best], ACCENT[best], 0.35);
-    deltaEl.textContent = `+${lead.toLocaleString()}`;
+  function buildStandings() {
+    standingsEl.innerHTML = "";
+    standingRows = [];
+    for (let i = 0; i < PLAYERS; i++) {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.dataset.team = String(i);
+      const track = document.createElement("div");
+      track.className = "track";
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.background = mixHex(PALETTE[i], ACCENT[i], 0.28);
+      const n = document.createElement("span");
+      n.className = "n";
+      n.textContent = "0";
+      track.appendChild(bar);
+      row.appendChild(track);
+      row.appendChild(n);
+      standingsEl.appendChild(row);
+      standingRows.push({ row, bar, n, team: i });
+    }
+  }
+
+  function refreshLeader() {
+    if (!world || !standingRows.length) return;
+    const { counts } = ownership();
+    const max = Math.max(1, ...counts);
+    const ranked = standingRows
+      .map((r) => ({ ...r, count: counts[r.team] }))
+      .sort((a, b) => b.count - a.count || a.team - b.team);
+    ranked.forEach((r, i) => {
+      r.row.style.order = String(i);
+      r.bar.style.width = `${(r.count / max) * 100}%`;
+      r.n.textContent = r.count.toLocaleString();
+    });
   }
 
   function update(dt) {
@@ -497,7 +516,7 @@
     particles = particles.filter((p) => p.age < p.life);
 
     const { counts, best } = ownership();
-    refreshLeader(false);
+    refreshLeader();
     if (counts[best] / world.cells.length > 0.96) {
       dominateTimer += dt;
       if (dominateTimer > 5.5) startFade();
