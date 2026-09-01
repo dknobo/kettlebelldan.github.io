@@ -1,5 +1,6 @@
 (() => {
   "use strict";
+  // build 3: fewer regions, missile arcs, uncircled figures
 
   const canvas = document.querySelector("#world");
   const ctx = canvas.getContext("2d", { alpha: false });
