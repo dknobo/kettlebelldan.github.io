@@ -9,22 +9,17 @@
   const historyCtx = historyCanvas.getContext("2d");
 
   const REGION_NAMES = [
-    "USA", "Canada", "Mexico", "S. America",
-    "Africa", "Europe", "Russia", "Mid East",
-    "India", "China", "SE Asia", "Australia",
+    "USA", "Canada", "S. America", "Africa",
+    "Europe", "Russia", "Asia", "Australia",
   ];
   const REGIONS = [
-    ["united states of america", "puerto rico"],
+    ["united states of america", "puerto rico", "mexico", "guatemala", "belize", "honduras", "el salvador", "nicaragua", "costa rica", "panama", "cuba", "haiti", "dominican republic", "jamaica", "the bahamas"],
     ["canada"],
-    ["mexico", "guatemala", "belize", "honduras", "el salvador", "nicaragua", "costa rica", "panama", "cuba", "haiti", "dominican republic", "jamaica", "the bahamas"],
     ["brazil", "argentina", "chile", "peru", "colombia", "venezuela", "bolivia", "paraguay", "uruguay", "ecuador", "guyana", "suriname", "french guiana", "falkland"],
-    ["algeria", "angola", "benin", "botswana", "burkina", "burundi", "cameroon", "central african", "chad", "congo", "djibouti", "egypt", "equatorial guinea", "eritrea", "ethiopia", "gabon", "gambia", "ghana", "guinea", "ivory", "kenya", "lesotho", "liberia", "libya", "madagascar", "malawi", "mali", "mauritania", "morocco", "mozambique", "namibia", "niger", "nigeria", "rwanda", "senegal", "sierra leone", "somalia", "somaliland", "south africa", "south sudan", "sudan", "swaziland", "tanzania", "togo", "tunisia", "uganda", "western sahara", "zambia", "zimbabwe"],
+    ["algeria", "angola", "benin", "botswana", "burkina", "burundi", "cameroon", "central african", "chad", "congo", "djibouti", "egypt", "equatorial guinea", "eritrea", "ethiopia", "gabon", "gambia", "ghana", "guinea", "ivory", "kenya", "lesotho", "liberia", "libya", "madagascar", "malawi", "mali", "mauritania", "morocco", "mozambique", "namibia", "niger", "nigeria", "rwanda", "senegal", "sierra leone", "somalia", "somaliland", "south africa", "south sudan", "sudan", "swaziland", "tanzania", "togo", "tunisia", "uganda", "western sahara", "zambia", "zimbabwe", "saudi", "iran", "iraq", "syria", "jordan", "israel", "lebanon", "kuwait", "qatar", "united arab", "oman", "yemen", "turkey", "georgia", "armenia", "azerbaijan", "west bank", "cyprus"],
     ["united kingdom", "ireland", "france", "germany", "spain", "portugal", "italy", "switzerland", "austria", "belgium", "netherlands", "luxembourg", "denmark", "norway", "sweden", "finland", "iceland", "poland", "czech", "slovakia", "hungary", "romania", "bulgaria", "greece", "albania", "macedonia", "serbia", "bosnia", "croatia", "slovenia", "montenegro", "kosovo", "estonia", "latvia", "lithuania", "belarus", "ukraine", "moldova", "greenland"],
     ["russia", "kazakhstan", "uzbekistan", "turkmenistan", "kyrgyzstan", "tajikistan", "mongolia"],
-    ["saudi", "iran", "iraq", "syria", "jordan", "israel", "lebanon", "kuwait", "qatar", "united arab", "oman", "yemen", "turkey", "georgia", "armenia", "azerbaijan", "west bank", "northern cyprus", "cyprus"],
-    ["india", "pakistan", "bangladesh", "nepal", "bhutan", "sri lanka", "afghanistan"],
-    ["china", "taiwan", "japan", "north korea", "south korea"],
-    ["vietnam", "laos", "cambodia", "thailand", "myanmar", "malaysia", "indonesia", "philippines", "brunei", "east timor", "papua"],
+    ["china", "taiwan", "japan", "north korea", "south korea", "india", "pakistan", "bangladesh", "nepal", "bhutan", "sri lanka", "afghanistan", "vietnam", "laos", "cambodia", "thailand", "myanmar", "malaysia", "indonesia", "philippines", "brunei", "east timor", "papua"],
     ["australia", "new zealand", "fiji", "solomon", "vanuatu", "new caledonia"],
   ];
   const FACTIONS = REGIONS.length;
@@ -34,14 +29,12 @@
   const MAX_CAPSULES = 16;
 
   const PALETTE = [
-    "#1a4d8c", "#8c1e1e", "#0d6b4c", "#8a4a0c",
-    "#5a1a78", "#0a5c6e", "#7a2418", "#6e4a0c",
-    "#2a5a18", "#8a1848", "#1e3a6e", "#4a1e3a",
+    "#1a4d8c", "#8c1e1e", "#8a4a0c", "#5a1a78",
+    "#0a5c6e", "#7a2418", "#8a1848", "#4a1e3a",
   ];
   const ACCENT = [
-    "#4d8cff", "#ff4d4d", "#2ee08a", "#ffb020",
-    "#c46bff", "#2ad4e6", "#ff6b3a", "#e0b040",
-    "#7dff4d", "#ff4d9a", "#6d8cff", "#e06b9a",
+    "#4d8cff", "#ff4d4d", "#ffb020", "#c46bff",
+    "#2ad4e6", "#ff6b3a", "#ff4d9a", "#e06b9a",
   ];
 
   const KINDS = {
@@ -198,24 +191,18 @@
     if (lat > 18.5 && lat < 22.8 && lon < -154 && lon > -161) return 0;
     if (lon <= -25) {
       if (lat >= 49) return 1;
-      if (lat >= 24.3) return 0;
-      if (lat >= 7.2) return 2;
-      return 3;
+      if (lat >= 7.2) return 0;
+      return 2;
     }
-    if (lon > 112 && lon < 180 && lat < -10) return 11;
-    if (lon > 165 && lat < -32) return 11;
-    if (lon > -19 && lon < 51 && lat < 37.2 && lat > -35) {
-      if (lon > 34 && lat > 29) return 7;
-      return 4;
-    }
-    if (lon > 67 && lon < 90 && lat > 6 && lat < 36) return 8;
-    if (lon > 92 && lon < 141 && lat < 20.5 && lat > -11) return 10;
-    if (lon > 26 && lon < 64 && lat > 12 && lat < 42.5) return 7;
-    if (lon > 97 && lon < 147 && lat > 20 && lat < 54) return 9;
-    if (lon > -25 && lon < 29 && lat > 36) return 5;
-    if (lon > 28 && lat > 41) return 6;
-    if (lon > 29 && lon < 42 && lat > 36 && lat < 48) return 5;
-    return 5;
+    if (lon > 112 && lon < 180 && lat < -10) return 7;
+    if (lon > 165 && lat < -32) return 7;
+    if (lon > -19 && lon < 52 && lat < 37.2 && lat > -35) return 3;
+    if (lon > 26 && lon < 64 && lat > 12 && lat < 42.5) return 3;
+    if (lon > 66 && lon < 150 && lat > -11 && lat < 54) return 6;
+    if (lon > -25 && lon < 29 && lat > 36) return 4;
+    if (lon > 28 && lat > 41) return 5;
+    if (lon > 29 && lon < 42 && lat > 36 && lat < 48) return 4;
+    return 4;
   }
 
   function rasterize(cols, rows) {
@@ -843,134 +830,40 @@
   }
 
   function drawSoldier(c, r) {
-    c.strokeStyle = "#d8f5c8";
-    c.lineWidth = Math.max(1.1, r * 0.08);
-    c.fillStyle = "#3f8a45";
+    c.strokeStyle = "#3f8a45";
+    c.lineWidth = Math.max(1.6, r * 0.18);
+    c.lineCap = "round";
     c.beginPath();
-    c.arc(0, -r * 0.4, r * 0.16, 0, Math.PI * 2);
-    c.fill();
+    c.moveTo(0, -r * 0.42);
+    c.lineTo(0, r * 0.42);
     c.stroke();
-    c.beginPath();
-    c.moveTo(-r * 0.13, -r * 0.2);
-    c.lineTo(r * 0.13, -r * 0.2);
-    c.lineTo(r * 0.1, r * 0.18);
-    c.lineTo(r * 0.08, r * 0.52);
-    c.lineTo(-r * 0.08, r * 0.52);
-    c.lineTo(-r * 0.1, r * 0.18);
-    c.closePath();
-    c.fill();
-    c.stroke();
-    c.fillRect(-r * 0.28, -r * 0.12, r * 0.12, r * 0.07);
-    c.fillRect(r * 0.16, -r * 0.12, r * 0.12, r * 0.07);
   }
 
   function drawTank(c, r) {
-    c.lineWidth = Math.max(1.2, r * 0.07);
-    c.strokeStyle = "#f3f7d0";
-    c.fillStyle = "#1c1e18";
-    c.beginPath();
-    c.moveTo(-r * 0.58, r * 0.08);
-    c.lineTo(r * 0.58, r * 0.08);
-    c.lineTo(r * 0.5, r * 0.46);
-    c.lineTo(-r * 0.5, r * 0.46);
-    c.closePath();
-    c.fill();
-    c.stroke();
-    c.fillStyle = "#0e0e0c";
-    for (const x of [-0.36, -0.12, 0.12, 0.36]) {
-      c.beginPath();
-      c.arc(x * r, r * 0.28, r * 0.12, 0, Math.PI * 2);
-      c.fill();
-    }
-    c.fillStyle = "#8fb44a";
-    c.beginPath();
-    c.moveTo(-r * 0.48, r * 0.1);
-    c.lineTo(-r * 0.36, -r * 0.1);
-    c.lineTo(r * 0.3, -r * 0.1);
-    c.lineTo(r * 0.5, r * 0.1);
-    c.closePath();
-    c.fill();
-    c.stroke();
-    c.fillStyle = "#b4d45c";
-    c.beginPath();
-    c.arc(-r * 0.02, -r * 0.16, r * 0.24, Math.PI, 0);
-    c.lineTo(r * 0.2, r * 0.02);
-    c.lineTo(-r * 0.24, r * 0.02);
-    c.closePath();
-    c.fill();
-    c.stroke();
-    c.fillStyle = "#2a2c22";
-    c.fillRect(r * 0.14, -r * 0.3, r * 0.58, r * 0.11);
-    c.strokeRect(r * 0.14, -r * 0.3, r * 0.58, r * 0.11);
-    c.fillStyle = "#141410";
-    c.fillRect(r * 0.68, -r * 0.34, r * 0.1, r * 0.19);
+    c.fillStyle = "#9bb84a";
+    c.fillRect(-r * 0.38, -r * 0.14, r * 0.62, r * 0.28);
+    c.fillRect(r * 0.2, -r * 0.06, r * 0.28, r * 0.1);
   }
 
   function drawPlane(c, r, color) {
-    const body = color || "#c5cdd6";
-    const shade = mixHex(body.replace(/\s/g, ""), "#ffffff", 0) || body;
-    c.fillStyle = body;
-    c.strokeStyle = "#f4f7ff";
-    c.lineWidth = Math.max(1, r * 0.06);
+    c.fillStyle = color || "#d0d6de";
     c.beginPath();
-    c.moveTo(r * 0.56, 0);
-    c.lineTo(r * 0.18, -r * 0.08);
-    c.lineTo(-r * 0.08, -r * 0.46);
-    c.lineTo(-r * 0.22, -r * 0.46);
-    c.lineTo(-r * 0.12, -r * 0.08);
-    c.lineTo(-r * 0.48, -r * 0.16);
-    c.lineTo(-r * 0.48, -r * 0.06);
-    c.lineTo(-r * 0.28, 0);
-    c.lineTo(-r * 0.48, r * 0.06);
-    c.lineTo(-r * 0.48, r * 0.16);
-    c.lineTo(-r * 0.12, r * 0.08);
-    c.lineTo(-r * 0.22, r * 0.46);
-    c.lineTo(-r * 0.08, r * 0.46);
-    c.lineTo(r * 0.18, r * 0.08);
+    c.moveTo(r * 0.42, 0);
+    c.lineTo(-r * 0.28, -r * 0.28);
+    c.lineTo(-r * 0.12, 0);
+    c.lineTo(-r * 0.28, r * 0.28);
     c.closePath();
     c.fill();
-    c.stroke();
-    c.fillStyle = shade;
-    c.fillRect(-r * 0.2, -r * 0.05, r * 0.42, r * 0.1);
   }
 
   function drawMissile(c, r, color) {
-    const body = color || "#d7dbe0";
-    c.fillStyle = body;
-    c.strokeStyle = "#fff6e8";
-    c.lineWidth = Math.max(1, r * 0.06);
+    c.fillStyle = color || "#e07040";
     c.beginPath();
-    c.moveTo(0, -r * 0.56);
-    c.lineTo(r * 0.15, -r * 0.22);
-    c.lineTo(r * 0.15, r * 0.22);
-    c.lineTo(-r * 0.15, r * 0.22);
-    c.lineTo(-r * 0.15, -r * 0.22);
+    c.moveTo(0, -r * 0.48);
+    c.lineTo(r * 0.14, r * 0.28);
+    c.lineTo(0, r * 0.14);
+    c.lineTo(-r * 0.14, r * 0.28);
     c.closePath();
-    c.fill();
-    c.stroke();
-    c.fillStyle = mixHex(body.startsWith("#") ? body : "#446688", "#220800", 0.25);
-    c.beginPath();
-    c.moveTo(0, -r * 0.56);
-    c.lineTo(r * 0.15, -r * 0.22);
-    c.lineTo(-r * 0.15, -r * 0.22);
-    c.closePath();
-    c.fill();
-    c.fillStyle = mixHex(body.startsWith("#") ? body : "#446688", "#000000", 0.35);
-    c.beginPath();
-    c.moveTo(-r * 0.15, r * 0.08);
-    c.lineTo(-r * 0.32, r * 0.34);
-    c.lineTo(-r * 0.15, r * 0.22);
-    c.fill();
-    c.beginPath();
-    c.moveTo(r * 0.15, r * 0.08);
-    c.lineTo(r * 0.32, r * 0.34);
-    c.lineTo(r * 0.15, r * 0.22);
-    c.fill();
-    c.fillStyle = "#ff7a20";
-    c.beginPath();
-    c.moveTo(-r * 0.08, r * 0.22);
-    c.lineTo(0, r * 0.48);
-    c.lineTo(r * 0.08, r * 0.22);
     c.fill();
   }
 
@@ -1094,27 +987,22 @@
       const prev = missilePos(m, Math.max(0, u - 0.04));
       ctx.save();
       if (!m.claimed) {
-        ctx.strokeStyle = m.color;
-        ctx.globalAlpha = 0.35;
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = factionTint(m.owner, true);
+        ctx.globalAlpha = 0.7;
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.moveTo(prev.x, prev.y);
-        ctx.lineTo(p.x, p.y);
-        ctx.stroke();
-        ctx.globalAlpha = 0.18;
-        for (let k = 2; k < 6; k++) {
-          const q = missilePos(m, Math.max(0, u - k * 0.035));
-          ctx.beginPath();
-          ctx.arc(q.x, q.y, 1.2, 0, Math.PI * 2);
-          ctx.fillStyle = m.color;
-          ctx.fill();
+        const steps = 24;
+        for (let s = 0; s <= steps; s++) {
+          const uu = u * (s / steps);
+          const q = missilePos(m, uu);
+          if (s === 0) ctx.moveTo(q.x, q.y);
+          else ctx.lineTo(q.x, q.y);
         }
+        ctx.stroke();
         ctx.globalAlpha = 1;
         ctx.translate(p.x, p.y);
         ctx.rotate(Math.atan2(p.y - prev.y, p.x - prev.x) + Math.PI / 2);
-        ctx.shadowColor = factionTint(m.owner, true);
-        ctx.shadowBlur = 10;
-        drawMissile(ctx, Math.min(world.cellW, world.cellH) * 0.9, factionTint(m.owner, true));
+        drawMissile(ctx, Math.min(world.cellW, world.cellH) * 0.7, factionTint(m.owner, true));
       } else {
         const boom = (m.t - m.dur) / 0.16;
         ctx.globalAlpha = 1 - boom;
@@ -1138,7 +1026,7 @@
         ctx.fillRect(u.x - 2, u.y - 4, 4, 8);
         continue;
       }
-      const uSize = u.kind === "soldier" ? cell * 1.05 : u.kind === "tank" ? cell * 1.75 : cell * 1.55;
+      const uSize = u.kind === "soldier" ? cell * 0.85 : u.kind === "tank" ? cell * 0.95 : cell * 0.9;
       ctx.save();
       if (crowd < 180) {
         ctx.shadowColor = "rgba(0,0,0,0.45)";
