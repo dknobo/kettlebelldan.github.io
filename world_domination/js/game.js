@@ -29,8 +29,8 @@
   ];
   const FACTIONS = REGIONS.length;
   const HISTORY_MAX = 120;
-  const MAX_UNITS = 24;
-  const MAX_TOTAL = 140;
+  const MAX_UNITS = 48;
+  const MAX_TOTAL = 280;
   const MAX_CAPSULES = 10;
 
   const PALETTE = [
@@ -151,7 +151,10 @@
     const b = parseInt(toward.slice(1), 16);
     const ar = (a >> 16) & 255, ag = (a >> 8) & 255, ab = a & 255;
     const br = (b >> 16) & 255, bg = (b >> 8) & 255, bb = b & 255;
-    return `rgb(${Math.round(ar + (br - ar) * t)},${Math.round(ag + (bg - ag) * t)},${Math.round(ab + (bb - ab) * t)})`;
+    const r = Math.round(ar + (br - ar) * t);
+    const g = Math.round(ag + (bg - ag) * t);
+    const bl = Math.round(ab + (bb - ab) * t);
+    return `#${((1 << 24) + (r << 16) + (g << 8) + bl).toString(16).slice(1)}`;
   }
 
   const LAT_MAX = 84;
@@ -460,11 +463,16 @@
     if (kind === "mult") {
       const srcKind = collector && collector.kind ? collector.kind : "soldier";
       const copies = world.units.filter((u) => u.owner === owner && u.kind === srcKind);
+      const extras = [];
       for (const src of copies) {
-        if (world.units.filter((u) => u.owner === owner).length >= MAX_UNITS) break;
-        if (world.units.length >= MAX_TOTAL) break;
-        world.units.push(spawnUnit(owner, srcKind, src.x + (Math.random() - 0.5) * 10, src.y + (Math.random() - 0.5) * 10, world.random, world.brick));
+        if (world.units.length + extras.length >= MAX_TOTAL) break;
+        if (copies.length + extras.length >= MAX_UNITS) break;
+        const twin = spawnUnit(owner, srcKind, src.x + (Math.random() - 0.5) * 12, src.y + (Math.random() - 0.5) * 12, world.random, world.brick);
+        twin.vx = src.vx + (Math.random() - 0.5) * 40;
+        twin.vy = src.vy + (Math.random() - 0.5) * 40;
+        extras.push(twin);
       }
+      world.units.push(...extras);
     } else {
       const mine = world.units.filter((u) => u.owner === owner).length;
       if (mine < MAX_UNITS && world.units.length < MAX_TOTAL) {
@@ -731,42 +739,60 @@
     } else dominateTimer = 0;
   }
 
+  function factionTint(owner, light) {
+    const base = mixHex(PALETTE[owner] || "#446", ACCENT[owner] || "#88f", 0.62);
+    return light ? mixHex(base, "#ffffff", 0.28) : base;
+  }
+
   function drawSoldier(c, r) {
-    c.fillStyle = "#1a3d22";
+    c.strokeStyle = "#d8f5c8";
+    c.lineWidth = Math.max(1.1, r * 0.08);
+    c.fillStyle = "#3f8a45";
     c.beginPath();
-    c.arc(0, -r * 0.38, r * 0.2, 0, Math.PI * 2);
+    c.arc(0, -r * 0.4, r * 0.16, 0, Math.PI * 2);
     c.fill();
+    c.stroke();
     c.beginPath();
-    c.moveTo(-r * 0.22, -r * 0.14);
-    c.lineTo(r * 0.22, -r * 0.14);
-    c.lineTo(r * 0.16, r * 0.22);
-    c.lineTo(r * 0.12, r * 0.5);
-    c.lineTo(-r * 0.12, r * 0.5);
-    c.lineTo(-r * 0.16, r * 0.22);
+    c.moveTo(-r * 0.13, -r * 0.2);
+    c.lineTo(r * 0.13, -r * 0.2);
+    c.lineTo(r * 0.1, r * 0.18);
+    c.lineTo(r * 0.08, r * 0.52);
+    c.lineTo(-r * 0.08, r * 0.52);
+    c.lineTo(-r * 0.1, r * 0.18);
     c.closePath();
     c.fill();
-    c.fillRect(-r * 0.34, -r * 0.08, r * 0.16, r * 0.08);
-    c.fillRect(r * 0.18, -r * 0.08, r * 0.16, r * 0.08);
+    c.stroke();
+    c.fillRect(-r * 0.28, -r * 0.12, r * 0.12, r * 0.07);
+    c.fillRect(r * 0.16, -r * 0.12, r * 0.12, r * 0.07);
   }
 
   function drawTank(c, r) {
-    c.fillStyle = "#1a1c16";
+    c.strokeStyle = "#eef6c4";
+    c.lineWidth = Math.max(1.1, r * 0.07);
+    c.fillStyle = "#1e2218";
     c.fillRect(-r * 0.52, r * 0.1, r * 1.04, r * 0.28);
-    c.fillStyle = "#3c4a28";
+    c.strokeRect(-r * 0.52, r * 0.1, r * 1.04, r * 0.28);
+    c.fillStyle = "#7a9240";
     c.fillRect(-r * 0.44, -r * 0.1, r * 0.88, r * 0.28);
-    c.fillStyle = "#4a5a30";
+    c.strokeRect(-r * 0.44, -r * 0.1, r * 0.88, r * 0.28);
+    c.fillStyle = "#9bb24e";
     c.fillRect(-r * 0.14, -r * 0.34, r * 0.34, r * 0.26);
-    c.fillStyle = "#222218";
-    c.fillRect(r * 0.16, -r * 0.28, r * 0.46, r * 0.09);
+    c.strokeRect(-r * 0.14, -r * 0.34, r * 0.34, r * 0.26);
     c.fillStyle = "#2a2c20";
+    c.fillRect(r * 0.16, -r * 0.28, r * 0.46, r * 0.09);
+    c.fillStyle = "#c8d878";
     c.fillRect(-r * 0.48, r * 0.14, r * 0.12, r * 0.12);
     c.fillRect(-r * 0.2, r * 0.14, r * 0.12, r * 0.12);
     c.fillRect(0.08 * r, r * 0.14, r * 0.12, r * 0.12);
     c.fillRect(0.36 * r, r * 0.14, r * 0.12, r * 0.12);
   }
 
-  function drawPlane(c, r) {
-    c.fillStyle = "#c5cdd6";
+  function drawPlane(c, r, color) {
+    const body = color || "#c5cdd6";
+    const shade = mixHex(body.replace(/\s/g, ""), "#ffffff", 0) || body;
+    c.fillStyle = body;
+    c.strokeStyle = "#f4f7ff";
+    c.lineWidth = Math.max(1, r * 0.06);
     c.beginPath();
     c.moveTo(r * 0.56, 0);
     c.lineTo(r * 0.18, -r * 0.08);
@@ -784,12 +810,16 @@
     c.lineTo(r * 0.18, r * 0.08);
     c.closePath();
     c.fill();
-    c.fillStyle = "#8a94a0";
+    c.stroke();
+    c.fillStyle = shade;
     c.fillRect(-r * 0.2, -r * 0.05, r * 0.42, r * 0.1);
   }
 
-  function drawMissile(c, r) {
-    c.fillStyle = "#d7dbe0";
+  function drawMissile(c, r, color) {
+    const body = color || "#d7dbe0";
+    c.fillStyle = body;
+    c.strokeStyle = "#fff6e8";
+    c.lineWidth = Math.max(1, r * 0.06);
     c.beginPath();
     c.moveTo(0, -r * 0.56);
     c.lineTo(r * 0.15, -r * 0.22);
@@ -798,14 +828,15 @@
     c.lineTo(-r * 0.15, -r * 0.22);
     c.closePath();
     c.fill();
-    c.fillStyle = "#c43a22";
+    c.stroke();
+    c.fillStyle = mixHex(body.startsWith("#") ? body : "#446688", "#220800", 0.25);
     c.beginPath();
     c.moveTo(0, -r * 0.56);
     c.lineTo(r * 0.15, -r * 0.22);
     c.lineTo(-r * 0.15, -r * 0.22);
     c.closePath();
     c.fill();
-    c.fillStyle = "#6a7080";
+    c.fillStyle = mixHex(body.startsWith("#") ? body : "#446688", "#000000", 0.35);
     c.beginPath();
     c.moveTo(-r * 0.15, r * 0.08);
     c.lineTo(-r * 0.32, r * 0.34);
@@ -827,13 +858,14 @@
   function drawIcon(kind, x, y, s, unit) {
     ctx.save();
     ctx.translate(x, y);
+    const tint = unit ? factionTint(unit.owner, true) : "#c5cdd6";
     if (kind === "plane" && unit) ctx.rotate(Math.atan2(unit.vy, unit.vx));
     else if (kind === "tank" && unit && unit.vx < 0) ctx.scale(-1, 1);
     else if (kind === "missile" && unit) ctx.rotate(Math.atan2(unit.vy, unit.vx) + Math.PI / 2);
     if (kind === "soldier") drawSoldier(ctx, s);
     else if (kind === "tank") drawTank(ctx, s);
-    else if (kind === "plane") drawPlane(ctx, s);
-    else drawMissile(ctx, s);
+    else if (kind === "plane") drawPlane(ctx, s, tint);
+    else drawMissile(ctx, s, tint);
     ctx.restore();
   }
 
@@ -947,9 +979,9 @@
         ctx.globalAlpha = 1;
         ctx.translate(p.x, p.y);
         ctx.rotate(Math.atan2(p.y - prev.y, p.x - prev.x) + Math.PI / 2);
-        ctx.shadowColor = "#ff7a20";
+        ctx.shadowColor = factionTint(m.owner, true);
         ctx.shadowBlur = 10;
-        drawMissile(ctx, Math.min(world.cellW, world.cellH) * 0.9);
+        drawMissile(ctx, Math.min(world.cellW, world.cellH) * 0.9, factionTint(m.owner, true));
       } else {
         const boom = (m.t - m.dur) / 0.16;
         ctx.globalAlpha = 1 - boom;
