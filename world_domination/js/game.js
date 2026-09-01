@@ -29,7 +29,7 @@
   ];
   const FACTIONS = REGIONS.length;
   const HISTORY_MAX = 120;
-  const MAX_UNITS = 16;
+  const MAX_UNITS = 24;
   const MAX_TOTAL = 140;
   const MAX_CAPSULES = 10;
 
@@ -118,16 +118,7 @@
       src.connect(f); f.connect(g); g.connect(this.master);
       src.start(t); src.stop(t + dur + 0.02);
     },
-    hit() {
-      this.unlock();
-      if (!this.ready()) return;
-      const now = this.ctx.currentTime;
-      if (now < this.hitGate) return;
-      this.hitGate = now + 0.02;
-      const f = 310 + Math.random() * 80;
-      this.tone(f, 0.055, "triangle", 0.14, f * 0.45);
-      this.noise(0.04, 0.08, "highpass", 900, 1400);
-    },
+    hit() {},
     power(kind) {
       this.unlock();
       if (!this.ready()) return;
@@ -141,6 +132,10 @@
         this.noise(0.16, 0.28, "highpass", 1600, 300);
         this.tone(80, 0.2, "sawtooth", 0.12, 40);
         this.tone(1400, 0.08, "square", 0.1, 200);
+      } else if (kind === "mult") {
+        [523, 659, 784, 1046].forEach((f, i) => {
+          window.setTimeout(() => this.tone(f, 0.12, "triangle", 0.16), i * 55);
+        });
       }
     },
     zap() {
@@ -457,14 +452,24 @@
     audio.zap();
   }
 
-  function maybeCollect(index, owner) {
+  function maybeCollect(index, owner, collector) {
     const kind = world.powerups.get(index);
     if (!kind) return false;
     world.powerups.delete(index);
     const pos = cellCenter(index);
-    const mine = world.units.filter((u) => u.owner === owner).length;
-    if (mine < MAX_UNITS && world.units.length < MAX_TOTAL) {
-      world.units.push(spawnUnit(owner, kind, pos.x, pos.y, world.random, world.brick));
+    if (kind === "mult") {
+      const srcKind = collector && collector.kind ? collector.kind : "soldier";
+      const copies = world.units.filter((u) => u.owner === owner && u.kind === srcKind);
+      for (const src of copies) {
+        if (world.units.filter((u) => u.owner === owner).length >= MAX_UNITS) break;
+        if (world.units.length >= MAX_TOTAL) break;
+        world.units.push(spawnUnit(owner, srcKind, src.x + (Math.random() - 0.5) * 10, src.y + (Math.random() - 0.5) * 10, world.random, world.brick));
+      }
+    } else {
+      const mine = world.units.filter((u) => u.owner === owner).length;
+      if (mine < MAX_UNITS && world.units.length < MAX_TOTAL) {
+        world.units.push(spawnUnit(owner, kind, pos.x, pos.y, world.random, world.brick));
+      }
     }
     burst(pos.x, pos.y, ACCENT[owner], 18);
     audio.power(kind);
@@ -485,11 +490,12 @@
   function pickupKind() {
     const t = accumulatedTime;
     const roll = Math.random();
-    if (t < 18) return "tank";
-    if (t < 42) return roll < 0.55 ? "tank" : "plane";
-    if (roll < 0.34) return "tank";
-    if (roll < 0.68) return "plane";
-    return "missile";
+    if (t < 16) return roll < 0.72 ? "tank" : "mult";
+    if (t < 40) return roll < 0.42 ? "tank" : roll < 0.78 ? "plane" : "mult";
+    if (roll < 0.28) return "tank";
+    if (roll < 0.52) return "plane";
+    if (roll < 0.76) return "missile";
+    return "mult";
   }
 
   function spawnPowerup() {
@@ -508,7 +514,7 @@
     const nextY = unit.y + unit.vy * dt;
     const hit = collisionCandidate(unit, nextX, nextY);
     const here = cellAt(unit.x, unit.y);
-    let picked = here >= 0 && maybeCollect(here, unit.owner);
+    let picked = here >= 0 && maybeCollect(here, unit.owner, unit);
 
     if (!hit) {
       unit.x = nextX;
@@ -516,7 +522,7 @@
       return;
     }
 
-    if (hit.index >= 0) picked = maybeCollect(hit.index, unit.owner) || picked;
+    if (hit.index >= 0) picked = maybeCollect(hit.index, unit.owner, unit) || picked;
 
     if (accumulatedTime > 0.85 && hit.index >= 0 && isLand(hit.index) && hit.index !== unit.lastCapture && !isProtected(hit.index, unit.owner)) {
       world.owner[hit.index] = unit.owner;
@@ -571,7 +577,7 @@
     standingRows = [];
     const head = document.createElement("div");
     head.className = "row head";
-    head.innerHTML = `<span class="swatch"></span><span class="name"></span><span class="n">tiles</span><span class="u">S</span><span class="u">T</span><span class="u">P</span><span class="u">R</span>`;
+    head.innerHTML = `<span class="swatch"></span><span class="name"></span><span class="n">Territories</span><span class="u">Soldiers</span><span class="u">Tanks</span><span class="u">Planes</span><span class="u">Rockets</span>`;
     head.style.order = "0";
     standingsEl.appendChild(head);
     for (let i = 0; i < FACTIONS; i++) {
@@ -832,8 +838,8 @@
   }
 
   function drawCapsule(cx, cy, kind, t) {
-    const color = kind === "tank" ? "#c4a24a" : kind === "plane" ? "#6dc8ff" : "#ff6b4a";
-    const s = Math.max(30, Math.min(world.cellW, world.cellH) * 2.35);
+    const color = kind === "tank" ? "#c4a24a" : kind === "plane" ? "#6dc8ff" : kind === "mult" ? "#d46bff" : "#ff6b4a";
+    const s = Math.max(34, Math.min(world.cellW, world.cellH) * 2.6);
     const pulse = 1 + Math.sin(t * 5) * 0.04;
     const r = (s / 2) * pulse;
     ctx.save();
@@ -853,7 +859,13 @@
     ctx.stroke();
     if (kind === "tank") drawTank(ctx, r * 0.78);
     else if (kind === "plane") drawPlane(ctx, r * 0.78);
-    else drawMissile(ctx, r * 0.78);
+    else if (kind === "mult") {
+      ctx.fillStyle = color;
+      ctx.font = `800 ${Math.max(11, r * 0.85)}px Rajdhani, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("×2", 0, 1);
+    } else drawMissile(ctx, r * 0.78);
     ctx.restore();
   }
 
@@ -952,7 +964,7 @@
 
     const cell = Math.min(world.cellW, world.cellH);
     for (const u of world.units) {
-      const uSize = u.kind === "soldier" ? cell * 0.72 : cell * 1.08;
+      const uSize = u.kind === "soldier" ? cell * 1.05 : cell * 1.55;
       ctx.save();
       ctx.shadowColor = "rgba(0,0,0,0.45)";
       ctx.shadowBlur = 4;
