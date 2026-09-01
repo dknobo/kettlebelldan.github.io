@@ -829,42 +829,186 @@
     return light ? mixHex(base, "#ffffff", 0.28) : base;
   }
 
-  function drawSoldier(c, r) {
+  const GLYPH_COUNT = 12;
+  const glyphs = loadGlyphs();
+  function loadGlyphs() {
+    try {
+      const raw = JSON.parse(localStorage.getItem("wd.glyphs") || "{}");
+      return {
+        soldier: clampGlyph(raw.soldier, 0),
+        tank: clampGlyph(raw.tank, 0),
+        plane: clampGlyph(raw.plane, 0),
+        missile: clampGlyph(raw.missile, 0),
+      };
+    } catch (e) {
+      return { soldier: 0, tank: 0, plane: 0, missile: 0 };
+    }
+  }
+  function clampGlyph(v, fallback) {
+    const n = Number(v);
+    return Number.isFinite(n) ? Math.max(0, Math.min(GLYPH_COUNT - 1, n | 0)) : fallback;
+  }
+  function saveGlyphs() {
+    localStorage.setItem("wd.glyphs", JSON.stringify(glyphs));
+  }
+
+  function drawSoldier(c, r, id) {
+    const v = id == null ? glyphs.soldier : id;
     c.strokeStyle = "#3f8a45";
-    c.lineWidth = Math.max(1.6, r * 0.18);
+    c.fillStyle = "#3f8a45";
     c.lineCap = "round";
-    c.beginPath();
-    c.moveTo(0, -r * 0.42);
-    c.lineTo(0, r * 0.42);
-    c.stroke();
+    c.lineJoin = "round";
+    c.lineWidth = Math.max(1.6, r * 0.18);
+    if (v === 1) {
+      c.beginPath(); c.arc(0, -r * 0.32, r * 0.12, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.moveTo(0, -r * 0.16); c.lineTo(0, r * 0.42); c.stroke();
+    } else if (v === 2) {
+      c.lineWidth = Math.max(1.2, r * 0.12);
+      c.beginPath(); c.arc(0, -r * 0.34, r * 0.1, 0, Math.PI * 2); c.stroke();
+      c.beginPath(); c.moveTo(0, -r * 0.22); c.lineTo(0, r * 0.16);
+      c.moveTo(-r * 0.22, -r * 0.02); c.lineTo(r * 0.22, -r * 0.02);
+      c.moveTo(0, r * 0.16); c.lineTo(-r * 0.18, r * 0.42);
+      c.moveTo(0, r * 0.16); c.lineTo(r * 0.18, r * 0.42); c.stroke();
+    } else if (v === 3) {
+      c.beginPath(); c.moveTo(0, -r * 0.4); c.lineTo(-r * 0.22, r * 0.2); c.lineTo(r * 0.22, r * 0.2); c.closePath(); c.stroke();
+    } else if (v === 4) {
+      c.beginPath(); c.moveTo(0, -r * 0.4); c.lineTo(0, r * 0.4); c.moveTo(-r * 0.28, 0); c.lineTo(r * 0.28, 0); c.stroke();
+    } else if (v === 5) {
+      c.beginPath(); c.moveTo(-r * 0.02, -r * 0.4); c.lineTo(-r * 0.02, r * 0.4);
+      c.moveTo(r * 0.12, -r * 0.4); c.lineTo(r * 0.12, r * 0.4); c.stroke();
+    } else if (v === 6) {
+      c.beginPath(); c.moveTo(-r * 0.2, r * 0.35); c.lineTo(0, -r * 0.4); c.lineTo(r * 0.2, r * 0.35); c.stroke();
+    } else if (v === 7) {
+      c.beginPath(); c.moveTo(-r * 0.22, -r * 0.32); c.lineTo(r * 0.22, -r * 0.32); c.lineTo(0, r * 0.4); c.closePath(); c.stroke();
+    } else if (v === 8) {
+      c.beginPath(); c.moveTo(0, -r * 0.4); c.lineTo(0, r * 0.15); c.lineTo(-r * 0.22, r * 0.4);
+      c.moveTo(0, r * 0.15); c.lineTo(r * 0.22, r * 0.4); c.stroke();
+    } else if (v === 9) {
+      c.beginPath(); c.arc(0, 0, r * 0.28, 0, Math.PI * 2); c.stroke();
+    } else if (v === 10) {
+      c.beginPath(); c.moveTo(0, -r * 0.36); c.lineTo(r * 0.22, 0); c.lineTo(0, r * 0.36); c.lineTo(-r * 0.22, 0); c.closePath(); c.stroke();
+    } else if (v === 11) {
+      for (const y of [-0.32, 0, 0.32]) { c.beginPath(); c.arc(0, y * r, r * 0.1, 0, Math.PI * 2); c.fill(); }
+    } else {
+      c.beginPath(); c.moveTo(0, -r * 0.42); c.lineTo(0, r * 0.42); c.stroke();
+    }
   }
 
-  function drawTank(c, r) {
+  function drawTank(c, r, id) {
+    const v = id == null ? glyphs.tank : id;
     c.fillStyle = "#9bb84a";
-    c.fillRect(-r * 0.38, -r * 0.14, r * 0.62, r * 0.28);
-    c.fillRect(r * 0.2, -r * 0.06, r * 0.28, r * 0.1);
+    c.strokeStyle = "#9bb84a";
+    c.lineWidth = Math.max(1.4, r * 0.1);
+    if (v === 1) {
+      c.fillRect(-r * 0.42, -r * 0.28, r * 0.16, r * 0.56);
+      c.fillRect(r * 0.26, -r * 0.28, r * 0.16, r * 0.56);
+      c.fillRect(-r * 0.3, -r * 0.16, r * 0.6, r * 0.32);
+      c.fillRect(r * 0.22, -r * 0.05, r * 0.32, r * 0.1);
+    } else if (v === 2) {
+      c.beginPath(); c.arc(0, 0, r * 0.26, 0, Math.PI * 2); c.fill();
+      c.fillRect(r * 0.18, -r * 0.06, r * 0.4, r * 0.12);
+    } else if (v === 3) {
+      c.beginPath(); c.moveTo(-r * 0.4, r * 0.18); c.lineTo(-r * 0.22, -r * 0.18); c.lineTo(r * 0.22, -r * 0.18); c.lineTo(r * 0.4, r * 0.18); c.closePath(); c.fill();
+      c.fillRect(r * 0.18, -r * 0.08, r * 0.36, r * 0.1);
+    } else if (v === 4) {
+      c.beginPath(); c.arc(-r * 0.22, 0, r * 0.22, Math.PI * 0.5, Math.PI * 1.5); c.arc(r * 0.22, 0, r * 0.22, -Math.PI * 0.5, Math.PI * 0.5); c.closePath(); c.fill();
+      c.fillRect(r * 0.28, -r * 0.05, r * 0.28, r * 0.1);
+    } else if (v === 5) {
+      c.beginPath(); c.moveTo(0, -r * 0.28); c.lineTo(r * 0.28, 0); c.lineTo(0, r * 0.28); c.lineTo(-r * 0.28, 0); c.closePath(); c.fill();
+      c.fillRect(r * 0.18, -r * 0.05, r * 0.32, r * 0.1);
+    } else if (v === 6) {
+      c.fillRect(-r * 0.4, -r * 0.16, r * 0.8, r * 0.32);
+    } else if (v === 7) {
+      c.fillRect(-r * 0.36, -r * 0.08, r * 0.5, r * 0.2);
+      c.fillRect(-r * 0.08, -r * 0.22, r * 0.22, r * 0.16);
+      c.fillRect(r * 0.12, -r * 0.16, r * 0.38, r * 0.08);
+    } else if (v === 8) {
+      c.beginPath(); c.moveTo(-r * 0.34, r * 0.2); c.lineTo(-r * 0.34, -r * 0.08); c.lineTo(r * 0.1, -r * 0.08); c.lineTo(r * 0.1, r * 0.2); c.stroke();
+      c.fillRect(r * 0.1, -r * 0.04, r * 0.36, r * 0.08);
+    } else if (v === 9) {
+      c.fillRect(-r * 0.42, -r * 0.12, r * 0.7, r * 0.24);
+      c.beginPath(); c.arc(-r * 0.02, -r * 0.02, r * 0.16, 0, Math.PI * 2); c.fill();
+      c.fillRect(r * 0.12, -r * 0.05, r * 0.38, r * 0.1);
+    } else if (v === 10) {
+      c.beginPath(); c.moveTo(-r * 0.4, r * 0.22); c.lineTo(-r * 0.18, -r * 0.22); c.lineTo(r * 0.4, -r * 0.08); c.lineTo(r * 0.28, r * 0.22); c.closePath(); c.fill();
+    } else if (v === 11) {
+      c.strokeRect(-r * 0.38, -r * 0.18, r * 0.76, r * 0.36);
+      c.fillRect(r * 0.22, -r * 0.04, r * 0.3, r * 0.08);
+    } else {
+      c.fillRect(-r * 0.38, -r * 0.14, r * 0.62, r * 0.28);
+      c.fillRect(r * 0.2, -r * 0.06, r * 0.28, r * 0.1);
+    }
   }
 
-  function drawPlane(c, r, color) {
+  function drawPlane(c, r, color, id) {
+    const v = id == null ? glyphs.plane : id;
     c.fillStyle = color || "#d0d6de";
-    c.beginPath();
-    c.moveTo(r * 0.42, 0);
-    c.lineTo(-r * 0.28, -r * 0.28);
-    c.lineTo(-r * 0.12, 0);
-    c.lineTo(-r * 0.28, r * 0.28);
-    c.closePath();
-    c.fill();
+    c.strokeStyle = color || "#d0d6de";
+    c.lineWidth = Math.max(1.4, r * 0.1);
+    if (v === 1) {
+      c.beginPath(); c.moveTo(r * 0.46, 0); c.lineTo(-r * 0.34, -r * 0.34); c.lineTo(-r * 0.34, r * 0.34); c.closePath(); c.fill();
+    } else if (v === 2) {
+      c.fillRect(-r * 0.38, -r * 0.07, r * 0.76, r * 0.14);
+      c.fillRect(-r * 0.07, -r * 0.38, r * 0.14, r * 0.76);
+    } else if (v === 3) {
+      c.beginPath(); c.moveTo(-r * 0.34, -r * 0.34); c.lineTo(r * 0.34, r * 0.34); c.moveTo(r * 0.34, -r * 0.34); c.lineTo(-r * 0.34, r * 0.34); c.stroke();
+    } else if (v === 4) {
+      c.beginPath(); c.moveTo(r * 0.44, 0); c.lineTo(-r * 0.34, -r * 0.22); c.lineTo(-r * 0.18, 0); c.lineTo(-r * 0.34, r * 0.22); c.closePath(); c.fill();
+    } else if (v === 5) {
+      c.beginPath(); c.moveTo(-r * 0.28, -r * 0.32); c.lineTo(r * 0.36, 0); c.lineTo(-r * 0.28, r * 0.32); c.stroke();
+    } else if (v === 6) {
+      c.beginPath(); c.moveTo(r * 0.42, 0); c.lineTo(-r * 0.08, -r * 0.38); c.lineTo(-r * 0.28, -r * 0.12); c.lineTo(-r * 0.28, r * 0.12); c.lineTo(-r * 0.08, r * 0.38); c.closePath(); c.fill();
+    } else if (v === 7) {
+      c.beginPath(); c.moveTo(r * 0.46, 0); c.lineTo(-r * 0.4, -r * 0.12); c.lineTo(-r * 0.4, r * 0.12); c.closePath(); c.fill();
+    } else if (v === 8) {
+      c.fillRect(-r * 0.08, -r * 0.36, r * 0.16, r * 0.72);
+      c.fillRect(-r * 0.36, -r * 0.08, r * 0.72, r * 0.16);
+    } else if (v === 9) {
+      c.beginPath(); c.moveTo(-r * 0.3, -r * 0.28); c.quadraticCurveTo(0, -r * 0.08, r * 0.4, 0); c.quadraticCurveTo(0, r * 0.08, -r * 0.3, r * 0.28); c.closePath(); c.fill();
+    } else if (v === 10) {
+      c.beginPath(); c.moveTo(r * 0.4, 0); c.lineTo(0, -r * 0.22); c.lineTo(-r * 0.4, 0); c.lineTo(0, r * 0.22); c.closePath(); c.fill();
+    } else if (v === 11) {
+      c.fillRect(-r * 0.36, -r * 0.06, r * 0.72, r * 0.12);
+      c.beginPath(); c.moveTo(-r * 0.04, -r * 0.34); c.lineTo(r * 0.28, 0); c.lineTo(-r * 0.04, r * 0.34); c.fill();
+    } else {
+      c.beginPath(); c.moveTo(r * 0.42, 0); c.lineTo(-r * 0.28, -r * 0.28); c.lineTo(-r * 0.12, 0); c.lineTo(-r * 0.28, r * 0.28); c.closePath(); c.fill();
+    }
   }
 
-  function drawMissile(c, r, color) {
+  function drawMissile(c, r, color, id) {
+    const v = id == null ? glyphs.missile : id;
     c.fillStyle = color || "#e07040";
-    c.beginPath();
-    c.moveTo(0, -r * 0.48);
-    c.lineTo(r * 0.14, r * 0.28);
-    c.lineTo(0, r * 0.14);
-    c.lineTo(-r * 0.14, r * 0.28);
-    c.closePath();
-    c.fill();
+    c.strokeStyle = color || "#e07040";
+    c.lineWidth = Math.max(1.4, r * 0.1);
+    if (v === 1) {
+      c.beginPath(); c.moveTo(0, -r * 0.42); c.lineTo(r * 0.16, -r * 0.12); c.lineTo(r * 0.16, r * 0.3); c.lineTo(-r * 0.16, r * 0.3); c.lineTo(-r * 0.16, -r * 0.12); c.closePath(); c.fill();
+    } else if (v === 2) {
+      c.beginPath(); c.moveTo(0, -r * 0.44); c.lineTo(r * 0.24, r * 0.32); c.lineTo(-r * 0.24, r * 0.32); c.closePath(); c.fill();
+    } else if (v === 3) {
+      c.beginPath(); c.moveTo(0, -r * 0.44); c.lineTo(0, r * 0.2); c.stroke();
+      c.beginPath(); c.moveTo(0, -r * 0.44); c.lineTo(r * 0.16, -r * 0.08); c.lineTo(-r * 0.16, -r * 0.08); c.closePath(); c.fill();
+    } else if (v === 4) {
+      c.beginPath(); c.moveTo(0, -r * 0.44); c.quadraticCurveTo(r * 0.22, 0, 0, r * 0.4); c.quadraticCurveTo(-r * 0.22, 0, 0, -r * 0.44); c.fill();
+    } else if (v === 5) {
+      c.beginPath(); c.moveTo(0, -r * 0.44); c.lineTo(r * 0.2, r * 0.08); c.lineTo(0, r * 0.0); c.lineTo(-r * 0.2, r * 0.08); c.closePath(); c.fill();
+    } else if (v === 6) {
+      c.beginPath(); c.moveTo(0, -r * 0.36); c.lineTo(r * 0.22, 0); c.lineTo(0, r * 0.36); c.lineTo(-r * 0.22, 0); c.closePath(); c.fill();
+    } else if (v === 7) {
+      c.beginPath(); c.moveTo(0, -r * 0.4); c.lineTo(-r * 0.2, r * 0.28); c.lineTo(0, r * 0.12); c.lineTo(r * 0.2, r * 0.28); c.closePath(); c.stroke();
+    } else if (v === 8) {
+      c.beginPath(); c.moveTo(0, -r * 0.46); c.lineTo(0, r * 0.36); c.stroke();
+      c.beginPath(); c.moveTo(-r * 0.12, r * 0.12); c.lineTo(0, r * 0.36); c.lineTo(r * 0.12, r * 0.12); c.stroke();
+    } else if (v === 9) {
+      c.beginPath(); c.moveTo(r * 0.08, -r * 0.42); c.lineTo(-r * 0.1, -r * 0.04); c.lineTo(r * 0.12, -r * 0.04); c.lineTo(-r * 0.08, r * 0.42); c.lineTo(r * 0.04, r * 0.06); c.lineTo(-r * 0.14, r * 0.06); c.closePath(); c.fill();
+    } else if (v === 10) {
+      c.fillRect(-r * 0.08, -r * 0.28, r * 0.16, r * 0.56);
+      c.beginPath(); c.moveTo(0, -r * 0.46); c.lineTo(r * 0.14, -r * 0.22); c.lineTo(-r * 0.14, -r * 0.22); c.closePath(); c.fill();
+    } else if (v === 11) {
+      c.beginPath(); c.arc(0, r * 0.08, r * 0.22, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.moveTo(0, -r * 0.42); c.lineTo(r * 0.14, -r * 0.04); c.lineTo(-r * 0.14, -r * 0.04); c.closePath(); c.fill();
+    } else {
+      c.beginPath(); c.moveTo(0, -r * 0.48); c.lineTo(r * 0.14, r * 0.28); c.lineTo(0, r * 0.14); c.lineTo(-r * 0.14, r * 0.28); c.closePath(); c.fill();
+    }
   }
 
   function drawIcon(kind, x, y, s, unit) {
@@ -1046,11 +1190,13 @@
     const dt = Math.min(0.05, (now - previousTime) / 1000);
     previousTime = now;
     accumulatedTime += dt;
-    if (fadingOut) {
-      fade = Math.min(1, fade + dt * 1.3);
-      if (fade >= 1) resetWorld();
-    } else update(dt);
-    draw();
+    if (!picking) {
+      if (fadingOut) {
+        fade = Math.min(1, fade + dt * 1.3);
+        if (fade >= 1) resetWorld();
+      } else update(dt);
+      draw();
+    }
     animationId = requestAnimationFrame(tick);
   }
 
@@ -1059,6 +1205,7 @@
   window.addEventListener("pointermove", unlockAudio, { once: true });
   window.addEventListener("keydown", unlockAudio);
   window.addEventListener("keydown", (e) => {
+    if (picking) return;
     if (e.code === "Space" || e.code === "KeyR") {
       e.preventDefault();
       if (!fadingOut) { fadingOut = true; fade = 0; }
@@ -1070,6 +1217,80 @@
   });
 
   window.__DOM = () => world;
+
+  let picking = true;
+  const pickerEl = document.querySelector("#picker");
+  const pickerGrid = document.querySelector("#picker-grid");
+  const pickerGo = document.querySelector("#picker-go");
+  const pickerOpen = document.querySelector("#picker-open");
+
+  function paintPick(canvas, kind, id) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = 72, h = 72;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    const c = canvas.getContext("2d");
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, w, h);
+    c.translate(w / 2, h / 2);
+    const r = 22;
+    if (kind === "soldier") drawSoldier(c, r, id);
+    else if (kind === "tank") drawTank(c, r, id);
+    else if (kind === "plane") drawPlane(c, r, "#d0d6de", id);
+    else drawMissile(c, r, "#e07040", id);
+  }
+
+  function buildPicker() {
+    pickerGrid.innerHTML = "";
+    const blocks = [
+      ["soldier", "SOLDIERS"],
+      ["tank", "TANKS"],
+      ["plane", "PLANES"],
+      ["missile", "ROCKETS"],
+    ];
+    for (const [kind, title] of blocks) {
+      const block = document.createElement("div");
+      block.className = "pick-block";
+      const h = document.createElement("h2");
+      h.textContent = title;
+      const row = document.createElement("div");
+      row.className = "pick-row";
+      for (let i = 0; i < GLYPH_COUNT; i++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "pick-cell" + (glyphs[kind] === i ? " sel" : "");
+        btn.dataset.kind = kind;
+        btn.dataset.id = String(i);
+        const cv = document.createElement("canvas");
+        btn.appendChild(cv);
+        paintPick(cv, kind, i);
+        btn.addEventListener("click", () => {
+          glyphs[kind] = i;
+          saveGlyphs();
+          row.querySelectorAll(".pick-cell").forEach((el) => el.classList.toggle("sel", el === btn));
+        });
+        row.appendChild(btn);
+      }
+      block.append(h, row);
+      pickerGrid.appendChild(block);
+    }
+  }
+
+  function showPicker() {
+    picking = true;
+    pickerEl.classList.remove("hidden");
+    buildPicker();
+  }
+
+  function hidePicker() {
+    picking = false;
+    pickerEl.classList.add("hidden");
+    previousTime = performance.now();
+  }
+
+  pickerGo.addEventListener("click", hidePicker);
+  pickerOpen.addEventListener("click", showPicker);
+  buildPicker();
 
   fetch("data/countries.geo.json")
     .then((r) => r.json())
