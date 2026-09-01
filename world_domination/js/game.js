@@ -29,9 +29,9 @@
   ];
   const FACTIONS = REGIONS.length;
   const HISTORY_MAX = 120;
-  const MAX_UNITS = 48;
-  const MAX_TOTAL = 280;
-  const MAX_CAPSULES = 14;
+  const MAX_PER_TYPE = 256;
+  const MAX_TOTAL = 2400;
+  const MAX_CAPSULES = 16;
 
   const PALETTE = [
     "#1a4d8c", "#8c1e1e", "#0d6b4c", "#8a4a0c",
@@ -314,11 +314,13 @@
     historyTimer = 0;
     accumulatedTime = 0;
     spawnTimer = 0.4;
+    spawnSpecific("tank");
+    spawnSpecific("plane");
+    spawnSpecific("missile");
     spawnSpecific("mult-soldier");
     spawnSpecific("mult-tank");
     spawnSpecific("mult-plane");
     spawnSpecific("mult-missile");
-    spawnPowerup();
     spawnTimer = 0.25;
     dominateTimer = 0;
     fade = 0;
@@ -476,16 +478,16 @@
       const extras = [];
       for (const src of copies) {
         if (world.units.length + extras.length >= MAX_TOTAL) break;
-        if (copies.length + extras.length >= MAX_UNITS) break;
+        if (copies.length + extras.length >= MAX_PER_TYPE) break;
         const twin = spawnUnit(owner, srcKind, src.x + (Math.random() - 0.5) * 12, src.y + (Math.random() - 0.5) * 12, world.random, world.brick);
         twin.vx = src.vx + (Math.random() - 0.5) * 40;
         twin.vy = src.vy + (Math.random() - 0.5) * 40;
         extras.push(twin);
       }
       world.units.push(...extras);
-    } else {
-      const mine = world.units.filter((u) => u.owner === owner).length;
-      if (mine < MAX_UNITS && world.units.length < MAX_TOTAL) {
+    } else if (kind === "tank" || kind === "plane" || kind === "missile") {
+      const ofType = world.units.filter((u) => u.owner === owner && u.kind === kind).length;
+      if (ofType < MAX_PER_TYPE && world.units.length < MAX_TOTAL) {
         world.units.push(spawnUnit(owner, kind, pos.x, pos.y, world.random, world.brick));
       }
     }
