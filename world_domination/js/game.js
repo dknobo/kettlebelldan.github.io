@@ -307,6 +307,7 @@
       width, height, cols, rows, cellW, cellH, brick,
       owner, land, units, cents, tileFill, random,
       powerups: new Map(),
+      occ: new Uint16Array(cols * rows),
     };
     particles = [];
     missiles = [];
@@ -318,9 +319,6 @@
     spawnSpecific("plane");
     spawnSpecific("missile");
     spawnSpecific("mult-soldier");
-    spawnSpecific("mult-tank");
-    spawnSpecific("mult-plane");
-    spawnSpecific("mult-missile");
     spawnTimer = 0.25;
     dominateTimer = 0;
     fade = 0;
@@ -348,21 +346,43 @@
     return world.owner[i] !== unit.owner;
   }
 
+  function rebuildOcc() {
+    const occ = world.occ;
+    occ.fill(0);
+    const cols = world.cols;
+    const cellW = world.cellW;
+    const cellH = world.cellH;
+    for (let i = 0; i < world.units.length; i++) {
+      const u = world.units[i];
+      const c = (u.x / cellW) | 0;
+      const r = (u.y / cellH) | 0;
+      if (c < 0 || r < 0 || c >= cols || r >= world.rows) continue;
+      occ[r * cols + c] |= (1 << u.owner);
+    }
+  }
+
   function isProtected(index, attacker) {
     if (index < 0) return true;
-    const col = index % world.cols;
-    const row = Math.floor(index / world.cols);
-    for (const u of world.units) {
-      if (u.owner === attacker) continue;
-      const bc = Math.floor(u.x / world.cellW);
-      const br = Math.floor(u.y / world.cellH);
-      if (Math.abs(col - bc) <= 1 && Math.abs(row - br) <= 1) return true;
+    const cols = world.cols;
+    const col = index % cols;
+    const row = (index / cols) | 0;
+    const mask = ~(1 << attacker);
+    const occ = world.occ;
+    for (let dr = -1; dr <= 1; dr++) {
+      const rr = row + dr;
+      if (rr < 0 || rr >= world.rows) continue;
+      for (let dc = -1; dc <= 1; dc++) {
+        const cc = col + dc;
+        if (cc < 0 || cc >= cols) continue;
+        if (occ[rr * cols + cc] & mask) return true;
+      }
     }
     return false;
   }
 
   function collisionCandidate(unit, nextX, nextY) {
-    const samples = 14;
+    const n = world.units.length;
+    const samples = n > 900 ? 5 : n > 400 ? 7 : 12;
     const hits = [];
     const rad = Math.min(world.cellW, world.cellH) * 0.38;
     for (let i = 0; i < samples; i++) {
@@ -507,11 +527,41 @@
     }
   }
 
+  function ownersWith(kind) {
+    const seen = [];
+    const mark = new Uint8Array(FACTIONS);
+    for (let i = 0; i < world.units.length; i++) {
+      const u = world.units[i];
+      if (u.kind === kind && !mark[u.owner]) {
+        mark[u.owner] = 1;
+        seen.push(u.owner);
+      }
+    }
+    return seen;
+  }
+
+  function nearOwner(index, owner) {
+    const cols = world.cols;
+    const c = index % cols;
+    const r = (index / cols) | 0;
+    for (let dr = -2; dr <= 2; dr++) {
+      for (let dc = -2; dc <= 2; dc++) {
+        const cc = c + dc, rr = r + dr;
+        if (cc < 0 || rr < 0 || cc >= cols || rr >= world.rows) continue;
+        const n = rr * cols + cc;
+        if (world.land[n] && world.owner[n] === owner) return true;
+      }
+    }
+    return false;
+  }
+
   function pickupKind() {
     const t = accumulatedTime;
     const roll = Math.random();
     if (roll < 0.46) {
-      return "mult-" + ["soldier", "tank", "plane", "missile"][(Math.random() * 4) | 0];
+      const opts = ["soldier", "tank", "plane", "missile"].filter((k) => ownersWith(k).length);
+      if (!opts.length) return "tank";
+      return "mult-" + opts[(Math.random() * opts.length) | 0];
     }
     if (t < 16) return "tank";
     if (t < 40) return roll < 0.7 ? "tank" : "plane";
@@ -526,12 +576,22 @@
 
   function spawnSpecific(kind) {
     if (world.powerups.size >= MAX_CAPSULES) return;
+    const target = multFor(kind);
+    let only = -1;
+    if (target) {
+      const owners = ownersWith(target);
+      if (!owners.length) return;
+      only = owners[(Math.random() * owners.length) | 0];
+    }
     const sea = isSeaPickup(kind);
-    for (let tries = 0; tries < 80; tries++) {
+    for (let tries = 0; tries < 90; tries++) {
       const i = (Math.random() * world.owner.length) | 0;
       if (world.powerups.has(i)) continue;
       if (sea) {
         if (world.land[i]) continue;
+        if (only >= 0 && !nearOwner(i, only)) continue;
+      } else if (only >= 0) {
+        if (world.owner[i] !== only) continue;
       } else if (!world.land[i]) continue;
       world.powerups.set(i, kind);
       return;
@@ -730,7 +790,9 @@
 
   function update(dt) {
     if (!world || fadingOut) return;
-    const maxStep = 1 / 120;
+    rebuildOcc();
+    const n = world.units.length;
+    const maxStep = n > 1200 ? 1 / 45 : n > 600 ? 1 / 70 : 1 / 120;
     let remaining = Math.min(dt, 0.05);
     while (remaining > 0) {
       const step = Math.min(maxStep, remaining);
@@ -1066,11 +1128,22 @@
     }
 
     const cell = Math.min(world.cellW, world.cellH);
-    for (const u of world.units) {
+    const crowd = world.units.length;
+    const simple = crowd > 450;
+    ctx.shadowBlur = 0;
+    for (let i = 0; i < crowd; i++) {
+      const u = world.units[i];
+      if (simple && u.kind === "soldier") {
+        ctx.fillStyle = "#4a9a4e";
+        ctx.fillRect(u.x - 2, u.y - 4, 4, 8);
+        continue;
+      }
       const uSize = u.kind === "soldier" ? cell * 1.05 : u.kind === "tank" ? cell * 1.75 : cell * 1.55;
       ctx.save();
-      ctx.shadowColor = "rgba(0,0,0,0.45)";
-      ctx.shadowBlur = 4;
+      if (crowd < 180) {
+        ctx.shadowColor = "rgba(0,0,0,0.45)";
+        ctx.shadowBlur = 4;
+      }
       drawIcon(u.kind, u.x, u.y, uSize, u);
       ctx.restore();
     }
