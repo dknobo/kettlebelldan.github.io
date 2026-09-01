@@ -8,6 +8,11 @@
   const historyCanvas = document.querySelector("#history-plot");
   const historyCtx = historyCanvas.getContext("2d");
 
+  const REGION_NAMES = [
+    "USA", "Canada", "Mexico", "S. America",
+    "Africa", "Europe", "Russia", "Mid East",
+    "India", "China", "SE Asia", "Australia",
+  ];
   const REGIONS = [
     ["united states of america", "puerto rico"],
     ["canada"],
@@ -553,39 +558,62 @@
     return { counts, best };
   }
 
+  function unitCounts() {
+    const tab = Array.from({ length: FACTIONS }, () => ({ soldier: 0, tank: 0, plane: 0, missile: 0 }));
+    for (const u of world.units) {
+      if (tab[u.owner] && tab[u.owner][u.kind] != null) tab[u.owner][u.kind]++;
+    }
+    return tab;
+  }
+
   function buildStandings() {
     standingsEl.innerHTML = "";
     standingRows = [];
+    const head = document.createElement("div");
+    head.className = "row head";
+    head.innerHTML = `<span class="swatch"></span><span class="name"></span><span class="n">tiles</span><span class="u">S</span><span class="u">T</span><span class="u">P</span><span class="u">R</span>`;
+    head.style.order = "0";
+    standingsEl.appendChild(head);
     for (let i = 0; i < FACTIONS; i++) {
       const row = document.createElement("div");
       row.className = "row";
-      const track = document.createElement("div");
-      track.className = "track";
-      const bar = document.createElement("div");
-      bar.className = "bar";
-      bar.style.background = mixHex(PALETTE[i], ACCENT[i], 0.28);
+      const swatch = document.createElement("span");
+      swatch.className = "swatch";
+      swatch.style.background = mixHex(PALETTE[i], ACCENT[i], 0.22);
+      const name = document.createElement("span");
+      name.className = "name";
+      name.textContent = REGION_NAMES[i];
       const n = document.createElement("span");
       n.className = "n";
-      track.appendChild(bar);
-      row.appendChild(track);
-      row.appendChild(n);
+      const s = document.createElement("span");
+      s.className = "u";
+      const t = document.createElement("span");
+      t.className = "u";
+      const p = document.createElement("span");
+      p.className = "u";
+      const m = document.createElement("span");
+      m.className = "u";
+      row.append(swatch, name, n, s, t, p, m);
       standingsEl.appendChild(row);
-      standingRows.push({ row, bar, n, team: i });
+      standingRows.push({ row, n, s, t, p, m, team: i });
     }
   }
 
   function refreshLeader() {
     if (!world || !standingRows.length) return;
     const { counts } = ownership();
-    const max = Math.max(1, ...counts);
+    const units = unitCounts();
     const ranked = standingRows
       .map((r) => ({ ...r, count: counts[r.team] }))
       .sort((a, b) => b.count - a.count || a.team - b.team);
     ranked.forEach((r, i) => {
-      r.row.style.order = String(i);
-      r.bar.style.width = `${(r.count / max) * 100}%`;
+      r.row.style.order = String(i + 1);
       r.n.textContent = r.count.toLocaleString();
-      r.row.style.display = r.count ? "flex" : "none";
+      const u = units[r.team];
+      r.s.textContent = u.soldier;
+      r.t.textContent = u.tank;
+      r.p.textContent = u.plane;
+      r.m.textContent = u.missile;
     });
   }
 
@@ -611,19 +639,28 @@
     const h = historyCanvas._cssH || historyCanvas.clientHeight;
     if (!w || !h || history.length < 2) return;
     historyCtx.clearRect(0, 0, w, h);
-    let lo = Infinity, hi = 0;
+    const origin = history[0];
+    let lo = 0;
+    let hi = 0;
     for (const sample of history) {
       for (let t = 0; t < FACTIONS; t++) {
-        const v = sample[t] || 0;
-        if (v < lo) lo = v;
-        if (v > hi) hi = v;
+        const d = (sample[t] || 0) - (origin[t] || 0);
+        if (d < lo) lo = d;
+        if (d > hi) hi = d;
       }
     }
-    const padY = Math.max(6, (hi - lo) * 0.2);
-    lo = Math.max(0, lo - padY);
-    hi = hi + padY;
-    if (hi <= lo) hi = lo + 1;
-    const pad = 1.5;
+    const padY = Math.max(8, (hi - lo) * 0.18);
+    lo -= padY;
+    hi += padY;
+    if (hi <= lo) { hi = 8; lo = -8; }
+    const pad = 2;
+    const zeroY = h - pad - ((0 - lo) / (hi - lo)) * (h - pad * 2);
+    historyCtx.strokeStyle = "rgba(255,255,255,0.18)";
+    historyCtx.lineWidth = 1;
+    historyCtx.beginPath();
+    historyCtx.moveTo(pad, zeroY);
+    historyCtx.lineTo(w - pad, zeroY);
+    historyCtx.stroke();
     const span = Math.max(history.length - 1, 1);
     for (let t = 0; t < FACTIONS; t++) {
       historyCtx.beginPath();
@@ -631,8 +668,9 @@
       historyCtx.strokeStyle = ACCENT[t];
       historyCtx.lineJoin = "round";
       for (let i = 0; i < history.length; i++) {
+        const d = (history[i][t] || 0) - (origin[t] || 0);
         const x = pad + (i / span) * (w - pad * 2);
-        const y = h - pad - (((history[i][t] || 0) - lo) / (hi - lo)) * (h - pad * 2);
+        const y = h - pad - ((d - lo) / (hi - lo)) * (h - pad * 2);
         if (i === 0) historyCtx.moveTo(x, y);
         else historyCtx.lineTo(x, y);
       }
