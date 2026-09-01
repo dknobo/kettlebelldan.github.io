@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  // build 3: fewer regions, missile arcs, uncircled figures
+  // build 4: solid starting blocs, clearer unit figures
 
   const canvas = document.querySelector("#world");
   const ctx = canvas.getContext("2d", { alpha: false });
@@ -188,20 +188,46 @@
     return -1;
   }
 
+  function geoAssign(x, y, cols, rows) {
+    const lon = (x + 0.5) / cols * 360 - 180;
+    const lat = LAT_MAX - (y + 0.5) / rows * (LAT_MAX - LAT_MIN);
+    if (lat > 51 && lon < -129) return 0;
+    if (lat > 18.5 && lat < 22.8 && lon < -154 && lon > -161) return 0;
+    if (lon <= -25) {
+      if (lat >= 49) return 1;
+      if (lat >= 24.3) return 0;
+      if (lat >= 7.2) return 2;
+      return 3;
+    }
+    if (lon > 112 && lon < 180 && lat < -10) return 11;
+    if (lon > 165 && lat < -32) return 11;
+    if (lon > -19 && lon < 51 && lat < 37.2 && lat > -35) {
+      if (lon > 34 && lat > 29) return 7;
+      return 4;
+    }
+    if (lon > 67 && lon < 90 && lat > 6 && lat < 36) return 8;
+    if (lon > 92 && lon < 141 && lat < 20.5 && lat > -11) return 10;
+    if (lon > 26 && lon < 64 && lat > 12 && lat < 42.5) return 7;
+    if (lon > 97 && lon < 147 && lat > 20 && lat < 54) return 9;
+    if (lon > -25 && lon < 29 && lat > 36) return 5;
+    if (lon > 28 && lat > 41) return 6;
+    if (lon > 29 && lon < 42 && lat > 36 && lat < 48) return 5;
+    return 5;
+  }
+
   function rasterize(cols, rows) {
     const off = document.createElement("canvas");
     off.width = cols;
     off.height = rows;
     const octx = off.getContext("2d", { willReadFrequently: true });
+    octx.imageSmoothingEnabled = false;
     octx.clearRect(0, 0, cols, rows);
-    const feats = geo.features;
-    for (let i = 0; i < feats.length; i++) {
-      const name = String(feats[i].properties.name || "").toLowerCase();
+    octx.fillStyle = "#fff";
+    for (const feat of geo.features) {
+      const name = String(feat.properties.name || "").toLowerCase();
       if (name.includes("antarctica") || name.includes("french southern")) continue;
-      const id = i + 1;
-      octx.fillStyle = `rgb(${id % 256},${(id >> 8) & 255},0)`;
       octx.beginPath();
-      const g = feats[i].geometry;
+      const g = feat.geometry;
       const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
       for (const poly of polys) {
         for (const ring of poly) drawRing(octx, ring, cols, rows);
@@ -209,44 +235,14 @@
       octx.fill("evenodd");
     }
     const img = octx.getImageData(0, 0, cols, rows).data;
-    const raw = new Int16Array(cols * rows);
-    for (let p = 0; p < cols * rows; p++) {
-      const r = img[p * 4], gch = img[p * 4 + 1], a = img[p * 4 + 3];
-      if (a < 20) { raw[p] = -1; continue; }
-      const id = r + (gch << 8) - 1;
-      raw[p] = (id >= 0 && id < feats.length) ? id : -1;
-    }
-    const centroids = Array.from({ length: FACTIONS }, () => ({ x: 0, y: 0, n: 0 }));
     const owner = new Int16Array(cols * rows);
     const land = new Uint8Array(cols * rows);
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const p = y * cols + x;
-        const src = raw[p];
-        if (src < 0) { owner[p] = -1; continue; }
+        if (img[p * 4 + 3] < 20) { owner[p] = -1; continue; }
         land[p] = 1;
-        const fi = regionOf(feats[src].properties.name);
-        if (fi >= 0) {
-          owner[p] = fi;
-          centroids[fi].x += x;
-          centroids[fi].y += y;
-          centroids[fi].n++;
-        } else owner[p] = -3;
-      }
-    }
-    for (const c of centroids) if (c.n) { c.x /= c.n; c.y /= c.n; }
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        const p = y * cols + x;
-        if (owner[p] !== -3) continue;
-        let best = 0, bd = 1e12;
-        for (let k = 0; k < FACTIONS; k++) {
-          if (!centroids[k].n) continue;
-          const dx = x - centroids[k].x, dy = y - centroids[k].y;
-          const d = dx * dx + dy * dy;
-          if (d < bd) { bd = d; best = k; }
-        }
-        owner[p] = best;
+        owner[p] = geoAssign(x, y, cols, rows);
       }
     }
     return { owner, land };
@@ -517,7 +513,7 @@
 
     if (hit.index >= 0) picked = maybeCollect(hit.index, unit.owner) || picked;
 
-    if (hit.index >= 0 && isLand(hit.index) && hit.index !== unit.lastCapture && !isProtected(hit.index, unit.owner)) {
+    if (accumulatedTime > 0.85 && hit.index >= 0 && isLand(hit.index) && hit.index !== unit.lastCapture && !isProtected(hit.index, unit.owner)) {
       world.owner[hit.index] = unit.owner;
       unit.lastCapture = hit.index;
       const spec = KINDS[unit.kind];
@@ -692,60 +688,108 @@
   }
 
   function drawSoldier(c, r) {
+    c.fillStyle = "#1a3d22";
     c.beginPath();
-    c.arc(0, -r * 0.42, r * 0.22, 0, Math.PI * 2);
+    c.arc(0, -r * 0.38, r * 0.2, 0, Math.PI * 2);
     c.fill();
     c.beginPath();
-    c.moveTo(-r * 0.28, -r * 0.12);
-    c.lineTo(r * 0.28, -r * 0.12);
-    c.lineTo(r * 0.18, r * 0.48);
-    c.lineTo(-r * 0.18, r * 0.48);
+    c.moveTo(-r * 0.22, -r * 0.14);
+    c.lineTo(r * 0.22, -r * 0.14);
+    c.lineTo(r * 0.16, r * 0.22);
+    c.lineTo(r * 0.12, r * 0.5);
+    c.lineTo(-r * 0.12, r * 0.5);
+    c.lineTo(-r * 0.16, r * 0.22);
     c.closePath();
     c.fill();
+    c.fillRect(-r * 0.34, -r * 0.08, r * 0.16, r * 0.08);
+    c.fillRect(r * 0.18, -r * 0.08, r * 0.16, r * 0.08);
   }
 
   function drawTank(c, r) {
-    c.fillRect(-r * 0.42, -r * 0.32, r * 0.18, r * 0.64);
-    c.fillRect(r * 0.24, -r * 0.32, r * 0.18, r * 0.64);
-    c.fillRect(-r * 0.3, -r * 0.2, r * 0.6, r * 0.4);
-    c.fillRect(r * 0.18, -r * 0.06, r * 0.38, r * 0.12);
+    c.fillStyle = "#1a1c16";
+    c.fillRect(-r * 0.52, r * 0.1, r * 1.04, r * 0.28);
+    c.fillStyle = "#3c4a28";
+    c.fillRect(-r * 0.44, -r * 0.1, r * 0.88, r * 0.28);
+    c.fillStyle = "#4a5a30";
+    c.fillRect(-r * 0.14, -r * 0.34, r * 0.34, r * 0.26);
+    c.fillStyle = "#222218";
+    c.fillRect(r * 0.16, -r * 0.28, r * 0.46, r * 0.09);
+    c.fillStyle = "#2a2c20";
+    c.fillRect(-r * 0.48, r * 0.14, r * 0.12, r * 0.12);
+    c.fillRect(-r * 0.2, r * 0.14, r * 0.12, r * 0.12);
+    c.fillRect(0.08 * r, r * 0.14, r * 0.12, r * 0.12);
+    c.fillRect(0.36 * r, r * 0.14, r * 0.12, r * 0.12);
   }
 
   function drawPlane(c, r) {
+    c.fillStyle = "#c5cdd6";
     c.beginPath();
-    c.moveTo(r * 0.52, 0);
-    c.lineTo(-r * 0.18, -r * 0.42);
-    c.lineTo(-r * 0.08, 0);
-    c.lineTo(-r * 0.18, r * 0.42);
+    c.moveTo(r * 0.56, 0);
+    c.lineTo(r * 0.18, -r * 0.08);
+    c.lineTo(-r * 0.08, -r * 0.46);
+    c.lineTo(-r * 0.22, -r * 0.46);
+    c.lineTo(-r * 0.12, -r * 0.08);
+    c.lineTo(-r * 0.48, -r * 0.16);
+    c.lineTo(-r * 0.48, -r * 0.06);
+    c.lineTo(-r * 0.28, 0);
+    c.lineTo(-r * 0.48, r * 0.06);
+    c.lineTo(-r * 0.48, r * 0.16);
+    c.lineTo(-r * 0.12, r * 0.08);
+    c.lineTo(-r * 0.22, r * 0.46);
+    c.lineTo(-r * 0.08, r * 0.46);
+    c.lineTo(r * 0.18, r * 0.08);
     c.closePath();
     c.fill();
-    c.fillRect(-r * 0.42, -r * 0.06, r * 0.28, r * 0.12);
+    c.fillStyle = "#8a94a0";
+    c.fillRect(-r * 0.2, -r * 0.05, r * 0.42, r * 0.1);
   }
 
   function drawMissile(c, r) {
+    c.fillStyle = "#d7dbe0";
     c.beginPath();
-    c.moveTo(0, -r * 0.5);
-    c.lineTo(r * 0.16, -r * 0.12);
-    c.lineTo(r * 0.16, r * 0.28);
-    c.lineTo(0, r * 0.18);
-    c.lineTo(-r * 0.16, r * 0.28);
-    c.lineTo(-r * 0.16, -r * 0.12);
+    c.moveTo(0, -r * 0.56);
+    c.lineTo(r * 0.15, -r * 0.22);
+    c.lineTo(r * 0.15, r * 0.22);
+    c.lineTo(-r * 0.15, r * 0.22);
+    c.lineTo(-r * 0.15, -r * 0.22);
     c.closePath();
+    c.fill();
+    c.fillStyle = "#c43a22";
+    c.beginPath();
+    c.moveTo(0, -r * 0.56);
+    c.lineTo(r * 0.15, -r * 0.22);
+    c.lineTo(-r * 0.15, -r * 0.22);
+    c.closePath();
+    c.fill();
+    c.fillStyle = "#6a7080";
+    c.beginPath();
+    c.moveTo(-r * 0.15, r * 0.08);
+    c.lineTo(-r * 0.32, r * 0.34);
+    c.lineTo(-r * 0.15, r * 0.22);
+    c.fill();
+    c.beginPath();
+    c.moveTo(r * 0.15, r * 0.08);
+    c.lineTo(r * 0.32, r * 0.34);
+    c.lineTo(r * 0.15, r * 0.22);
+    c.fill();
+    c.fillStyle = "#ff7a20";
+    c.beginPath();
+    c.moveTo(-r * 0.08, r * 0.22);
+    c.lineTo(0, r * 0.48);
+    c.lineTo(r * 0.08, r * 0.22);
     c.fill();
   }
 
-  function drawIcon(kind, x, y, s, color) {
+  function drawIcon(kind, x, y, s, unit) {
     ctx.save();
     ctx.translate(x, y);
-    ctx.fillStyle = color;
-    ctx.strokeStyle = color;
+    if (kind === "plane" && unit) ctx.rotate(Math.atan2(unit.vy, unit.vx));
+    else if (kind === "tank" && unit && unit.vx < 0) ctx.scale(-1, 1);
+    else if (kind === "missile" && unit) ctx.rotate(Math.atan2(unit.vy, unit.vx) + Math.PI / 2);
     if (kind === "soldier") drawSoldier(ctx, s);
     else if (kind === "tank") drawTank(ctx, s);
-    else if (kind === "plane") {
-      const u = arguments[5];
-      if (u) ctx.rotate(Math.atan2(u.vy, u.vx));
-      drawPlane(ctx, s);
-    } else drawMissile(ctx, s);
+    else if (kind === "plane") drawPlane(ctx, s);
+    else drawMissile(ctx, s);
     ctx.restore();
   }
 
@@ -769,10 +813,9 @@
     ctx.lineWidth = 1.6;
     ctx.strokeStyle = color;
     ctx.stroke();
-    ctx.fillStyle = color;
-    if (kind === "tank") drawTank(ctx, r * 0.72);
-    else if (kind === "plane") drawPlane(ctx, r * 0.72);
-    else drawMissile(ctx, r * 0.72);
+    if (kind === "tank") drawTank(ctx, r * 0.78);
+    else if (kind === "plane") drawPlane(ctx, r * 0.78);
+    else drawMissile(ctx, r * 0.78);
     ctx.restore();
   }
 
@@ -854,10 +897,9 @@
         ctx.globalAlpha = 1;
         ctx.translate(p.x, p.y);
         ctx.rotate(Math.atan2(p.y - prev.y, p.x - prev.x) + Math.PI / 2);
-        ctx.shadowColor = m.color;
+        ctx.shadowColor = "#ff7a20";
         ctx.shadowBlur = 10;
-        ctx.fillStyle = m.color;
-        drawMissile(ctx, Math.min(world.cellW, world.cellH) * 0.85);
+        drawMissile(ctx, Math.min(world.cellW, world.cellH) * 0.9);
       } else {
         const boom = (m.t - m.dur) / 0.16;
         ctx.globalAlpha = 1 - boom;
@@ -870,12 +912,13 @@
       ctx.restore();
     }
 
-    const uSize = Math.min(world.cellW, world.cellH) * 1.05;
+    const cell = Math.min(world.cellW, world.cellH);
     for (const u of world.units) {
+      const uSize = u.kind === "soldier" ? cell * 0.72 : cell * 1.08;
       ctx.save();
-      ctx.shadowColor = ACCENT[u.owner];
-      ctx.shadowBlur = 8;
-      drawIcon(u.kind, u.x, u.y, uSize, ACCENT[u.owner], u);
+      ctx.shadowColor = "rgba(0,0,0,0.45)";
+      ctx.shadowBlur = 4;
+      drawIcon(u.kind, u.x, u.y, uSize, u);
       ctx.restore();
     }
 
