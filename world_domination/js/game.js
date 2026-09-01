@@ -314,13 +314,11 @@
     historyTimer = 0;
     accumulatedTime = 0;
     spawnTimer = 0.4;
+    spawnSpecific("mult-soldier");
+    spawnSpecific("mult-tank");
+    spawnSpecific("mult-plane");
+    spawnSpecific("mult-missile");
     spawnPowerup();
-    spawnPowerup();
-    spawnPowerup();
-    for (let i = 0; i < 3; i++) {
-      const idx = [...world.powerups.keys()][i];
-      if (idx != null && i < 2) world.powerups.set(idx, "mult");
-    }
     spawnTimer = 0.25;
     dominateTimer = 0;
     fade = 0;
@@ -460,14 +458,20 @@
     audio.zap();
   }
 
+  function multFor(kind) {
+    return kind && kind.startsWith("mult-") ? kind.slice(5) : null;
+  }
+
   function maybeCollect(index, owner, collector) {
     const kind = world.powerups.get(index);
     if (!kind) return false;
-    if (kind === "mult" && (!collector || !collector.kind)) return false;
+    const srcKind = multFor(kind);
+    if (srcKind) {
+      if (!collector || collector.kind !== srcKind) return false;
+    }
     world.powerups.delete(index);
     const pos = cellCenter(index);
-    if (kind === "mult") {
-      const srcKind = collector.kind;
+    if (srcKind) {
       const copies = world.units.filter((u) => u.owner === owner && u.kind === srcKind);
       const extras = [];
       for (const src of copies) {
@@ -486,7 +490,7 @@
       }
     }
     burst(pos.x, pos.y, ACCENT[owner], 18);
-    audio.power(kind);
+    audio.power(srcKind ? "mult" : kind);
     return true;
   }
 
@@ -504,7 +508,9 @@
   function pickupKind() {
     const t = accumulatedTime;
     const roll = Math.random();
-    if (roll < 0.4) return "mult";
+    if (roll < 0.46) {
+      return "mult-" + ["soldier", "tank", "plane", "missile"][(Math.random() * 4) | 0];
+    }
     if (t < 16) return "tank";
     if (t < 40) return roll < 0.7 ? "tank" : "plane";
     if (roll < 0.55) return "tank";
@@ -512,15 +518,18 @@
     return "missile";
   }
 
-  function spawnPowerup() {
+  function spawnSpecific(kind) {
     if (world.powerups.size >= MAX_CAPSULES) return;
-    const kind = pickupKind();
     for (let tries = 0; tries < 50; tries++) {
       const i = (Math.random() * world.owner.length) | 0;
       if (!world.land[i] || world.powerups.has(i)) continue;
       world.powerups.set(i, kind);
       return;
     }
+  }
+
+  function spawnPowerup() {
+    spawnSpecific(pickupKind());
   }
 
   function moveUnit(unit, dt) {
@@ -897,7 +906,14 @@
   }
 
   function drawCapsule(cx, cy, kind, t) {
-    const color = kind === "tank" ? "#c4a24a" : kind === "plane" ? "#6dc8ff" : kind === "mult" ? "#d46bff" : "#ff6b4a";
+    const target = multFor(kind);
+    const color = target === "soldier" ? "#5dff6a"
+      : target === "tank" ? "#e0c040"
+      : target === "plane" ? "#6dc8ff"
+      : target === "missile" ? "#ff8a4a"
+      : kind === "tank" ? "#c4a24a"
+      : kind === "plane" ? "#6dc8ff"
+      : "#ff6b4a";
     const s = Math.max(34, Math.min(world.cellW, world.cellH) * 2.6);
     const pulse = 1 + Math.sin(t * 5) * 0.04;
     const r = (s / 2) * pulse;
@@ -916,15 +932,22 @@
     ctx.lineWidth = 1.6;
     ctx.strokeStyle = color;
     ctx.stroke();
-    if (kind === "tank") drawTank(ctx, r * 0.78);
-    else if (kind === "plane") drawPlane(ctx, r * 0.78);
-    else if (kind === "mult") {
+    if (target) {
       ctx.fillStyle = color;
-      ctx.font = `800 ${Math.max(11, r * 0.85)}px Rajdhani, sans-serif`;
+      ctx.font = `800 ${Math.max(10, r * 0.52)}px Rajdhani, sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("×2", 0, 1);
-    } else drawMissile(ctx, r * 0.78);
+      ctx.fillText("×2", 0, -r * 0.32);
+      ctx.save();
+      ctx.translate(0, r * 0.22);
+      if (target === "soldier") drawSoldier(ctx, r * 0.48);
+      else if (target === "tank") drawTank(ctx, r * 0.5);
+      else if (target === "plane") drawPlane(ctx, r * 0.5, "#c5cdd6");
+      else drawMissile(ctx, r * 0.5, "#d7dbe0");
+      ctx.restore();
+    } else if (kind === "tank") drawTank(ctx, r * 0.78);
+    else if (kind === "plane") drawPlane(ctx, r * 0.78);
+    else drawMissile(ctx, r * 0.78);
     ctx.restore();
   }
 
