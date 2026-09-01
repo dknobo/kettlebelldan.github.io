@@ -31,7 +31,7 @@
   const HISTORY_MAX = 120;
   const MAX_UNITS = 48;
   const MAX_TOTAL = 280;
-  const MAX_CAPSULES = 10;
+  const MAX_CAPSULES = 14;
 
   const PALETTE = [
     "#1a4d8c", "#8c1e1e", "#0d6b4c", "#8a4a0c",
@@ -317,6 +317,11 @@
     spawnPowerup();
     spawnPowerup();
     spawnPowerup();
+    for (let i = 0; i < 3; i++) {
+      const idx = [...world.powerups.keys()][i];
+      if (idx != null && i < 2) world.powerups.set(idx, "mult");
+    }
+    spawnTimer = 0.25;
     dominateTimer = 0;
     fade = 0;
     fadingOut = false;
@@ -390,7 +395,7 @@
     return reflectedAngle + Math.PI * 0.62;
   }
 
-  function captureBurst(origin, owner, count) {
+  function captureBurst(origin, owner, count, collector) {
     if (count <= 1) return;
     const cols = world.cols;
     const seen = new Set([origin]);
@@ -411,7 +416,7 @@
         if (isProtected(n, owner)) continue;
         world.owner[n] = owner;
         converted++;
-        maybeCollect(n, owner);
+        maybeCollect(n, owner, collector);
         q.push(n);
         if (converted >= count) return;
       }
@@ -458,10 +463,11 @@
   function maybeCollect(index, owner, collector) {
     const kind = world.powerups.get(index);
     if (!kind) return false;
+    if (kind === "mult" && (!collector || !collector.kind)) return false;
     world.powerups.delete(index);
     const pos = cellCenter(index);
     if (kind === "mult") {
-      const srcKind = collector && collector.kind ? collector.kind : "soldier";
+      const srcKind = collector.kind;
       const copies = world.units.filter((u) => u.owner === owner && u.kind === srcKind);
       const extras = [];
       for (const src of copies) {
@@ -498,12 +504,12 @@
   function pickupKind() {
     const t = accumulatedTime;
     const roll = Math.random();
-    if (t < 16) return roll < 0.72 ? "tank" : "mult";
-    if (t < 40) return roll < 0.42 ? "tank" : roll < 0.78 ? "plane" : "mult";
-    if (roll < 0.28) return "tank";
-    if (roll < 0.52) return "plane";
-    if (roll < 0.76) return "missile";
-    return "mult";
+    if (roll < 0.4) return "mult";
+    if (t < 16) return "tank";
+    if (t < 40) return roll < 0.7 ? "tank" : "plane";
+    if (roll < 0.55) return "tank";
+    if (roll < 0.8) return "plane";
+    return "missile";
   }
 
   function spawnPowerup() {
@@ -536,7 +542,7 @@
       world.owner[hit.index] = unit.owner;
       unit.lastCapture = hit.index;
       const spec = KINDS[unit.kind];
-      if (spec.burst > 1) captureBurst(hit.index, unit.owner, spec.burst);
+      if (spec.burst > 1) captureBurst(hit.index, unit.owner, spec.burst, unit);
       if (spec.strike) fireStrike(hit.index, unit.owner);
     }
 
@@ -702,7 +708,7 @@
       remaining -= step;
     }
     spawnTimer -= dt;
-    const interval = Math.max(0.7, 2.4 - accumulatedTime * 0.012);
+    const interval = Math.max(0.45, 1.5 - accumulatedTime * 0.014);
     if (spawnTimer <= 0) {
       spawnPowerup();
       spawnTimer = interval;
@@ -717,7 +723,7 @@
         m.claimed = true;
         if (world.land[m.target]) {
           world.owner[m.target] = m.owner;
-          maybeCollect(m.target, m.owner);
+          maybeCollect(m.target, m.owner, { kind: "missile", owner: m.owner });
         }
         burst(m.x1, m.y1, m.color, 16);
       }
@@ -767,24 +773,45 @@
   }
 
   function drawTank(c, r) {
-    c.strokeStyle = "#eef6c4";
-    c.lineWidth = Math.max(1.1, r * 0.07);
-    c.fillStyle = "#1e2218";
-    c.fillRect(-r * 0.52, r * 0.1, r * 1.04, r * 0.28);
-    c.strokeRect(-r * 0.52, r * 0.1, r * 1.04, r * 0.28);
-    c.fillStyle = "#7a9240";
-    c.fillRect(-r * 0.44, -r * 0.1, r * 0.88, r * 0.28);
-    c.strokeRect(-r * 0.44, -r * 0.1, r * 0.88, r * 0.28);
-    c.fillStyle = "#9bb24e";
-    c.fillRect(-r * 0.14, -r * 0.34, r * 0.34, r * 0.26);
-    c.strokeRect(-r * 0.14, -r * 0.34, r * 0.34, r * 0.26);
-    c.fillStyle = "#2a2c20";
-    c.fillRect(r * 0.16, -r * 0.28, r * 0.46, r * 0.09);
-    c.fillStyle = "#c8d878";
-    c.fillRect(-r * 0.48, r * 0.14, r * 0.12, r * 0.12);
-    c.fillRect(-r * 0.2, r * 0.14, r * 0.12, r * 0.12);
-    c.fillRect(0.08 * r, r * 0.14, r * 0.12, r * 0.12);
-    c.fillRect(0.36 * r, r * 0.14, r * 0.12, r * 0.12);
+    c.lineWidth = Math.max(1.2, r * 0.07);
+    c.strokeStyle = "#f3f7d0";
+    c.fillStyle = "#1c1e18";
+    c.beginPath();
+    c.moveTo(-r * 0.58, r * 0.08);
+    c.lineTo(r * 0.58, r * 0.08);
+    c.lineTo(r * 0.5, r * 0.46);
+    c.lineTo(-r * 0.5, r * 0.46);
+    c.closePath();
+    c.fill();
+    c.stroke();
+    c.fillStyle = "#0e0e0c";
+    for (const x of [-0.36, -0.12, 0.12, 0.36]) {
+      c.beginPath();
+      c.arc(x * r, r * 0.28, r * 0.12, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.fillStyle = "#8fb44a";
+    c.beginPath();
+    c.moveTo(-r * 0.48, r * 0.1);
+    c.lineTo(-r * 0.36, -r * 0.1);
+    c.lineTo(r * 0.3, -r * 0.1);
+    c.lineTo(r * 0.5, r * 0.1);
+    c.closePath();
+    c.fill();
+    c.stroke();
+    c.fillStyle = "#b4d45c";
+    c.beginPath();
+    c.arc(-r * 0.02, -r * 0.16, r * 0.24, Math.PI, 0);
+    c.lineTo(r * 0.2, r * 0.02);
+    c.lineTo(-r * 0.24, r * 0.02);
+    c.closePath();
+    c.fill();
+    c.stroke();
+    c.fillStyle = "#2a2c22";
+    c.fillRect(r * 0.14, -r * 0.3, r * 0.58, r * 0.11);
+    c.strokeRect(r * 0.14, -r * 0.3, r * 0.58, r * 0.11);
+    c.fillStyle = "#141410";
+    c.fillRect(r * 0.68, -r * 0.34, r * 0.1, r * 0.19);
   }
 
   function drawPlane(c, r, color) {
@@ -996,7 +1023,7 @@
 
     const cell = Math.min(world.cellW, world.cellH);
     for (const u of world.units) {
-      const uSize = u.kind === "soldier" ? cell * 1.05 : cell * 1.55;
+      const uSize = u.kind === "soldier" ? cell * 1.05 : u.kind === "tank" ? cell * 1.75 : cell * 1.55;
       ctx.save();
       ctx.shadowColor = "rgba(0,0,0,0.45)";
       ctx.shadowBlur = 4;
