@@ -32,7 +32,7 @@ html, body {
   right: 14px;
   z-index: 5;
   width: 176px;
-  height: 92px;
+  height: 118px;
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(255, 255, 255, 0.06);
   pointer-events: none;
@@ -48,7 +48,7 @@ html, body {
 }
 
 #history {
-  top: 114px;
+  top: 140px;
   padding: 6px;
 }
 

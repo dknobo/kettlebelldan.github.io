@@ -7,23 +7,35 @@
   const historyCanvas = document.querySelector("#history-plot");
   const historyCtx = historyCanvas.getContext("2d");
 
-  const FACTIONS = 16;
+  const REGIONS = [
+    ["united states of america", "puerto rico"],
+    ["canada"],
+    ["mexico", "guatemala", "belize", "honduras", "el salvador", "nicaragua", "costa rica", "panama", "cuba", "haiti", "dominican republic", "jamaica", "the bahamas"],
+    ["brazil", "argentina", "chile", "peru", "colombia", "venezuela", "bolivia", "paraguay", "uruguay", "ecuador", "guyana", "suriname", "french guiana", "falkland"],
+    ["algeria", "angola", "benin", "botswana", "burkina", "burundi", "cameroon", "central african", "chad", "congo", "djibouti", "egypt", "equatorial guinea", "eritrea", "ethiopia", "gabon", "gambia", "ghana", "guinea", "ivory", "kenya", "lesotho", "liberia", "libya", "madagascar", "malawi", "mali", "mauritania", "morocco", "mozambique", "namibia", "niger", "nigeria", "rwanda", "senegal", "sierra leone", "somalia", "somaliland", "south africa", "south sudan", "sudan", "swaziland", "tanzania", "togo", "tunisia", "uganda", "western sahara", "zambia", "zimbabwe"],
+    ["united kingdom", "ireland", "france", "germany", "spain", "portugal", "italy", "switzerland", "austria", "belgium", "netherlands", "luxembourg", "denmark", "norway", "sweden", "finland", "iceland", "poland", "czech", "slovakia", "hungary", "romania", "bulgaria", "greece", "albania", "macedonia", "serbia", "bosnia", "croatia", "slovenia", "montenegro", "kosovo", "estonia", "latvia", "lithuania", "belarus", "ukraine", "moldova", "greenland"],
+    ["russia", "kazakhstan", "uzbekistan", "turkmenistan", "kyrgyzstan", "tajikistan", "mongolia"],
+    ["saudi", "iran", "iraq", "syria", "jordan", "israel", "lebanon", "kuwait", "qatar", "united arab", "oman", "yemen", "turkey", "georgia", "armenia", "azerbaijan", "west bank", "northern cyprus", "cyprus"],
+    ["india", "pakistan", "bangladesh", "nepal", "bhutan", "sri lanka", "afghanistan"],
+    ["china", "taiwan", "japan", "north korea", "south korea"],
+    ["vietnam", "laos", "cambodia", "thailand", "myanmar", "malaysia", "indonesia", "philippines", "brunei", "east timor", "papua"],
+    ["australia", "new zealand", "fiji", "solomon", "vanuatu", "new caledonia"],
+  ];
+  const FACTIONS = REGIONS.length;
   const HISTORY_MAX = 120;
-  const MAX_UNITS = 14;
-  const MAX_TOTAL = 160;
+  const MAX_UNITS = 16;
+  const MAX_TOTAL = 140;
   const MAX_CAPSULES = 10;
 
   const PALETTE = [
-    "#1a4d8c", "#8c1e1e", "#0d6b4c", "#8a5a0a",
-    "#5a1a78", "#0a5c6e", "#8c3a12", "#1e3a6e",
-    "#6e1848", "#2a5a18", "#0e4a7a", "#7a2a2a",
-    "#3a2a6e", "#0a6b62", "#6e4a0c", "#4a1e3a",
+    "#1a4d8c", "#8c1e1e", "#0d6b4c", "#8a4a0c",
+    "#5a1a78", "#0a5c6e", "#7a2418", "#6e4a0c",
+    "#2a5a18", "#8a1848", "#1e3a6e", "#4a1e3a",
   ];
   const ACCENT = [
-    "#4d8cff", "#ff4d4d", "#2ee08a", "#ffc233",
-    "#c46bff", "#2ad4e6", "#ff7a3a", "#6d8cff",
-    "#ff4d9a", "#7dff4d", "#3aa0ff", "#ff6b6b",
-    "#9b7dff", "#2ee0c8", "#e0b040", "#e06b9a",
+    "#4d8cff", "#ff4d4d", "#2ee08a", "#ffb020",
+    "#c46bff", "#2ad4e6", "#ff6b3a", "#e0b040",
+    "#7dff4d", "#ff4d9a", "#6d8cff", "#e06b9a",
   ];
 
   const KINDS = {
@@ -44,7 +56,7 @@
   let fadingOut = false;
   let resizeTimer = 0;
   let particles = [];
-  let bolts = [];
+  let missiles = [];
   let standingRows = [];
   let history = [];
   let historyTimer = 0;
@@ -161,6 +173,20 @@
     c.closePath();
   }
 
+  function regionOf(name) {
+    const n = String(name || "").toLowerCase();
+    if (n.includes("antarctica") || n.includes("french southern")) return -2;
+    for (let i = 0; i < REGIONS.length; i++) {
+      if (REGIONS[i].includes(n)) return i;
+    }
+    for (let i = 0; i < REGIONS.length; i++) {
+      for (const key of REGIONS[i]) {
+        if (key.length >= 7 && n.includes(key)) return i;
+      }
+    }
+    return -1;
+  }
+
   function rasterize(cols, rows) {
     const off = document.createElement("canvas");
     off.width = cols;
@@ -183,35 +209,13 @@
     }
     const img = octx.getImageData(0, 0, cols, rows).data;
     const raw = new Int16Array(cols * rows);
-    const counts = new Uint32Array(feats.length);
     for (let p = 0; p < cols * rows; p++) {
       const r = img[p * 4], gch = img[p * 4 + 1], a = img[p * 4 + 3];
       if (a < 20) { raw[p] = -1; continue; }
       const id = r + (gch << 8) - 1;
-      if (id < 0 || id >= feats.length) { raw[p] = -1; continue; }
-      raw[p] = id;
-      counts[id]++;
+      raw[p] = (id >= 0 && id < feats.length) ? id : -1;
     }
-    const ranked = [];
-    for (let i = 0; i < feats.length; i++) if (counts[i] > 0) ranked.push({ i, n: counts[i] });
-    ranked.sort((a, b) => b.n - a.n);
-    const keep = ranked.slice(0, FACTIONS).map((x) => x.i);
-    const keepSet = new Set(keep);
-    const centroids = keep.map(() => ({ x: 0, y: 0, n: 0 }));
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        const src = raw[y * cols + x];
-        if (src < 0) continue;
-        const fi = keep.indexOf(src);
-        if (fi < 0) continue;
-        centroids[fi].x += x;
-        centroids[fi].y += y;
-        centroids[fi].n++;
-      }
-    }
-    for (const c of centroids) {
-      if (c.n) { c.x /= c.n; c.y /= c.n; }
-    }
+    const centroids = Array.from({ length: FACTIONS }, () => ({ x: 0, y: 0, n: 0 }));
     const owner = new Int16Array(cols * rows);
     const land = new Uint8Array(cols * rows);
     for (let y = 0; y < rows; y++) {
@@ -220,20 +224,31 @@
         const src = raw[p];
         if (src < 0) { owner[p] = -1; continue; }
         land[p] = 1;
-        let fi = keep.indexOf(src);
-        if (fi < 0) {
-          let best = 0, bd = 1e12;
-          for (let k = 0; k < keep.length; k++) {
-            const dx = x - centroids[k].x, dy = y - centroids[k].y;
-            const d = dx * dx + dy * dy;
-            if (d < bd) { bd = d; best = k; }
-          }
-          fi = best;
-        }
-        owner[p] = fi;
+        const fi = regionOf(feats[src].properties.name);
+        if (fi >= 0) {
+          owner[p] = fi;
+          centroids[fi].x += x;
+          centroids[fi].y += y;
+          centroids[fi].n++;
+        } else owner[p] = -3;
       }
     }
-    return { owner, land, keep };
+    for (const c of centroids) if (c.n) { c.x /= c.n; c.y /= c.n; }
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const p = y * cols + x;
+        if (owner[p] !== -3) continue;
+        let best = 0, bd = 1e12;
+        for (let k = 0; k < FACTIONS; k++) {
+          if (!centroids[k].n) continue;
+          const dx = x - centroids[k].x, dy = y - centroids[k].y;
+          const d = dx * dx + dy * dy;
+          if (d < bd) { bd = d; best = k; }
+        }
+        owner[p] = best;
+      }
+    }
+    return { owner, land };
   }
 
   function spawnUnit(owner, kind, x, y, random, brick) {
@@ -265,7 +280,7 @@
     const rows = Math.max(22, Math.floor(height / brick));
     const cellW = width / cols;
     const cellH = height / rows;
-    const { owner, land, keep } = rasterize(cols, rows);
+    const { owner, land } = rasterize(cols, rows);
 
     const cents = Array.from({ length: FACTIONS }, () => ({ x: 0, y: 0, n: 0 }));
     for (let y = 0; y < rows; y++) {
@@ -290,11 +305,11 @@
     const tileFill = PALETTE.map((c) => mixHex(c, "#071018", 0.12));
     world = {
       width, height, cols, rows, cellW, cellH, brick,
-      owner, land, units, cents, keep, tileFill, random,
+      owner, land, units, cents, tileFill, random,
       powerups: new Map(),
     };
     particles = [];
-    bolts = [];
+    missiles = [];
     history = [];
     historyTimer = 0;
     accumulatedTime = 0;
@@ -410,19 +425,10 @@
     };
   }
 
-  function jaggedPath(x1, y1, x2, y2) {
-    const dx = x2 - x1, dy = y2 - y1;
-    const dist = Math.hypot(dx, dy) || 1;
-    const nx = -dy / dist, ny = dx / dist;
-    const n = Math.max(6, Math.min(14, (dist / 26) | 0));
-    const pts = [{ x: x1, y: y1 }];
-    for (let i = 1; i < n; i++) {
-      const t = i / n;
-      const j = (Math.random() * 2 - 1) * Math.min(22, dist * 0.14) * Math.sin(t * Math.PI);
-      pts.push({ x: x1 + dx * t + nx * j, y: y1 + dy * t + ny * j });
-    }
-    pts.push({ x: x2, y: y2 });
-    return pts;
+  function missilePos(m, u) {
+    const x = m.x0 + (m.x1 - m.x0) * u;
+    const y = m.y0 + (m.y1 - m.y0) * u - Math.sin(u * Math.PI) * m.arc;
+    return { x, y };
   }
 
   function fireStrike(from, owner) {
@@ -434,16 +440,18 @@
     }
     if (!pool.length) return;
     const target = pool[(Math.random() * pool.length) | 0];
-    world.owner[target] = owner;
-    maybeCollect(target, owner);
     const a = cellCenter(from), b = cellCenter(target);
-    bolts.push({
-      pts: jaggedPath(a.x, a.y, b.x, b.y),
-      tx: b.x, ty: b.y,
+    const dist = Math.hypot(b.x - a.x, b.y - a.y);
+    missiles.push({
+      x0: a.x, y0: a.y, x1: b.x, y1: b.y,
+      arc: Math.min(90, 18 + dist * 0.22),
+      owner, target,
+      t: 0,
+      dur: 0.42 + dist * 0.0005,
+      claimed: false,
       color: ACCENT[owner],
-      age: 0, life: 0.2,
     });
-    if (bolts.length > 40) bolts.splice(0, bolts.length - 40);
+    if (missiles.length > 36) missiles.splice(0, missiles.length - 36);
     audio.zap();
   }
 
@@ -580,7 +588,7 @@
       r.row.style.order = String(i);
       r.bar.style.width = `${(r.count / max) * 100}%`;
       r.n.textContent = r.count.toLocaleString();
-      r.row.style.display = i < 8 && r.count ? "flex" : "none";
+      r.row.style.display = r.count ? "flex" : "none";
     });
   }
 
@@ -654,8 +662,18 @@
       p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.96; p.vy *= 0.96;
     }
     particles = particles.filter((p) => p.age < p.life);
-    for (const b of bolts) b.age += dt;
-    bolts = bolts.filter((b) => b.age < b.life);
+    for (const m of missiles) {
+      m.t += dt;
+      if (!m.claimed && m.t >= m.dur) {
+        m.claimed = true;
+        if (world.land[m.target]) {
+          world.owner[m.target] = m.owner;
+          maybeCollect(m.target, m.owner);
+        }
+        burst(m.x1, m.y1, m.color, 16);
+      }
+    }
+    missiles = missiles.filter((m) => m.t < m.dur + 0.16);
 
     const { counts, best } = ownership();
     refreshLeader();
@@ -811,41 +829,52 @@
     }
     ctx.globalAlpha = 1;
 
-    for (const b of bolts) {
-      const a = 1 - b.age / b.life;
+    for (const m of missiles) {
+      const u = Math.max(0, Math.min(1, m.t / m.dur));
+      const p = missilePos(m, u);
+      const prev = missilePos(m, Math.max(0, u - 0.04));
       ctx.save();
-      ctx.globalAlpha = a * (0.75 + Math.random() * 0.25);
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.shadowColor = "#ffe8c8";
-      ctx.shadowBlur = 14;
-      ctx.strokeStyle = b.color;
-      ctx.lineWidth = 4.5;
-      strokePath(ctx, b.pts);
-      ctx.shadowBlur = 0;
-      ctx.strokeStyle = "#fff6e8";
-      ctx.lineWidth = 1.1;
-      strokePath(ctx, b.pts);
-      ctx.fillStyle = "#fff";
-      ctx.beginPath();
-      ctx.arc(b.tx, b.ty, 3 + (1 - a) * 6, 0, Math.PI * 2);
-      ctx.fill();
+      if (!m.claimed) {
+        ctx.strokeStyle = m.color;
+        ctx.globalAlpha = 0.35;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(prev.x, prev.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        ctx.globalAlpha = 0.18;
+        for (let k = 2; k < 6; k++) {
+          const q = missilePos(m, Math.max(0, u - k * 0.035));
+          ctx.beginPath();
+          ctx.arc(q.x, q.y, 1.2, 0, Math.PI * 2);
+          ctx.fillStyle = m.color;
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(Math.atan2(p.y - prev.y, p.x - prev.x) + Math.PI / 2);
+        ctx.shadowColor = m.color;
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = m.color;
+        drawMissile(ctx, Math.min(world.cellW, world.cellH) * 0.85);
+      } else {
+        const boom = (m.t - m.dur) / 0.16;
+        ctx.globalAlpha = 1 - boom;
+        ctx.strokeStyle = m.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(m.x1, m.y1, 4 + boom * 16, 0, Math.PI * 2);
+        ctx.stroke();
+      }
       ctx.restore();
     }
 
-    const uSize = Math.min(world.cellW, world.cellH) * 0.95;
+    const uSize = Math.min(world.cellW, world.cellH) * 1.05;
     for (const u of world.units) {
       ctx.save();
       ctx.shadowColor = ACCENT[u.owner];
-      ctx.shadowBlur = 12;
-      ctx.beginPath();
-      ctx.arc(u.x, u.y, uSize * 0.72, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(6,8,12,0.72)";
-      ctx.fill();
-      ctx.lineWidth = 1.4;
-      ctx.strokeStyle = ACCENT[u.owner];
-      ctx.stroke();
-      drawIcon(u.kind, u.x, u.y, uSize * 0.78, ACCENT[u.owner], u);
+      ctx.shadowBlur = 8;
+      drawIcon(u.kind, u.x, u.y, uSize, ACCENT[u.owner], u);
       ctx.restore();
     }
 
