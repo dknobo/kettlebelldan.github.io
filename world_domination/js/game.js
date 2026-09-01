@@ -520,14 +520,27 @@
     return "missile";
   }
 
+  function isSeaPickup(kind) {
+    return kind === "plane" || kind === "missile" || kind === "mult-plane" || kind === "mult-missile";
+  }
+
   function spawnSpecific(kind) {
     if (world.powerups.size >= MAX_CAPSULES) return;
-    for (let tries = 0; tries < 50; tries++) {
+    const sea = isSeaPickup(kind);
+    for (let tries = 0; tries < 80; tries++) {
       const i = (Math.random() * world.owner.length) | 0;
-      if (!world.land[i] || world.powerups.has(i)) continue;
+      if (world.powerups.has(i)) continue;
+      if (sea) {
+        if (world.land[i]) continue;
+      } else if (!world.land[i]) continue;
       world.powerups.set(i, kind);
       return;
     }
+  }
+
+  function tryCollect(unit) {
+    const here = cellAt(unit.x, unit.y);
+    return here >= 0 && maybeCollect(here, unit.owner, unit);
   }
 
   function spawnPowerup() {
@@ -538,8 +551,14 @@
     const nextX = unit.x + unit.vx * dt;
     const nextY = unit.y + unit.vy * dt;
     const hit = collisionCandidate(unit, nextX, nextY);
-    const here = cellAt(unit.x, unit.y);
-    let picked = here >= 0 && maybeCollect(here, unit.owner, unit);
+    let picked = tryCollect(unit);
+    if (!picked && KINDS[unit.kind].fly) {
+      const probe = Math.min(world.cellW, world.cellH) * 0.85;
+      for (const [dx, dy] of [[probe, 0], [-probe, 0], [0, probe], [0, -probe]]) {
+        const i = cellAt(unit.x + dx, unit.y + dy);
+        if (i >= 0 && maybeCollect(i, unit.owner, unit)) { picked = true; break; }
+      }
+    }
 
     if (!hit) {
       unit.x = nextX;
