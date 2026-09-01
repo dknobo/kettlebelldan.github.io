@@ -1,0 +1,898 @@
+(() => {
+  "use strict";
+
+  const canvas = document.querySelector("#world");
+  const ctx = canvas.getContext("2d", { alpha: false });
+  const standingsEl = document.querySelector("#standings");
+  const historyCanvas = document.querySelector("#history-plot");
+  const historyCtx = historyCanvas.getContext("2d");
+
+  const FACTIONS = 16;
+  const HISTORY_MAX = 120;
+  const MAX_UNITS = 14;
+  const MAX_TOTAL = 160;
+  const MAX_CAPSULES = 10;
+
+  const PALETTE = [
+    "#1a4d8c", "#8c1e1e", "#0d6b4c", "#8a5a0a",
+    "#5a1a78", "#0a5c6e", "#8c3a12", "#1e3a6e",
+    "#6e1848", "#2a5a18", "#0e4a7a", "#7a2a2a",
+    "#3a2a6e", "#0a6b62", "#6e4a0c", "#4a1e3a",
+  ];
+  const ACCENT = [
+    "#4d8cff", "#ff4d4d", "#2ee08a", "#ffc233",
+    "#c46bff", "#2ad4e6", "#ff7a3a", "#6d8cff",
+    "#ff4d9a", "#7dff4d", "#3aa0ff", "#ff6b6b",
+    "#9b7dff", "#2ee0c8", "#e0b040", "#e06b9a",
+  ];
+
+  const KINDS = {
+    soldier: { speed: 1.00, burst: 1, fly: false, strike: 0 },
+    tank:    { speed: 1.42, burst: 2, fly: false, strike: 0 },
+    plane:   { speed: 2.15, burst: 2, fly: true,  strike: 0 },
+    missile: { speed: 2.55, burst: 1, fly: true,  strike: 1 },
+  };
+
+  let geo = null;
+  let world = null;
+  let animationId = 0;
+  let previousTime = performance.now();
+  let accumulatedTime = 0;
+  let spawnTimer = 0;
+  let dominateTimer = 0;
+  let fade = 0;
+  let fadingOut = false;
+  let resizeTimer = 0;
+  let particles = [];
+  let bolts = [];
+  let standingRows = [];
+  let history = [];
+  let historyTimer = 0;
+
+  const audio = {
+    ctx: null,
+    master: null,
+    hitGate: 0,
+    unlock() {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      if (!this.ctx) {
+        this.ctx = new Ctx();
+        this.master = this.ctx.createGain();
+        this.master.gain.value = 0.85;
+        this.master.connect(this.ctx.destination);
+      }
+      if (this.ctx.state === "suspended") this.ctx.resume();
+    },
+    ready() { return this.ctx && this.ctx.state === "running"; },
+    tone(freq, dur, type, vol, slide) {
+      this.unlock();
+      if (!this.ready()) return;
+      const t = this.ctx.currentTime;
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, slide), t + dur);
+      g.gain.setValueAtTime(Math.max(0.0001, vol), t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(this.master);
+      o.start(t); o.stop(t + dur + 0.02);
+    },
+    noise(dur, vol, type, startHz, endHz) {
+      this.unlock();
+      if (!this.ready()) return;
+      const n = Math.max(1, (this.ctx.sampleRate * dur) | 0);
+      const buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) data[i] = Math.random() * 2 - 1;
+      const src = this.ctx.createBufferSource();
+      src.buffer = buf;
+      const f = this.ctx.createBiquadFilter();
+      f.type = type || "bandpass";
+      const t = this.ctx.currentTime;
+      f.frequency.setValueAtTime(startHz, t);
+      if (endHz) f.frequency.exponentialRampToValueAtTime(Math.max(40, endHz), t + dur);
+      f.Q.value = 0.7;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(f); f.connect(g); g.connect(this.master);
+      src.start(t); src.stop(t + dur + 0.02);
+    },
+    hit() {
+      this.unlock();
+      if (!this.ready()) return;
+      const now = this.ctx.currentTime;
+      if (now < this.hitGate) return;
+      this.hitGate = now + 0.02;
+      const f = 310 + Math.random() * 80;
+      this.tone(f, 0.055, "triangle", 0.14, f * 0.45);
+      this.noise(0.04, 0.08, "highpass", 900, 1400);
+    },
+    power(kind) {
+      this.unlock();
+      if (!this.ready()) return;
+      if (kind === "tank") {
+        this.tone(140, 0.12, "square", 0.14);
+        this.tone(90, 0.18, "sawtooth", 0.08);
+      } else if (kind === "plane") {
+        this.noise(0.26, 0.22, "bandpass", 500, 2200);
+        this.tone(220, 0.2, "sine", 0.08, 80);
+      } else if (kind === "missile") {
+        this.noise(0.16, 0.28, "highpass", 1600, 300);
+        this.tone(80, 0.2, "sawtooth", 0.12, 40);
+        this.tone(1400, 0.08, "square", 0.1, 200);
+      }
+    },
+    zap() {
+      this.unlock();
+      if (!this.ready()) return;
+      this.noise(0.07, 0.16, "highpass", 2200, 500);
+      this.tone(1200 + Math.random() * 500, 0.05, "square", 0.07, 260);
+    },
+  };
+
+  function mixHex(hex, toward, t) {
+    const a = parseInt(hex.slice(1), 16);
+    const b = parseInt(toward.slice(1), 16);
+    const ar = (a >> 16) & 255, ag = (a >> 8) & 255, ab = a & 255;
+    const br = (b >> 16) & 255, bg = (b >> 8) & 255, bb = b & 255;
+    return `rgb(${Math.round(ar + (br - ar) * t)},${Math.round(ag + (bg - ag) * t)},${Math.round(ab + (bb - ab) * t)})`;
+  }
+
+  const LAT_MAX = 84;
+  const LAT_MIN = -56;
+
+  function project(lon, lat, w, h) {
+    return [(lon + 180) / 360 * w, (LAT_MAX - lat) / (LAT_MAX - LAT_MIN) * h];
+  }
+
+  function drawRing(c, ring, w, h) {
+    let first = true;
+    let px = 0;
+    for (let i = 0; i < ring.length; i++) {
+      const [x, y] = project(ring[i][0], ring[i][1], w, h);
+      if (first) { c.moveTo(x, y); first = false; }
+      else if (Math.abs(x - px) > w * 0.45) c.moveTo(x, y);
+      else c.lineTo(x, y);
+      px = x;
+    }
+    c.closePath();
+  }
+
+  function rasterize(cols, rows) {
+    const off = document.createElement("canvas");
+    off.width = cols;
+    off.height = rows;
+    const octx = off.getContext("2d", { willReadFrequently: true });
+    octx.clearRect(0, 0, cols, rows);
+    const feats = geo.features;
+    for (let i = 0; i < feats.length; i++) {
+      const name = String(feats[i].properties.name || "").toLowerCase();
+      if (name.includes("antarctica") || name.includes("french southern")) continue;
+      const id = i + 1;
+      octx.fillStyle = `rgb(${id % 256},${(id >> 8) & 255},0)`;
+      octx.beginPath();
+      const g = feats[i].geometry;
+      const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+      for (const poly of polys) {
+        for (const ring of poly) drawRing(octx, ring, cols, rows);
+      }
+      octx.fill("evenodd");
+    }
+    const img = octx.getImageData(0, 0, cols, rows).data;
+    const raw = new Int16Array(cols * rows);
+    const counts = new Uint32Array(feats.length);
+    for (let p = 0; p < cols * rows; p++) {
+      const r = img[p * 4], gch = img[p * 4 + 1], a = img[p * 4 + 3];
+      if (a < 20) { raw[p] = -1; continue; }
+      const id = r + (gch << 8) - 1;
+      if (id < 0 || id >= feats.length) { raw[p] = -1; continue; }
+      raw[p] = id;
+      counts[id]++;
+    }
+    const ranked = [];
+    for (let i = 0; i < feats.length; i++) if (counts[i] > 0) ranked.push({ i, n: counts[i] });
+    ranked.sort((a, b) => b.n - a.n);
+    const keep = ranked.slice(0, FACTIONS).map((x) => x.i);
+    const keepSet = new Set(keep);
+    const centroids = keep.map(() => ({ x: 0, y: 0, n: 0 }));
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const src = raw[y * cols + x];
+        if (src < 0) continue;
+        const fi = keep.indexOf(src);
+        if (fi < 0) continue;
+        centroids[fi].x += x;
+        centroids[fi].y += y;
+        centroids[fi].n++;
+      }
+    }
+    for (const c of centroids) {
+      if (c.n) { c.x /= c.n; c.y /= c.n; }
+    }
+    const owner = new Int16Array(cols * rows);
+    const land = new Uint8Array(cols * rows);
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const p = y * cols + x;
+        const src = raw[p];
+        if (src < 0) { owner[p] = -1; continue; }
+        land[p] = 1;
+        let fi = keep.indexOf(src);
+        if (fi < 0) {
+          let best = 0, bd = 1e12;
+          for (let k = 0; k < keep.length; k++) {
+            const dx = x - centroids[k].x, dy = y - centroids[k].y;
+            const d = dx * dx + dy * dy;
+            if (d < bd) { bd = d; best = k; }
+          }
+          fi = best;
+        }
+        owner[p] = fi;
+      }
+    }
+    return { owner, land, keep };
+  }
+
+  function spawnUnit(owner, kind, x, y, random, brick) {
+    const spec = KINDS[kind];
+    const ang = random() * Math.PI * 2;
+    const cell = brick || (world && world.brick) || 14;
+    const base = cell * 18 * spec.speed * (0.92 + random() * 0.16);
+    return {
+      owner, kind,
+      x, y,
+      vx: Math.cos(ang) * base,
+      vy: Math.sin(ang) * base,
+      lastCapture: -1,
+    };
+  }
+
+  function resetWorld() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const width = Math.max(1, Math.floor(window.innerWidth));
+    const height = Math.max(1, Math.floor(window.innerHeight));
+    canvas.width = Math.floor(width * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const brick = Math.min(width, height) <= 700 ? 16 : 14;
+    const cols = Math.max(40, Math.floor(width / brick));
+    const rows = Math.max(22, Math.floor(height / brick));
+    const cellW = width / cols;
+    const cellH = height / rows;
+    const { owner, land, keep } = rasterize(cols, rows);
+
+    const cents = Array.from({ length: FACTIONS }, () => ({ x: 0, y: 0, n: 0 }));
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const o = owner[y * cols + x];
+        if (o < 0) continue;
+        cents[o].x += x; cents[o].y += y; cents[o].n++;
+      }
+    }
+    for (const c of cents) if (c.n) { c.x /= c.n; c.y /= c.n; }
+
+    const random = Math.random;
+    const units = [];
+    for (let f = 0; f < FACTIONS; f++) {
+      if (!cents[f].n) continue;
+      const x = (cents[f].x + 0.5) * cellW;
+      const y = (cents[f].y + 0.5) * cellH;
+      units.push(spawnUnit(f, "soldier", x, y, random, brick));
+      units.push(spawnUnit(f, "soldier", x + cellW * 0.8, y + cellH * 0.4, random, brick));
+    }
+
+    const tileFill = PALETTE.map((c) => mixHex(c, "#071018", 0.12));
+    world = {
+      width, height, cols, rows, cellW, cellH, brick,
+      owner, land, units, cents, keep, tileFill, random,
+      powerups: new Map(),
+    };
+    particles = [];
+    bolts = [];
+    history = [];
+    historyTimer = 0;
+    accumulatedTime = 0;
+    spawnTimer = 0.4;
+    spawnPowerup();
+    spawnPowerup();
+    spawnPowerup();
+    dominateTimer = 0;
+    fade = 0;
+    fadingOut = false;
+    previousTime = performance.now();
+    if (!standingRows.length) buildStandings();
+    sizeHistoryCanvas();
+    refreshLeader();
+    recordHistory(ownership().counts);
+    drawHistory();
+  }
+
+  function cellAt(x, y) {
+    if (!world || x < 0 || y < 0 || x >= world.width || y >= world.height) return -2;
+    const col = Math.min(world.cols - 1, Math.max(0, Math.floor(x / world.cellW)));
+    const row = Math.min(world.rows - 1, Math.max(0, Math.floor(y / world.cellH)));
+    return row * world.cols + col;
+  }
+
+  function isLand(i) { return i >= 0 && world.land[i]; }
+  function blocked(i, unit) {
+    if (i === -2) return true;
+    if (i < 0) return !KINDS[unit.kind].fly;
+    if (!world.land[i]) return !KINDS[unit.kind].fly;
+    return world.owner[i] !== unit.owner;
+  }
+
+  function isProtected(index, attacker) {
+    if (index < 0) return true;
+    const col = index % world.cols;
+    const row = Math.floor(index / world.cols);
+    for (const u of world.units) {
+      if (u.owner === attacker) continue;
+      const bc = Math.floor(u.x / world.cellW);
+      const br = Math.floor(u.y / world.cellH);
+      if (Math.abs(col - bc) <= 1 && Math.abs(row - br) <= 1) return true;
+    }
+    return false;
+  }
+
+  function collisionCandidate(unit, nextX, nextY) {
+    const samples = 14;
+    const hits = [];
+    const rad = Math.min(world.cellW, world.cellH) * 0.38;
+    for (let i = 0; i < samples; i++) {
+      const angle = (i / samples) * Math.PI * 2;
+      const sx = nextX + Math.cos(angle) * rad;
+      const sy = nextY + Math.sin(angle) * rad;
+      const index = cellAt(sx, sy);
+      if (blocked(index, unit)) hits.push({ index, nx: Math.cos(angle), ny: Math.sin(angle) });
+    }
+    if (!hits.length) return null;
+    hits.sort((a, b) => (b.nx * unit.vx + b.ny * unit.vy) - (a.nx * unit.vx + a.ny * unit.vy));
+    const approaching = hits.filter((h) => h.nx * unit.vx + h.ny * unit.vy > 0);
+    const surface = approaching.length ? approaching : hits;
+    let nx = 0, ny = 0;
+    for (const h of surface) { nx += h.nx; ny += h.ny; }
+    const len = Math.hypot(nx, ny) || 1;
+    return { index: hits[0].index, nx: nx / len, ny: ny / len };
+  }
+
+  function findEscape(unit, reflectedAngle, distance) {
+    const turn = Math.PI / 18;
+    const offsets = [0];
+    for (let i = 1; i <= 16; i++) offsets.push(i * turn, -i * turn);
+    for (const offset of offsets) {
+      const angle = reflectedAngle + offset;
+      const x = unit.x + Math.cos(angle) * distance;
+      const y = unit.y + Math.sin(angle) * distance;
+      if (!collisionCandidate(unit, x, y)) return angle;
+    }
+    return reflectedAngle + Math.PI * 0.62;
+  }
+
+  function captureBurst(origin, owner, count) {
+    if (count <= 1) return;
+    const cols = world.cols;
+    const seen = new Set([origin]);
+    const q = [origin];
+    let converted = 1;
+    while (q.length && converted < count) {
+      const i = q.shift();
+      const c = i % cols;
+      const r = Math.floor(i / cols);
+      for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+        const nc = c + dc, nr = r + dr;
+        if (nc < 0 || nr < 0 || nc >= cols || nr >= world.rows) continue;
+        const n = nr * cols + nc;
+        if (seen.has(n)) continue;
+        seen.add(n);
+        if (!world.land[n]) continue;
+        if (world.owner[n] === owner) { q.push(n); continue; }
+        if (isProtected(n, owner)) continue;
+        world.owner[n] = owner;
+        converted++;
+        maybeCollect(n, owner);
+        q.push(n);
+        if (converted >= count) return;
+      }
+    }
+  }
+
+  function cellCenter(index) {
+    return {
+      x: ((index % world.cols) + 0.5) * world.cellW,
+      y: (Math.floor(index / world.cols) + 0.5) * world.cellH,
+    };
+  }
+
+  function jaggedPath(x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const dist = Math.hypot(dx, dy) || 1;
+    const nx = -dy / dist, ny = dx / dist;
+    const n = Math.max(6, Math.min(14, (dist / 26) | 0));
+    const pts = [{ x: x1, y: y1 }];
+    for (let i = 1; i < n; i++) {
+      const t = i / n;
+      const j = (Math.random() * 2 - 1) * Math.min(22, dist * 0.14) * Math.sin(t * Math.PI);
+      pts.push({ x: x1 + dx * t + nx * j, y: y1 + dy * t + ny * j });
+    }
+    pts.push({ x: x2, y: y2 });
+    return pts;
+  }
+
+  function fireStrike(from, owner) {
+    const pool = [];
+    for (let i = 0; i < world.owner.length; i++) {
+      if (!world.land[i] || world.owner[i] === owner || i === from) continue;
+      if (isProtected(i, owner)) continue;
+      pool.push(i);
+    }
+    if (!pool.length) return;
+    const target = pool[(Math.random() * pool.length) | 0];
+    world.owner[target] = owner;
+    maybeCollect(target, owner);
+    const a = cellCenter(from), b = cellCenter(target);
+    bolts.push({
+      pts: jaggedPath(a.x, a.y, b.x, b.y),
+      tx: b.x, ty: b.y,
+      color: ACCENT[owner],
+      age: 0, life: 0.2,
+    });
+    if (bolts.length > 40) bolts.splice(0, bolts.length - 40);
+    audio.zap();
+  }
+
+  function maybeCollect(index, owner) {
+    const kind = world.powerups.get(index);
+    if (!kind) return false;
+    world.powerups.delete(index);
+    const pos = cellCenter(index);
+    const mine = world.units.filter((u) => u.owner === owner).length;
+    if (mine < MAX_UNITS && world.units.length < MAX_TOTAL) {
+      world.units.push(spawnUnit(owner, kind, pos.x, pos.y, world.random, world.brick));
+    }
+    burst(pos.x, pos.y, ACCENT[owner], 18);
+    audio.power(kind);
+    return true;
+  }
+
+  function burst(x, y, color, n) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = 40 + Math.random() * 140;
+      particles.push({
+        x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+        life: 0.3 + Math.random() * 0.25, age: 0, color, size: 1.2 + Math.random() * 2,
+      });
+    }
+  }
+
+  function pickupKind() {
+    const t = accumulatedTime;
+    const roll = Math.random();
+    if (t < 18) return "tank";
+    if (t < 42) return roll < 0.55 ? "tank" : "plane";
+    if (roll < 0.34) return "tank";
+    if (roll < 0.68) return "plane";
+    return "missile";
+  }
+
+  function spawnPowerup() {
+    if (world.powerups.size >= MAX_CAPSULES) return;
+    const kind = pickupKind();
+    for (let tries = 0; tries < 50; tries++) {
+      const i = (Math.random() * world.owner.length) | 0;
+      if (!world.land[i] || world.powerups.has(i)) continue;
+      world.powerups.set(i, kind);
+      return;
+    }
+  }
+
+  function moveUnit(unit, dt) {
+    const nextX = unit.x + unit.vx * dt;
+    const nextY = unit.y + unit.vy * dt;
+    const hit = collisionCandidate(unit, nextX, nextY);
+    const here = cellAt(unit.x, unit.y);
+    let picked = here >= 0 && maybeCollect(here, unit.owner);
+
+    if (!hit) {
+      unit.x = nextX;
+      unit.y = nextY;
+      return;
+    }
+
+    if (hit.index >= 0) picked = maybeCollect(hit.index, unit.owner) || picked;
+
+    if (hit.index >= 0 && isLand(hit.index) && hit.index !== unit.lastCapture && !isProtected(hit.index, unit.owner)) {
+      world.owner[hit.index] = unit.owner;
+      unit.lastCapture = hit.index;
+      const spec = KINDS[unit.kind];
+      if (spec.burst > 1) captureBurst(hit.index, unit.owner, spec.burst);
+      if (spec.strike) fireStrike(hit.index, unit.owner);
+    }
+
+    if (!picked) audio.hit();
+
+    const speed = Math.hypot(unit.vx, unit.vy);
+    const dot = unit.vx * hit.nx + unit.vy * hit.ny;
+    const rx = unit.vx - 2 * dot * hit.nx;
+    const ry = unit.vy - 2 * dot * hit.ny;
+    const probe = Math.max(1.5, Math.min(world.cellW, world.cellH) * 0.16);
+    const angle = findEscape(unit, Math.atan2(ry, rx), probe);
+    unit.vx = Math.cos(angle) * speed;
+    unit.vy = Math.sin(angle) * speed;
+    const ex = unit.x + Math.cos(angle) * probe;
+    const ey = unit.y + Math.sin(angle) * probe;
+    if (!collisionCandidate(unit, ex, ey)) { unit.x = ex; unit.y = ey; }
+  }
+
+  function landCount() {
+    let n = 0;
+    for (let i = 0; i < world.land.length; i++) if (world.land[i]) n++;
+    return n;
+  }
+
+  function ownership() {
+    const counts = new Uint32Array(FACTIONS);
+    for (let i = 0; i < world.owner.length; i++) {
+      const o = world.owner[i];
+      if (o >= 0) counts[o]++;
+    }
+    let best = 0;
+    for (let i = 1; i < FACTIONS; i++) if (counts[i] > counts[best]) best = i;
+    return { counts, best };
+  }
+
+  function buildStandings() {
+    standingsEl.innerHTML = "";
+    standingRows = [];
+    for (let i = 0; i < FACTIONS; i++) {
+      const row = document.createElement("div");
+      row.className = "row";
+      const track = document.createElement("div");
+      track.className = "track";
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.background = mixHex(PALETTE[i], ACCENT[i], 0.28);
+      const n = document.createElement("span");
+      n.className = "n";
+      track.appendChild(bar);
+      row.appendChild(track);
+      row.appendChild(n);
+      standingsEl.appendChild(row);
+      standingRows.push({ row, bar, n, team: i });
+    }
+  }
+
+  function refreshLeader() {
+    if (!world || !standingRows.length) return;
+    const { counts } = ownership();
+    const max = Math.max(1, ...counts);
+    const ranked = standingRows
+      .map((r) => ({ ...r, count: counts[r.team] }))
+      .sort((a, b) => b.count - a.count || a.team - b.team);
+    ranked.forEach((r, i) => {
+      r.row.style.order = String(i);
+      r.bar.style.width = `${(r.count / max) * 100}%`;
+      r.n.textContent = r.count.toLocaleString();
+      r.row.style.display = i < 8 && r.count ? "flex" : "none";
+    });
+  }
+
+  function sizeHistoryCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = historyCanvas.getBoundingClientRect();
+    const w = Math.max(1, Math.floor(rect.width));
+    const h = Math.max(1, Math.floor(rect.height));
+    historyCanvas.width = Math.floor(w * dpr);
+    historyCanvas.height = Math.floor(h * dpr);
+    historyCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    historyCanvas._cssW = w;
+    historyCanvas._cssH = h;
+  }
+
+  function recordHistory(counts) {
+    history.push(Array.from(counts));
+    if (history.length > HISTORY_MAX) history.shift();
+  }
+
+  function drawHistory() {
+    const w = historyCanvas._cssW || historyCanvas.clientWidth;
+    const h = historyCanvas._cssH || historyCanvas.clientHeight;
+    if (!w || !h || history.length < 2) return;
+    historyCtx.clearRect(0, 0, w, h);
+    let lo = Infinity, hi = 0;
+    for (const sample of history) {
+      for (let t = 0; t < FACTIONS; t++) {
+        const v = sample[t] || 0;
+        if (v < lo) lo = v;
+        if (v > hi) hi = v;
+      }
+    }
+    const padY = Math.max(6, (hi - lo) * 0.2);
+    lo = Math.max(0, lo - padY);
+    hi = hi + padY;
+    if (hi <= lo) hi = lo + 1;
+    const pad = 1.5;
+    const span = Math.max(history.length - 1, 1);
+    for (let t = 0; t < FACTIONS; t++) {
+      historyCtx.beginPath();
+      historyCtx.lineWidth = 1.4;
+      historyCtx.strokeStyle = ACCENT[t];
+      historyCtx.lineJoin = "round";
+      for (let i = 0; i < history.length; i++) {
+        const x = pad + (i / span) * (w - pad * 2);
+        const y = h - pad - (((history[i][t] || 0) - lo) / (hi - lo)) * (h - pad * 2);
+        if (i === 0) historyCtx.moveTo(x, y);
+        else historyCtx.lineTo(x, y);
+      }
+      historyCtx.stroke();
+    }
+  }
+
+  function update(dt) {
+    if (!world || fadingOut) return;
+    const maxStep = 1 / 120;
+    let remaining = Math.min(dt, 0.05);
+    while (remaining > 0) {
+      const step = Math.min(maxStep, remaining);
+      for (let i = 0; i < world.units.length; i++) moveUnit(world.units[i], step);
+      remaining -= step;
+    }
+    spawnTimer -= dt;
+    const interval = Math.max(0.7, 2.4 - accumulatedTime * 0.012);
+    if (spawnTimer <= 0) {
+      spawnPowerup();
+      spawnTimer = interval;
+    }
+    for (const p of particles) {
+      p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.96; p.vy *= 0.96;
+    }
+    particles = particles.filter((p) => p.age < p.life);
+    for (const b of bolts) b.age += dt;
+    bolts = bolts.filter((b) => b.age < b.life);
+
+    const { counts, best } = ownership();
+    refreshLeader();
+    historyTimer += dt;
+    if (historyTimer >= 0.14) {
+      historyTimer = 0;
+      recordHistory(counts);
+      drawHistory();
+    }
+    const land = landCount();
+    if (land && counts[best] / land > 0.96) {
+      dominateTimer += dt;
+      if (dominateTimer > 5.5) { fadingOut = true; fade = 0; }
+    } else dominateTimer = 0;
+  }
+
+  function drawSoldier(c, r) {
+    c.beginPath();
+    c.arc(0, -r * 0.42, r * 0.22, 0, Math.PI * 2);
+    c.fill();
+    c.beginPath();
+    c.moveTo(-r * 0.28, -r * 0.12);
+    c.lineTo(r * 0.28, -r * 0.12);
+    c.lineTo(r * 0.18, r * 0.48);
+    c.lineTo(-r * 0.18, r * 0.48);
+    c.closePath();
+    c.fill();
+  }
+
+  function drawTank(c, r) {
+    c.fillRect(-r * 0.42, -r * 0.32, r * 0.18, r * 0.64);
+    c.fillRect(r * 0.24, -r * 0.32, r * 0.18, r * 0.64);
+    c.fillRect(-r * 0.3, -r * 0.2, r * 0.6, r * 0.4);
+    c.fillRect(r * 0.18, -r * 0.06, r * 0.38, r * 0.12);
+  }
+
+  function drawPlane(c, r) {
+    c.beginPath();
+    c.moveTo(r * 0.52, 0);
+    c.lineTo(-r * 0.18, -r * 0.42);
+    c.lineTo(-r * 0.08, 0);
+    c.lineTo(-r * 0.18, r * 0.42);
+    c.closePath();
+    c.fill();
+    c.fillRect(-r * 0.42, -r * 0.06, r * 0.28, r * 0.12);
+  }
+
+  function drawMissile(c, r) {
+    c.beginPath();
+    c.moveTo(0, -r * 0.5);
+    c.lineTo(r * 0.16, -r * 0.12);
+    c.lineTo(r * 0.16, r * 0.28);
+    c.lineTo(0, r * 0.18);
+    c.lineTo(-r * 0.16, r * 0.28);
+    c.lineTo(-r * 0.16, -r * 0.12);
+    c.closePath();
+    c.fill();
+  }
+
+  function drawIcon(kind, x, y, s, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
+    if (kind === "soldier") drawSoldier(ctx, s);
+    else if (kind === "tank") drawTank(ctx, s);
+    else if (kind === "plane") {
+      const u = arguments[5];
+      if (u) ctx.rotate(Math.atan2(u.vy, u.vx));
+      drawPlane(ctx, s);
+    } else drawMissile(ctx, s);
+    ctx.restore();
+  }
+
+  function drawCapsule(cx, cy, kind, t) {
+    const color = kind === "tank" ? "#c4a24a" : kind === "plane" ? "#6dc8ff" : "#ff6b4a";
+    const s = Math.max(30, Math.min(world.cellW, world.cellH) * 2.35);
+    const pulse = 1 + Math.sin(t * 5) * 0.04;
+    const r = (s / 2) * pulse;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 14;
+    const g = ctx.createRadialGradient(-r * 0.25, -r * 0.3, r * 0.1, 0, 0, r);
+    g.addColorStop(0, "#2a3038");
+    g.addColorStop(1, "#080a10");
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.fillStyle = color;
+    if (kind === "tank") drawTank(ctx, r * 0.72);
+    else if (kind === "plane") drawPlane(ctx, r * 0.72);
+    else drawMissile(ctx, r * 0.72);
+    ctx.restore();
+  }
+
+  function strokePath(c, pts) {
+    if (!pts || pts.length < 2) return;
+    c.beginPath();
+    c.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) c.lineTo(pts[i].x, pts[i].y);
+    c.stroke();
+  }
+
+  function draw() {
+    if (!world) return;
+    ctx.fillStyle = "#071018";
+    ctx.fillRect(0, 0, world.width, world.height);
+
+    ctx.strokeStyle = "rgba(80,140,170,0.045)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x < world.cols; x += 8) {
+      ctx.beginPath();
+      ctx.moveTo(x * world.cellW, 0);
+      ctx.lineTo(x * world.cellW, world.height);
+      ctx.stroke();
+    }
+    for (let y = 0; y < world.rows; y += 8) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * world.cellH);
+      ctx.lineTo(world.width, y * world.cellH);
+      ctx.stroke();
+    }
+
+    const gapX = Math.max(0.7, world.cellW * 0.07);
+    const gapY = Math.max(0.7, world.cellH * 0.07);
+    for (let y = 0; y < world.rows; y++) {
+      for (let x = 0; x < world.cols; x++) {
+        const i = y * world.cols + x;
+        if (!world.land[i]) continue;
+        const o = world.owner[i];
+        const px = x * world.cellW + gapX * 0.5;
+        const py = y * world.cellH + gapY * 0.5;
+        ctx.fillStyle = world.tileFill[o] || "#1a2430";
+        ctx.fillRect(px, py, world.cellW - gapX, world.cellH - gapY);
+      }
+    }
+
+    for (const [index, kind] of world.powerups) {
+      const p = cellCenter(index);
+      drawCapsule(p.x, p.y + Math.sin(accumulatedTime * 4 + index) * 1.4, kind, accumulatedTime);
+    }
+
+    for (const p of particles) {
+      ctx.globalAlpha = 1 - p.age / p.life;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x, p.y, p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+
+    for (const b of bolts) {
+      const a = 1 - b.age / b.life;
+      ctx.save();
+      ctx.globalAlpha = a * (0.75 + Math.random() * 0.25);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.shadowColor = "#ffe8c8";
+      ctx.shadowBlur = 14;
+      ctx.strokeStyle = b.color;
+      ctx.lineWidth = 4.5;
+      strokePath(ctx, b.pts);
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "#fff6e8";
+      ctx.lineWidth = 1.1;
+      strokePath(ctx, b.pts);
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(b.tx, b.ty, 3 + (1 - a) * 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    const uSize = Math.min(world.cellW, world.cellH) * 0.95;
+    for (const u of world.units) {
+      ctx.save();
+      ctx.shadowColor = ACCENT[u.owner];
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(u.x, u.y, uSize * 0.72, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(6,8,12,0.72)";
+      ctx.fill();
+      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = ACCENT[u.owner];
+      ctx.stroke();
+      drawIcon(u.kind, u.x, u.y, uSize * 0.78, ACCENT[u.owner], u);
+      ctx.restore();
+    }
+
+    if (fade > 0) {
+      ctx.fillStyle = `rgba(4,6,12,${fade})`;
+      ctx.fillRect(0, 0, world.width, world.height);
+    }
+  }
+
+  function tick(now) {
+    const dt = Math.min(0.05, (now - previousTime) / 1000);
+    previousTime = now;
+    accumulatedTime += dt;
+    if (fadingOut) {
+      fade = Math.min(1, fade + dt * 1.3);
+      if (fade >= 1) resetWorld();
+    } else update(dt);
+    draw();
+    animationId = requestAnimationFrame(tick);
+  }
+
+  const unlockAudio = () => audio.unlock();
+  window.addEventListener("pointerdown", unlockAudio);
+  window.addEventListener("pointermove", unlockAudio, { once: true });
+  window.addEventListener("keydown", unlockAudio);
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space" || e.code === "KeyR") {
+      e.preventDefault();
+      if (!fadingOut) { fadingOut = true; fade = 0; }
+    }
+  });
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(resetWorld, 100);
+  });
+
+  window.__DOM = () => world;
+
+  fetch("data/countries.geo.json")
+    .then((r) => r.json())
+    .then((data) => {
+      geo = data;
+      resetWorld();
+      cancelAnimationFrame(animationId);
+      animationId = requestAnimationFrame(tick);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+})();
