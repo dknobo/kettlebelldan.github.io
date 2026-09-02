@@ -41,6 +41,31 @@
     "#4d6bfe",
   ];
 
+  const LETTER_FILL = [
+    "#245f8e",
+    "#6b4a32",
+    "#7a3a68",
+    "#a87a32",
+  ];
+
+  const TILE_WORDS = ["CLAUDE", "GROK", "OPENAI", "DEEPSEEK"];
+  const TILE_FONT = {
+    A: ["0110","1001","1001","1111","1001","1001","1001"],
+    C: ["0111","1000","1000","1000","1000","1000","0111"],
+    D: ["1110","1001","1001","1001","1001","1001","1110"],
+    E: ["1111","1000","1000","1110","1000","1000","1111"],
+    G: ["0111","1000","1000","1011","1001","1001","0111"],
+    I: ["1110","0100","0100","0100","0100","0100","1110"],
+    K: ["1001","1010","1100","1000","1100","1010","1001"],
+    L: ["1000","1000","1000","1000","1000","1000","1111"],
+    N: ["1001","1101","1011","1001","1001","1001","1001"],
+    O: ["0110","1001","1001","1001","1001","1001","0110"],
+    P: ["1110","1001","1001","1110","1000","1000","1000"],
+    R: ["1110","1001","1001","1110","1100","1010","1001"],
+    S: ["0111","1000","1000","0110","0001","0001","1110"],
+    U: ["1001","1001","1001","1001","1001","1001","0110"],
+  };
+
   const POWER_META = {
     triple: { color: "#d46bff", glow: "rgba(180,80,255,0.75)" },
     speed:  { color: "#3ad4e6", glow: "rgba(50,210,230,0.75)" },
@@ -59,6 +84,7 @@
   let resizeTimer = 0;
   let particles = [];
   let tileFill = [];
+  let letterFill = [];
   let standingRows = [];
   let history = [];
   let historyTimer = 0;
@@ -207,6 +233,34 @@
     return seeds;
   }
 
+  function stampWord(letters, word, x0, y0, x1, y1, cols) {
+    const availW = x1 - x0;
+    const availH = y1 - y0;
+    const n = word.length;
+    const gap = 1;
+    const gw = 4;
+    const gh = 7;
+    const need = n * gw + (n - 1) * gap;
+    const startX = x0 + Math.floor((availW - need) / 2);
+    const startY = y0 + Math.floor((availH - gh) / 2);
+    for (let i = 0; i < n; i++) {
+      const glyph = TILE_FONT[word[i]];
+      if (!glyph) continue;
+      const ox = startX + i * (gw + gap);
+      for (let gy = 0; gy < gh; gy++) {
+        const row = glyph[gy];
+        for (let gx = 0; gx < gw; gx++) {
+          if (row[gx] !== "1") continue;
+          const px = ox + gx;
+          const py = startY + gy;
+          if (px >= x0 && px < x1 && py >= y0 && py < y1) {
+            letters[py * cols + px] = 1;
+          }
+        }
+      }
+    }
+  }
+
   function brickSizeFor(width, height) {
     const short = Math.min(width, height);
     if (short <= 520) return 18;
@@ -248,6 +302,14 @@
       }
     }
 
+    const splitX = Math.ceil(cols / 2);
+    const splitY = Math.ceil(rows / 2);
+    const letters = new Uint8Array(cols * rows);
+    stampWord(letters, TILE_WORDS[0], 0, 0, splitX, splitY, cols);
+    stampWord(letters, TILE_WORDS[1], splitX, 0, cols, splitY, cols);
+    stampWord(letters, TILE_WORDS[2], 0, splitY, splitX, rows, cols);
+    stampWord(letters, TILE_WORDS[3], splitX, splitY, cols, rows, cols);
+
     const teams = Array.from({ length: PLAYERS }, () => ({
       speedMul: 1,
       burst: 1,
@@ -258,10 +320,11 @@
     const balls = seeds.map((s, owner) => spawnBall(s.x, s.y, owner, cellW, cellH, brick, random));
 
     tileFill = PALETTE.map((c) => mixHex(c, "#050508", 0.04));
+    letterFill = LETTER_FILL.slice();
 
     world = {
       width, height, cols, rows, cellW, cellH, cells, balls, teams,
-      brick, random, seed: useSeed,
+      brick, random, seed: useSeed, letters,
       powerups: new Map(),
     };
     particles = [];
@@ -898,12 +961,13 @@
 
     for (let y = 0; y < world.rows; y++) {
       for (let x = 0; x < world.cols; x++) {
-        const owner = world.cells[y * world.cols + x];
+        const index = y * world.cols + x;
+        const owner = world.cells[index];
         const px = x * world.cellW + gapX * 0.5;
         const py = y * world.cellH + gapY * 0.5;
         const w = world.cellW - gapX;
         const h = world.cellH - gapY;
-        ctx.fillStyle = tileFill[owner];
+        ctx.fillStyle = world.letters[index] ? letterFill[owner] : tileFill[owner];
         ctx.fillRect(px, py, w, h);
       }
     }
@@ -945,10 +1009,6 @@
 
       const img = LOGOS[ball.owner];
       const half = logoSize * 0.5;
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, half * 0.92, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(0,0,0,0.28)";
-      ctx.fill();
       if (img) {
         const iw = img.naturalWidth || img.width || 1;
         const ih = img.naturalHeight || img.height || 1;
