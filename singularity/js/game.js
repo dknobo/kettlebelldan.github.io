@@ -26,8 +26,7 @@
   ];
   const LOGOS = [null, null, null, null];
 
-  // Territory colors chosen to contrast the official marks:
-  // Claude orange spark, Grok white/black, ChatGPT teal blossom, DeepSeek blue whale.
+  // Territory colors contrast the marks; bar/line accents are the mark colors.
   const PALETTE = [
     "#0c3558",
     "#3a2416",
@@ -36,10 +35,10 @@
   ];
 
   const ACCENT = [
-    "#e08a55",
-    "#f3efe8",
+    "#c37959",
+    "#f4f4f4",
     "#74aa9c",
-    "#6d8cff",
+    "#4d6bfe",
   ];
 
   const POWER_META = {
@@ -632,7 +631,7 @@
       track.className = "track";
       const bar = document.createElement("div");
       bar.className = "bar";
-      bar.style.background = mixHex(PALETTE[i], ACCENT[i], 0.28);
+      bar.style.background = ACCENT[i];
       const n = document.createElement("span");
       n.className = "n";
       n.textContent = "0";
@@ -948,10 +947,15 @@
       const half = logoSize * 0.5;
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, half * 0.92, 0, Math.PI * 2);
-      ctx.fillStyle = ball.owner === 1 ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.28)";
+      ctx.fillStyle = "rgba(0,0,0,0.28)";
       ctx.fill();
       if (img) {
-        ctx.drawImage(img, ball.x - half, ball.y - half, logoSize, logoSize);
+        const iw = img.naturalWidth || img.width || 1;
+        const ih = img.naturalHeight || img.height || 1;
+        const scale = Math.min(logoSize / iw, logoSize / ih);
+        const dw = iw * scale;
+        const dh = ih * scale;
+        ctx.drawImage(img, ball.x - dw * 0.5, ball.y - dh * 0.5, dw, dh);
       } else {
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, half * 0.72, 0, Math.PI * 2);
