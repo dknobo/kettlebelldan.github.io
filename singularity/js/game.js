@@ -48,13 +48,14 @@
     "#a87a32",
   ];
 
-  const TILE_WORDS = ["CLAUDE", "GROK", "OPENAI", "DEEPSEEK"];
+  const TILE_WORDS = ["CLAUDE", "GROK", "CHATGPT", "DEEPSEEK"];
   const TILE_FONT = {
     A: ["0110","1001","1001","1111","1001","1001","1001"],
     C: ["0111","1000","1000","1000","1000","1000","0111"],
     D: ["1110","1001","1001","1001","1001","1001","1110"],
     E: ["1111","1000","1000","1110","1000","1000","1111"],
     G: ["0111","1000","1000","1011","1001","1001","0111"],
+    H: ["1001","1001","1001","1111","1001","1001","1001"],
     I: ["1110","0100","0100","0100","0100","0100","1110"],
     K: ["1001","1010","1100","1000","1100","1010","1001"],
     L: ["1000","1000","1000","1000","1000","1000","1111"],
@@ -63,6 +64,7 @@
     P: ["1110","1001","1001","1110","1000","1000","1000"],
     R: ["1110","1001","1001","1110","1100","1010","1001"],
     S: ["0111","1000","1000","0110","0001","0001","1110"],
+    T: ["1111","0100","0100","0100","0100","0100","0100"],
     U: ["1001","1001","1001","1001","1001","1001","0110"],
   };
 
@@ -79,6 +81,7 @@
   let accumulatedTime = 0;
   let spawnTimer = 0;
   let dominateTimer = 0;
+  let singularity = null;
   let fade = 0;
   let fadingOut = false;
   let resizeTimer = 0;
@@ -335,6 +338,8 @@
     spawnPowerup();
     spawnPowerup();
     dominateTimer = 0;
+    singularity = null;
+    hideSingularity();
     fade = 0;
     fadingOut = false;
     previousTime = performance.now();
@@ -812,10 +817,41 @@
       recordHistory(counts);
       drawHistory();
     }
-    if (counts[best] / world.cells.length > 0.96) {
+    const share = counts[best] / world.cells.length;
+    if (!singularity && share >= 0.8) {
+      singularity = { team: best, t: 0 };
+      showSingularity(best);
+    }
+    if (singularity) singularity.t += dt;
+    if (share > 0.96) {
       dominateTimer += dt;
       if (dominateTimer > 5.5) startFade();
     } else dominateTimer = 0;
+  }
+
+  function showSingularity(team) {
+    const el = document.querySelector("#singularity");
+    const img = document.querySelector("#singularity-logo");
+    const msg = document.querySelector("#singularity-msg");
+    if (!el || !img || !msg) return;
+    const logo = LOGOS[team];
+    if (logo) {
+      img.src = logo.src;
+      img.hidden = false;
+    } else {
+      img.removeAttribute("src");
+      img.hidden = true;
+    }
+    msg.textContent = `SINGULARITY ACHIEVED BY ${NAMES[team].toUpperCase()}`;
+    el.hidden = false;
+    requestAnimationFrame(() => el.classList.add("on"));
+  }
+
+  function hideSingularity() {
+    const el = document.querySelector("#singularity");
+    if (!el) return;
+    el.classList.remove("on");
+    el.hidden = true;
   }
 
   function startFade() {
