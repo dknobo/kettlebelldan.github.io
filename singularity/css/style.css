@@ -1,0 +1,97 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #030306;
+  color: #d4d4d4;
+  font-family: "Rajdhani", sans-serif;
+  user-select: none;
+  touch-action: none;
+}
+
+#world {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+#vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.62) 100%);
+}
+
+#standings,
+#history {
+  position: fixed;
+  right: 14px;
+  z-index: 5;
+  width: 248px;
+  height: 86px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+
+#standings {
+  top: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px;
+}
+
+#history {
+  top: 108px;
+  height: 68px;
+  padding: 6px;
+}
+
+#standings .row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#standings .name {
+  min-width: 64px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+#standings .track {
+  flex: 1;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+#standings .bar {
+  height: 100%;
+  width: 0;
+  transition: width 0.12s linear;
+}
+
+#standings .n {
+  min-width: 2.6em;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: #cfcfcf;
+}
+
+#history-plot {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
