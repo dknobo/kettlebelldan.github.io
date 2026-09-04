@@ -1,0 +1,242 @@
+:root {
+  --ink: #e8dcc4;
+  --muted: #b7a88a;
+  --gold: #c9a24a;
+  --blood: #8a1e1e;
+  --void: #07080c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #07080c url("assets/title.jpg") center/cover no-repeat;
+  color: var(--ink);
+  font-family: Cinzel, "Times New Roman", serif;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 8, 12, 0.84);
+  pointer-events: none;
+}
+
+#frame {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+#game {
+  position: relative;
+  z-index: 1;
+  display: block;
+  image-rendering: auto;
+  background: #0b0d12;
+  box-shadow: 0 0 0 1px #3a3020, 0 0 0 8px #120e0a, 0 30px 80px rgba(0,0,0,.65);
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+.title-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 42% 40%;
+  filter: saturate(1.05) contrast(1.05);
+}
+.title-art.dim { filter: saturate(.7) contrast(1.1) brightness(.45); }
+
+.title-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(7,8,12,.78) 0%, rgba(7,8,12,.35) 46%, rgba(7,8,12,.15) 100%),
+    linear-gradient(180deg, rgba(7,8,12,.2) 0%, rgba(7,8,12,.75) 100%);
+}
+
+.title-copy {
+  position: relative;
+  z-index: 2;
+  width: min(640px, 92vw);
+  padding: 8vh 6vw 10vh;
+  align-self: end;
+}
+
+.kicker {
+  font-size: 11px;
+  letter-spacing: .42em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+h1 {
+  font-family: "Cinzel Decorative", Cinzel, serif;
+  font-weight: 900;
+  font-size: clamp(34px, 6vw, 58px);
+  line-height: .95;
+  letter-spacing: .02em;
+  color: #f3ead4;
+  text-shadow: 0 2px 0 #1a1208, 0 18px 40px rgba(0,0,0,.55);
+}
+
+.tag {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 15px;
+  letter-spacing: .04em;
+}
+
+#btn-start, #btn-again, #btn-skip {
+  margin-top: 28px;
+  appearance: none;
+  border: 1px solid #c9a24a;
+  background: linear-gradient(#2a2114, #16110c);
+  color: #f3ead4;
+  font-family: Cinzel, serif;
+  font-size: 13px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  cursor: pointer;
+}
+#btn-start:hover, #btn-again:hover, #btn-skip:hover {
+  background: linear-gradient(#3a2d18, #1c150e);
+}
+
+.keys {
+  margin-top: 18px;
+  color: #8a8070;
+  font-size: 11px;
+  letter-spacing: .06em;
+  line-height: 1.7;
+}
+.keys span {
+  color: #d7c39a;
+  margin: 0 4px 0 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+#crawl {
+  background: #07080c;
+}
+.crawl-text {
+  width: min(520px, 86vw);
+  color: #d8cba8;
+  font-size: 18px;
+  line-height: 1.7;
+  letter-spacing: .08em;
+  text-align: center;
+  white-space: pre-wrap;
+}
+#btn-skip {
+  position: absolute;
+  bottom: 28px;
+  right: 28px;
+  margin: 0;
+  opacity: .7;
+}
+
+#hud {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  width: 640px;
+  height: 360px;
+  transform-origin: center center;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #e6d7b4;
+  text-shadow: 0 1px 2px #000;
+}
+#hud-room { color: #c9a24a; margin-bottom: 4px; }
+#hud-hint { color: #9a8b70; letter-spacing: .08em; text-transform: none; max-width: 340px; line-height: 1.35; }
+#hud-right { text-align: right; }
+#hud-time { font-size: 16px; letter-spacing: .2em; margin-top: 4px; }
+#hud-hp { height: 16px; }
+
+#banner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  transform: translate(-50%, -50%);
+  min-width: 280px;
+  text-align: center;
+  background: rgba(7,8,12,.78);
+  border: 1px solid #c9a24a55;
+  padding: 22px 28px 18px;
+  font-family: "Cinzel Decorative", Cinzel, serif;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #f3ead4;
+  font-size: 18px;
+}
+#banner small {
+  display: block;
+  margin-top: 10px;
+  font-family: Cinzel, serif;
+  font-size: 11px;
+  letter-spacing: .16em;
+  color: #b7a88a;
+}
+
+#touch {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  display: none;
+  justify-content: space-between;
+  padding: 0 12px;
+  pointer-events: none;
+}
+#touch .pad {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+#touch button {
+  min-width: 58px;
+  height: 52px;
+  border: 1px solid #c9a24a55;
+  background: rgba(10,10,14,.55);
+  color: #e8dcc4;
+  font-family: Cinzel, serif;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border-radius: 8px;
+}
+#touch button:active { background: rgba(201,162,74,.28); }
+
+@media (pointer: coarse) {
+  #touch { display: flex; }
+  .keys { display: none; }
+}

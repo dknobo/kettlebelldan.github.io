@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#07080c" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>The Prince of Kettlebells</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307080c'/%3E%3Cpath d='M10 8h12v4h-2v3h2v11H10V15h2v-3h-2z' fill='%23333'/%3E%3Cpath d='M12 6.5h8v3h-1.5v2.5h2V17h-9v-5h2V9.5H12z' fill='%236a6560'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=3" />
+</head>
+<body>
+  <div id="frame">
+    <canvas id="game" width="640" height="360" aria-label="The Prince of Kettlebells"></canvas>
+
+    <div id="title" class="screen">
+      <img src="assets/title.jpg" alt="" class="title-art" />
+      <div class="title-shade"></div>
+      <div class="title-copy">
+        <div class="kicker">A palace. A clock. A 24.</div>
+        <h1>The Prince of<br />Kettlebells</h1>
+        <p class="tag">Your sword is gone. Your kettlebell is not.</p>
+        <button id="btn-start" type="button">Enter the palace</button>
+        <p class="keys">
+          <span>← →</span> run
+          <span>↑ space</span> jump / climb
+          <span>↓</span> squat
+          <span>J</span> swing
+          <span>K</span> throw / place
+          <span>shift</span> careful step
+        </p>
+      </div>
+    </div>
+
+    <div id="crawl" class="screen hidden">
+      <div class="crawl-text" id="crawl-text"></div>
+      <button id="btn-skip" type="button">Skip</button>
+    </div>
+
+    <div id="hud" class="hidden">
+      <div id="hud-left">
+        <div id="hud-room"></div>
+        <div id="hud-hint"></div>
+      </div>
+      <div id="hud-right">
+        <div id="hud-hp" aria-label="Health"></div>
+        <div id="hud-time">60:00</div>
+      </div>
+    </div>
+
+    <div id="banner" class="hidden"></div>
+
+    <div id="end" class="screen hidden">
+      <img src="assets/title.jpg" alt="" class="title-art dim" />
+      <div class="title-shade"></div>
+      <div class="title-copy">
+        <div class="kicker" id="end-kicker">The palace is quiet</div>
+        <h1 id="end-title">The Prince<br />has fallen</h1>
+        <p class="tag" id="end-tag"></p>
+        <button id="btn-again" type="button">Rise again</button>
+      </div>
+    </div>
+
+    <div id="touch" class="hidden">
+      <div class="pad">
+        <button data-k="left" type="button">‹</button>
+        <button data-k="down" type="button">squat</button>
+        <button data-k="right" type="button">›</button>
+      </div>
+      <div class="pad">
+        <button data-k="throw" type="button">throw</button>
+        <button data-k="swing" type="button">swing</button>
+        <button data-k="jump" type="button">jump</button>
+      </div>
+    </div>
+  </div>
+  <script src="game.js?v=3"></script>
+</body>
+</html>
