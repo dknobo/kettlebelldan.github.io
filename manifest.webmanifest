@@ -1,16 +1,22 @@
 {
-  "name": "Imposter Party",
-  "short_name": "Imposter",
-  "description": "Pass-the-phone secret word party game for families and friends.",
-  "start_url": "/imposter",
+  "name": "Kettlebell Dan",
+  "short_name": "Krüe",
+  "description": "Dan. Kettlebells, cooking, and the Kettlebell Krüe.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0a1022",
-  "theme_color": "#0a1022",
+  "background_color": "#f7f6f3",
+  "theme_color": "#f7f6f3",
   "icons": [
     {
-      "src": "/imposter-icon.jpg",
-      "sizes": "512x512",
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/portrait.jpg",
+      "sizes": "1400x1652",
       "type": "image/jpeg",
       "purpose": "any"
     }
