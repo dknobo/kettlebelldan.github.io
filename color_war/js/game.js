@@ -46,6 +46,58 @@
   let lastLeader = -1;
   let lastDelta = -1;
 
+  const audio = {
+    ctx: null,
+    master: null,
+    hitGate: 0,
+    unlock() {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return;
+      if (!this.ctx) {
+        this.ctx = new Ctx();
+        this.master = this.ctx.createGain();
+        this.master.gain.value = 0.5;
+        this.master.connect(this.ctx.destination);
+      }
+      if (this.ctx.state === "suspended") this.ctx.resume();
+    },
+    tone(freq, dur, type, vol, slide) {
+      if (!this.ctx || this.ctx.state !== "running") return;
+      const t = this.ctx.currentTime;
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, slide), t + dur);
+      g.gain.setValueAtTime(Math.max(0.0001, vol), t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g);
+      g.connect(this.master);
+      o.start(t);
+      o.stop(t + dur + 0.02);
+    },
+    hit() {
+      if (!this.ctx || this.ctx.state !== "running") return;
+      const now = this.ctx.currentTime;
+      if (now < this.hitGate) return;
+      this.hitGate = now + 0.018;
+      this.tone(210 + Math.random() * 50, 0.028, "sine", 0.016, 120);
+    },
+    power(kind) {
+      if (kind === "triple") {
+        this.tone(392, 0.09, "square", 0.11);
+        this.tone(523, 0.11, "square", 0.1);
+        window.setTimeout(() => this.tone(659, 0.18, "square", 0.13), 70);
+      } else if (kind === "speed") {
+        this.tone(480, 0.22, "sawtooth", 0.13, 1680);
+        this.tone(720, 0.12, "triangle", 0.07, 1400);
+      } else {
+        this.tone(196, 0.14, "square", 0.14);
+        this.tone(294, 0.2, "triangle", 0.11, 160);
+      }
+    },
+  };
+
   function mulberry32(seed) {
     return function random() {
       let t = seed += 0x6d2b79f5;
@@ -264,9 +316,10 @@
 
   function maybeCollect(index, owner) {
     const kind = world.powerups.get(index);
-    if (!kind) return;
+    if (!kind) return false;
     world.powerups.delete(index);
     applyPower(owner, kind, index);
+    return true;
   }
 
   function applyPower(owner, kind, index) {
@@ -276,6 +329,7 @@
     const x = (col + 0.5) * world.cellW;
     const y = (row + 0.5) * world.cellH;
     burst(x, y, POWER_META[kind].color, 22);
+    audio.power(kind);
 
     if (kind === "speed") {
       if (team.speedMul < MAX_SPEED_MUL) {
@@ -353,7 +407,7 @@
     const hit = collisionCandidate(ball, nextX, nextY);
 
     const here = cellAt(ball.x, ball.y);
-    if (here >= 0 && world.powerups.has(here)) maybeCollect(here, ball.owner);
+    let picked = here >= 0 && maybeCollect(here, ball.owner);
 
     if (!hit) {
       ball.x = nextX;
@@ -361,7 +415,7 @@
       return;
     }
 
-    if (hit.index >= 0 && world.powerups.has(hit.index)) maybeCollect(hit.index, ball.owner);
+    if (hit.index >= 0) picked = maybeCollect(hit.index, ball.owner) || picked;
 
     if (hit.index >= 0 && hit.index !== ball.lastCapture && !isProtected(hit.index, ball.owner)) {
       world.cells[hit.index] = ball.owner;
@@ -370,6 +424,8 @@
       const burstN = world.teams[ball.owner].burst;
       if (burstN > 1) captureBurst(hit.index, ball.owner, burstN);
     }
+
+    if (!picked) audio.hit();
 
     const speed = Math.hypot(ball.vx, ball.vy);
     const dot = ball.vx * hit.nx + ball.vy * hit.ny;
@@ -505,13 +561,18 @@
       }
       ctx.stroke();
     } else {
-      const q = r * 0.2;
-      const g2 = r * 0.08;
-      for (const dx of [-1, 1]) {
-        for (const dy of [-1, 1]) {
-          ctx.fillRect(dx * (q + g2) * 0.5 - q / 2, dy * (q + g2) * 0.5 - q / 2, q, q);
-        }
-      }
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 0.42, 0, Math.PI * 2);
+      ctx.lineWidth = Math.max(1.4, r * 0.1);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, r * 0.22);
+      ctx.lineTo(0, -r * 0.16);
+      ctx.moveTo(-r * 0.2, r * 0.02);
+      ctx.lineTo(0, -r * 0.22);
+      ctx.lineTo(r * 0.2, r * 0.02);
+      ctx.lineWidth = Math.max(1.8, r * 0.14);
+      ctx.stroke();
     }
 
     ctx.restore();
@@ -620,12 +681,16 @@
     clearTimeout(resizeTimer);
     resizeTimer = window.setTimeout(() => resetWorld(world ? world.seed : undefined), 80);
   });
+  const unlockAudio = () => audio.unlock();
+  window.addEventListener("pointerdown", unlockAudio, { once: true });
+  window.addEventListener("keydown", unlockAudio, { once: true });
   window.addEventListener("keydown", (e) => {
     if (e.code === "Space" || e.code === "KeyR") {
       e.preventDefault();
       if (!fadingOut) startFade();
     }
   });
+  audio.unlock();
 
   window.__VOID = () => world;
   resetWorld();
